@@ -41,17 +41,44 @@ BMA-2026/
 │   └── global.css                # Global CSS for web (autofill fix)
 ├── components/                   # Reusable UI components
 │   ├── index.ts                  # Component exports
-│   ├── Button.tsx                # Button component
-│   ├── Card.tsx                  # Card container
-│   ├── Input.tsx                 # Form input
-│   ├── ScreenContainer.tsx       # Screen wrapper
+│   ├── Button.tsx                # Enhanced button with variants
+│   ├── Card.tsx                  # Enhanced card with variants
+│   ├── Input.tsx                 # Enhanced input with variants
+│   ├── ScreenContainer.tsx       # Enhanced screen wrapper
+│   ├── typography/               # Typography components
+│   │   ├── Text.tsx              # Body text
+│   │   ├── Heading.tsx           # Semantic headings
+│   │   ├── Label.tsx             # Form labels
+│   │   ├── Caption.tsx           # Small captions
+│   │   └── index.ts
+│   ├── layout/                   # Layout components
+│   │   ├── Stack.tsx             # Flex stack (VStack/HStack/Row)
+│   │   ├── Spacer.tsx            # Spacing component
+│   │   ├── Divider.tsx           # Divider component
+│   │   ├── Container.tsx         # Max-width container
+│   │   └── index.ts
+│   ├── display/                  # Display components
+│   │   ├── Icon.tsx              # Themed icon wrapper
+│   │   ├── Avatar.tsx            # User avatars
+│   │   ├── Badge.tsx             # Status badges
+│   │   └── index.ts
 │   └── navigation/               # Navigation components
 │       ├── index.ts              # Navigation exports
 │       ├── WebHeader.tsx         # Desktop horizontal nav
 │       ├── MobileHeader.tsx      # Mobile header bar
 │       └── MobileDrawer.tsx      # Mobile drawer menu
 ├── constants/                    # App constants
-│   └── theme.ts                  # Colors, typography, spacing
+│   ├── theme.ts                  # Legacy theme exports
+│   └── tokens/                   # Design tokens
+│       ├── colors.ts             # Color primitives & semantics
+│       ├── typography.ts         # Font sizes, weights
+│       ├── spacing.ts            # Spacing scale
+│       ├── borders.ts            # Border radius tokens
+│       ├── shadows.ts            # Shadow definitions
+│       ├── animation.ts          # Animation tokens
+│       ├── breakpoints.ts        # Responsive breakpoints
+│       ├── layout.ts             # Layout tokens
+│       └── index.ts              # Unified export
 ├── contexts/                     # React contexts
 │   ├── AuthContext.tsx           # Authentication state (Supabase)
 │   └── ThemeContext.tsx          # Theme state (dark/light)
@@ -59,8 +86,19 @@ BMA-2026/
 │   └── supabase.ts               # Supabase client setup
 ├── hooks/                        # Custom hooks
 │   ├── index.ts                  # Hook exports
-│   └── useMediaQuery.ts          # Responsive layout detection
+│   ├── useMediaQuery.ts          # Responsive layout detection
+│   ├── useBreakpoint.ts          # Breakpoint utilities
+│   ├── useResponsiveValue.ts     # Responsive values
+│   ├── useAccessibility.ts       # Accessibility helpers
+│   └── usePlatform.ts            # Platform detection
+├── utils/                        # Utility functions
+│   ├── colors.ts                 # Color manipulation
+│   ├── responsive.ts             # Responsive utilities
+│   └── platform.ts               # Platform utilities
 ├── docs/                         # Documentation
+│   ├── PROJECT-SCAFFOLDING-STEPS.md
+│   ├── SUPABASE-INTEGRATION-STEPS.md
+│   └── DESIGN-SYSTEM-IMPLEMENTATION.md
 ├── .env                          # Environment variables (not in git)
 ├── .env.example                  # Environment variables template
 ├── .env.required                 # Required environment variables
@@ -871,6 +909,7 @@ npm run android
 ## Future Enhancements
 
 - [x] Real authentication (Supabase integration) ✅ Completed
+- [x] Design System with tokens and components ✅ Completed (see `docs/DESIGN-SYSTEM-IMPLEMENTATION.md`)
 - [ ] Persistent theme preference
 - [ ] Push notifications
 - [ ] Offline support
