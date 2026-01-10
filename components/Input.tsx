@@ -7,6 +7,8 @@ import {
   ViewStyle,
   TextInputProps,
   TouchableOpacity,
+  Platform,
+  TextStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -38,6 +40,11 @@ export function Input({
   const showPasswordToggle = secureTextEntry;
   const actualSecureEntry = secureTextEntry && !isPasswordVisible;
 
+  // Web-specific style to remove browser focus outline
+  const webInputStyle: TextStyle = Platform.OS === 'web'
+    ? { outlineStyle: 'none' as unknown as undefined }
+    : {};
+
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>}
@@ -66,6 +73,7 @@ export function Input({
             { color: colors.text },
             leftIcon && styles.inputWithLeftIcon,
             (rightIcon || showPasswordToggle) && styles.inputWithRightIcon,
+            webInputStyle,
           ]}
           placeholderTextColor={colors.textMuted}
           onFocus={() => setIsFocused(true)}
@@ -123,6 +131,7 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
+    // outlineStyle is applied via webInputStyle below for web platform
   },
   inputWithLeftIcon: {
     paddingLeft: spacing.xs,

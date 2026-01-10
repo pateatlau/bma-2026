@@ -36,7 +36,7 @@ export default function ProfileScreen() {
           <View style={styles.avatarContainer}>
             <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
               <Text style={styles.avatarText}>
-                {user?.name.split(' ').map(n => n[0]).join('')}
+                {user?.name?.split(' ').map(n => n[0]).join('') || user?.email?.[0]?.toUpperCase() || '?'}
               </Text>
             </View>
             <View style={[styles.avatarBadge, { borderColor: colors.surface, backgroundColor: colors.success }]}>
@@ -102,7 +102,7 @@ export default function ProfileScreen() {
               title="Logout"
               onPress={logout}
               variant="outline"
-              style={[styles.logoutButton, { borderColor: colors.error }]}
+              style={styles.logoutButton}
               textStyle={{ color: colors.error }}
             />
           </Card>

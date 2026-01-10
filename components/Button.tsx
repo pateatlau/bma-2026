@@ -60,12 +60,24 @@ export function Button({
     ghost: { color: colors.primary },
   };
 
+  const sizeStyles: Record<string, ViewStyle> = {
+    sm: styles.size_sm,
+    md: styles.size_md,
+    lg: styles.size_lg,
+  };
+
+  const textSizeStyles: Record<string, TextStyle> = {
+    sm: styles.text_sm,
+    md: styles.text_md,
+    lg: styles.text_lg,
+  };
+
   return (
     <TouchableOpacity
       style={[
         styles.base,
         variantStyles[variant],
-        styles[`size_${size}` as keyof typeof styles],
+        sizeStyles[size],
         isDisabled && styles.disabled,
         style,
       ]}
@@ -83,7 +95,7 @@ export function Button({
           style={[
             styles.text,
             textVariantStyles[variant],
-            styles[`text_${size}` as keyof typeof styles],
+            textSizeStyles[size],
             textStyle,
           ]}
         >

@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+} from 'react-native';
+import { Link } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,13 +15,14 @@ import { Button, Input, Card } from '@/components';
 import { spacing, typography, borderRadius } from '@/constants/theme';
 
 export default function LoginScreen() {
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     setError('');
@@ -28,7 +37,9 @@ export default function LoginScreen() {
       return;
     }
 
+    setIsLoading(true);
     const result = await login(email.trim(), password);
+    setIsLoading(false);
 
     if (!result.success) {
       setError(result.error || 'Login failed');
@@ -67,8 +78,9 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            autoComplete="email"
+            autoComplete="off"
             leftIcon="mail-outline"
+            editable={!isLoading}
           />
 
           <Input
@@ -78,9 +90,18 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
-            autoComplete="password"
+            autoComplete="off"
             leftIcon="lock-closed-outline"
+            editable={!isLoading}
           />
+
+          <Link href="/forgot-password" asChild>
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
+          </Link>
 
           <Button
             title="Sign In"
@@ -90,10 +111,14 @@ export default function LoginScreen() {
           />
 
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: colors.textMuted }]}>Demo credentials:</Text>
-            <Text style={[styles.credentialsText, { color: colors.textSecondary }]}>
-              user@example.com / password123
+            <Text style={[styles.footerText, { color: colors.textMuted }]}>
+              Don't have an account?{' '}
             </Text>
+            <Link href="/signup" asChild>
+              <TouchableOpacity>
+                <Text style={[styles.linkText, { color: colors.primary }]}>Sign Up</Text>
+              </TouchableOpacity>
+            </Link>
           </View>
         </Card>
       </View>
@@ -155,20 +180,31 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     textAlign: 'center',
   },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: spacing.md,
+  },
+  forgotPasswordText: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
   loginButton: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   footer: {
-    marginTop: spacing.xl,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: spacing.xl,
   },
   footerText: {
     fontFamily: typography.fontFamily,
     fontSize: typography.sizes.sm,
   },
-  credentialsText: {
+  linkText: {
     fontFamily: typography.fontFamily,
     fontSize: typography.sizes.sm,
-    marginTop: spacing.xs,
+    fontWeight: typography.weights.semibold,
   },
 });

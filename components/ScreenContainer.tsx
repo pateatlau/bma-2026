@@ -22,9 +22,9 @@ export function ScreenContainer({
 
   const containerStyle: ViewStyle[] = [
     styles.container,
-    padded && styles.padded,
-    centered && styles.centered,
-    style,
+    ...(padded ? [styles.padded] : []),
+    ...(centered ? [styles.centered] : []),
+    ...(style ? [style] : []),
   ];
 
   if (scrollable) {

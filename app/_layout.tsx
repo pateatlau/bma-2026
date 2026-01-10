@@ -1,17 +1,36 @@
 import { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 
+// Import global CSS for web to override browser autofill styles
+if (Platform.OS === 'web') {
+  require('@/assets/global.css');
+}
+
+function LoadingScreen() {
+  const { colors } = useTheme();
+
+  return (
+    <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
+}
+
 function RootLayoutNav() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { colors, isDark } = useTheme();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
+    // Don't navigate while still loading the initial session
+    if (isLoading) return;
+
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated && !inAuthGroup) {
@@ -19,7 +38,12 @@ function RootLayoutNav() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(app)/home');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, isLoading, segments]);
+
+  // Show loading screen while checking initial session
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
@@ -49,3 +73,11 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
