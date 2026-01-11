@@ -135,7 +135,7 @@ export const lightSemanticColors = {
   background: primitives.white,
   surface: primitives.red[50],
   surfaceHover: primitives.red[100],
-  surfaceElevated: primitives.white,
+  surfaceElevated: primitives.red[50], // Light red tint for elevated cards
 
   // Text
   text: primitives.gray[950],
