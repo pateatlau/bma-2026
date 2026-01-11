@@ -26,6 +26,7 @@
     },
     "web": {
       "bundler": "metro",
+      "_comment_output": "Using 'single' (SPA) mode: app requires authentication, no SEO needed, client-side routing via expo-router. Vercel rewrites configured in vercel.json.",
       "output": "single",
       "favicon": "./assets/favicon.png"
     },

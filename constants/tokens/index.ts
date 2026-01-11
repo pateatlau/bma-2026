@@ -80,7 +80,7 @@ export {
 // SHADOW TOKENS
 // =============================================================================
 
-export { shadows, getShadow, legacyShadows, type ShadowDefinition, type Shadow } from './shadows';
+export { shadows, getShadow, type ShadowDefinition, type Shadow } from './shadows';
 
 // =============================================================================
 // ANIMATION TOKENS

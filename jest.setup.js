@@ -1,5 +1,7 @@
-// Use @testing-library/jest-native for matchers
-// The jest-native package provides toBeVisible, toHaveTextContent, etc.
+// Import React Native Testing Library matchers (toBeVisible, toHaveTextContent, etc.)
+// Note: @testing-library/jest-native package is deprecated.
+// In RNTL v13+, matchers are built-in and auto-extend when you import from the library.
+// We keep this explicit import for clarity and backwards compatibility.
 require('@testing-library/jest-native/extend-expect');
 
 // Mock expo modules not covered by jest-expo

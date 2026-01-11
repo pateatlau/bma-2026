@@ -59,13 +59,34 @@ export function Divider({
   const spacingValue = getSpacingValue(dividerSpacing);
   const isHorizontal = orientation === 'horizontal';
 
-  // Base line style
-  const lineStyle: ViewStyle = {
-    backgroundColor: colors.border,
-    ...(isHorizontal ? { height: thickness, flex: 1 } : { width: thickness, flex: 1 }),
-    ...(variant === 'dashed' && { borderStyle: 'dashed' }),
-    ...(variant === 'dotted' && { borderStyle: 'dotted' }),
+  // Build line style based on variant
+  // For solid: use backgroundColor
+  // For dashed/dotted: use border properties (backgroundColor doesn't support borderStyle)
+  const getLineStyle = (): ViewStyle => {
+    const baseLayout: ViewStyle = {
+      flex: 1,
+      ...(isHorizontal ? { height: thickness } : { width: thickness }),
+    };
+
+    if (variant === 'solid') {
+      return {
+        ...baseLayout,
+        backgroundColor: colors.border,
+      };
+    }
+
+    // For dashed and dotted variants, use border properties
+    return {
+      ...baseLayout,
+      borderColor: colors.border,
+      borderStyle: variant,
+      ...(isHorizontal
+        ? { borderBottomWidth: thickness, height: 0 }
+        : { borderLeftWidth: thickness, width: 0 }),
+    };
   };
+
+  const lineStyle = getLineStyle();
 
   // Container style with spacing
   const containerStyle: ViewStyle = {

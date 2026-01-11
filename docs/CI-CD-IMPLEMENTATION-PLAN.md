@@ -59,7 +59,7 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ## Architecture Overview
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              DEVELOPMENT                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -103,7 +103,7 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ### Testing Pyramid
 
-```
+```plaintext
                     ┌─────────────┐
                    /   E2E Tests   \          Few, Slow, Expensive
                   /   (Playwright   \         - Critical user flows
@@ -155,7 +155,7 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ### Recommended: GitHub Flow (Simple)
 
-```
+```plaintext
 main (production)
   │
   ├── feature/user-auth ──────► PR ──────► merge to main
@@ -686,11 +686,11 @@ Configure in Vercel Dashboard → Project → Settings → Environment Variables
 
 ---
 
-## Phase 4: EAS Build Setup
+## Phase 5: EAS Build Setup
 
 ### Prerequisites
 
-1. Create Expo account at https://expo.dev
+1. Create Expo account at <https://expo.dev>
 2. Install EAS CLI: `npm install -g eas-cli`
 3. Login: `eas login`
 4. Configure project: `eas build:configure`
@@ -824,7 +824,7 @@ jobs:
 
 ---
 
-## Phase 5: Web Deployment (Vercel)
+## Phase 6: Web Deployment (Vercel)
 
 ### Why Vercel?
 
@@ -837,7 +837,7 @@ jobs:
 ### Setup Steps
 
 1. **Connect Repository**
-   - Go to https://vercel.com
+   - Go to <https://vercel.com>
    - Import GitHub repository
    - Vercel auto-detects Expo
 
@@ -914,12 +914,12 @@ jobs:
 
 ---
 
-## Phase 6: Android Deployment (Play Store)
+## Phase 7: Android Deployment (Play Store)
 
 ### Prerequisites
 
 1. **Google Play Console Account** ($25 one-time)
-   - https://play.google.com/console
+   - <https://play.google.com/console>
 
 2. **Service Account for CI/CD**
    - Google Cloud Console → IAM → Service Accounts
@@ -988,12 +988,12 @@ Add to `eas.json`:
 
 ---
 
-## Phase 7: iOS Deployment (App Store)
+## Phase 8: iOS Deployment (App Store)
 
 ### Prerequisites
 
 1. **Apple Developer Account** ($99/year)
-   - https://developer.apple.com
+   - <https://developer.apple.com>
 
 2. **App Store Connect**
    - Create app record
@@ -1073,7 +1073,7 @@ Add to `eas.json`:
 
 ---
 
-## Phase 8: Monitoring & Analytics (Optional)
+## Phase 9: Monitoring & Analytics (Optional)
 
 ### Error Tracking: Sentry
 
@@ -1152,8 +1152,8 @@ Sentry.init({
 
 ### Pre-Implementation
 
-- [ ] Create Expo account (https://expo.dev)
-- [ ] Create Vercel account (https://vercel.com)
+- [ ] Create Expo account (<https://expo.dev>)
+- [ ] Create Vercel account (<https://vercel.com>)
 - [ ] Purchase Apple Developer membership ($99)
 - [ ] Create Google Play Console account ($25)
 - [ ] Set up Supabase projects (dev, staging, prod)
@@ -1296,7 +1296,7 @@ For native code changes, requires new build and store submission.
 
 Ensure `.gitignore` includes:
 
-```
+```gitignore
 # Secrets
 .env
 .env.local
@@ -1320,12 +1320,13 @@ ios/
 | ----- | ------------------------- | --------------------- |
 | 1     | Pre-commit hooks          | None                  |
 | 2     | GitHub Actions CI         | None                  |
-| 3     | Environment configuration | Supabase setup        |
-| 4     | EAS Build setup           | Expo account          |
-| 5     | Web deployment            | Vercel account        |
-| 6     | Android deployment        | Play Console, Phase 4 |
-| 7     | iOS deployment            | Apple Dev, Phase 4    |
-| 8     | Monitoring                | All phases complete   |
+| 3     | Testing infrastructure    | Phase 2               |
+| 4     | Environment configuration | Supabase setup        |
+| 5     | EAS Build setup           | Expo account          |
+| 6     | Web deployment            | Vercel account        |
+| 7     | Android deployment        | Play Console, Phase 5 |
+| 8     | iOS deployment            | Apple Dev, Phase 5    |
+| 9     | Monitoring                | All phases complete   |
 
 ---
 
@@ -1355,7 +1356,7 @@ ios/
 
 All workflow files are provided in the phases above. Copy them to:
 
-```
+```plaintext
 .github/
 └── workflows/
     ├── ci.yml           # Lint, Type Check, Unit & Integration Tests

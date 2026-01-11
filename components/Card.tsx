@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle, GestureResponderEvent } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { spacing, borderRadius, shadows } from '@/constants/theme';
+import { legacySpacing, borderRadius, getShadow } from '@/constants/tokens';
 
 export type CardVariant = 'default' | 'outlined' | 'elevated' | 'filled';
 export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
@@ -30,9 +30,9 @@ export interface CardProps {
  */
 const paddingConfig: Record<CardPadding, number> = {
   none: 0,
-  sm: spacing.sm,
-  md: spacing.md,
-  lg: spacing.lg,
+  sm: legacySpacing.sm,
+  md: legacySpacing.md,
+  lg: legacySpacing.lg,
 };
 
 export function Card({
@@ -65,7 +65,7 @@ export function Card({
           backgroundColor: colors.surfaceElevated,
           borderColor: 'transparent',
           borderWidth: 0,
-          ...shadows.md,
+          ...getShadow('md'),
         };
       case 'filled':
         return {
@@ -154,14 +154,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   header: {
-    marginBottom: spacing.md,
+    marginBottom: legacySpacing.md,
   },
   body: {
     // Default body styles
   },
   footer: {
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
+    marginTop: legacySpacing.md,
+    paddingTop: legacySpacing.md,
     borderTopWidth: 1,
   },
 });

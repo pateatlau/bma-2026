@@ -98,7 +98,7 @@ Use tracks to progressively roll out your app.
 
 ### Recommended Release Flow
 
-```
+```plaintext
 Internal Testing → Closed Testing → Production (Staged Rollout)
        ↓                 ↓                    ↓
    1-2 days          3-7 days           10% → 50% → 100%

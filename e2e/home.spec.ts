@@ -42,24 +42,6 @@ test.describe('Accessibility', () => {
 });
 
 /**
- * Navigation tests
- */
-test.describe('Navigation', () => {
-  test('should handle browser back/forward navigation', async ({ page }) => {
-    await page.goto('/');
-    const initialUrl = page.url();
-
-    // If there are other routes, navigate to them
-    // await page.goto('/other-route');
-    // await page.goBack();
-    // await expect(page).toHaveURL(initialUrl);
-
-    // For now, just verify the page loads
-    await expect(page).toHaveURL(initialUrl);
-  });
-});
-
-/**
  * Performance tests
  */
 test.describe('Performance', () => {

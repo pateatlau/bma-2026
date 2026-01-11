@@ -173,34 +173,34 @@ ESLint 9.x uses the new flat configuration format. Create the file at the projec
 **File**: `eslint.config.js`
 
 ```javascript
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
-const prettierConfig = require('eslint-config-prettier');
-const prettierPlugin = require('eslint-plugin-prettier');
+const eslintPluginPrettier = require('eslint-plugin-prettier/recommended');
 
-module.exports = defineConfig([
-  // Expo's base configuration (includes React, React Native, TypeScript rules)
-  expoConfig,
+/** @type {import('eslint').Linter.Config[]} */
+module.exports = [
+  // Expo's flat config (includes TypeScript, React, React Hooks, Expo rules)
+  // Note: expoConfig is an array, so we spread it
+  ...expoConfig,
 
-  // Prettier integration
+  // Prettier integration - uses recommended config which:
+  // 1. Adds prettier plugin
+  // 2. Sets 'prettier/prettier': 'error'
+  // 3. Disables conflicting ESLint rules (via eslint-config-prettier)
+  eslintPluginPrettier,
+
+  // Project-specific configuration for all JS/TS files
   {
-    plugins: {
-      prettier: prettierPlugin,
-    },
+    files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
-      'prettier/prettier': 'error',
+      // Console statements - warn in development
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
 
-  // Disable rules that conflict with Prettier
-  prettierConfig,
-
-  // Project-specific overrides
+  // TypeScript-specific overrides (plugin only available for TS files)
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
-      // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -209,43 +209,27 @@ module.exports = defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
-        },
-      ],
-
-      // React rules
-      'react/react-in-jsx-scope': 'off', // Not needed in React 17+
-      'react/prop-types': 'off', // Using TypeScript for prop validation
-      'react/display-name': 'off', // Anonymous components are fine
-
-      // React Native rules
-      'react-native/no-inline-styles': 'warn', // Prefer StyleSheet
-      'react-native/no-unused-styles': 'warn', // Clean up unused styles
-      'react-native/split-platform-components': 'warn', // Platform-specific files
-
-      // General rules
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'prefer-const': 'error',
-      'no-var': 'error',
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
     },
   },
 
-  // Test files - relaxed rules
+  // Jest setup file - add jest globals
   {
-    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      'no-console': 'off',
+    files: ['jest.setup.js', 'jest.config.js', '**/__tests__/**/*', '**/__mocks__/**/*'],
+    languageOptions: {
+      globals: {
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
     },
   },
 
-  // Ignore patterns
+  // Global ignores
   {
     ignores: [
       'node_modules/',
@@ -255,48 +239,44 @@ module.exports = defineConfig([
       'android/',
       'ios/',
       'coverage/',
-      '*.config.js',
+      '*.min.js',
+      '*.bundle.js',
       'babel.config.js',
       'metro.config.js',
+      'playwright-report/',
+      'playwright-results/',
     ],
   },
-]);
+];
 ```
+
+> **Note**: ESLint 9.x flat config exports a plain array - no wrapper function needed.
+> Use JSDoc annotations for type hints. The `eslint-plugin-prettier/recommended` export
+> is the preferred way to integrate Prettier with ESLint in flat config. It combines
+> the plugin, the `prettier/prettier` rule, and `eslint-config-prettier` in one import.
 
 ### ESLint Rules Explanation
 
-#### TypeScript Rules
+#### From eslint-config-expo (Inherited)
 
-| Rule                                         | Setting | Rationale                                             |
-| -------------------------------------------- | ------- | ----------------------------------------------------- |
-| `@typescript-eslint/no-unused-vars`          | `warn`  | Allow underscore-prefixed vars (intentionally unused) |
-| `@typescript-eslint/no-explicit-any`         | `warn`  | Encourage type safety, but allow escape hatch         |
-| `@typescript-eslint/consistent-type-imports` | `error` | Use `type` imports for types (tree-shaking)           |
+The Expo config provides sensible defaults for React, React Native, and TypeScript projects.
+These rules are automatically included and don't need explicit configuration.
 
-#### React Rules
+#### Project-Specific Overrides
 
-| Rule                       | Setting | Rationale                              |
-| -------------------------- | ------- | -------------------------------------- |
-| `react/react-in-jsx-scope` | `off`   | React 17+ doesn't require React import |
-| `react/prop-types`         | `off`   | TypeScript handles prop validation     |
-| `react/display-name`       | `off`   | Not needed for functional components   |
+| Rule                                | Setting | Rationale                                             |
+| ----------------------------------- | ------- | ----------------------------------------------------- |
+| `no-console`                        | `warn`  | Allow warn/error, warn on log/info                    |
+| `@typescript-eslint/no-unused-vars` | `warn`  | Allow underscore-prefixed vars (intentionally unused) |
 
-#### React Native Rules
+#### Prettier Integration
 
-| Rule                                     | Setting | Rationale                         |
-| ---------------------------------------- | ------- | --------------------------------- |
-| `react-native/no-inline-styles`          | `warn`  | Prefer StyleSheet for performance |
-| `react-native/no-unused-styles`          | `warn`  | Keep stylesheets clean            |
-| `react-native/split-platform-components` | `warn`  | Proper platform-specific code     |
+| Rule                | Setting | Rationale                         |
+| ------------------- | ------- | --------------------------------- |
+| `prettier/prettier` | `error` | Format errors fail the lint check |
 
-#### General Rules
-
-| Rule           | Setting | Rationale                            |
-| -------------- | ------- | ------------------------------------ |
-| `no-console`   | `warn`  | Allow warn/error, warn on log/info   |
-| `prefer-const` | `error` | Immutability by default              |
-| `no-var`       | `error` | Use const/let instead                |
-| `eqeqeq`       | `error` | Strict equality (except null checks) |
+The `eslint-plugin-prettier/recommended` config automatically disables ESLint rules that
+would conflict with Prettier formatting (via `eslint-config-prettier`).
 
 ---
 

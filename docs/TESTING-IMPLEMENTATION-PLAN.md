@@ -128,10 +128,10 @@ After installation, `package.json` devDependencies should include:
 {
   "devDependencies": {
     "@babel/core": "^7.24.0",
-    "@playwright/test": "^1.48.0",
-    "@testing-library/jest-native": "^5.4.0",
-    "@testing-library/react-native": "^12.8.0",
-    "@types/jest": "^29.5.0",
+    "@playwright/test": "^1.57.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.10",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
@@ -139,11 +139,11 @@ After installation, `package.json` devDependencies should include:
     "eslint-config-expo": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "husky": "^9.0.0",
-    "jest": "^29.7.0",
-    "jest-expo": "~52.0.0",
-    "lint-staged": "^15.0.0",
-    "msw": "^2.6.0",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "jest-expo": "^54.0.16",
+    "lint-staged": "^16.2.7",
+    "msw": "^2.12.7",
     "prettier": "^3.7.4",
     "typescript": "~5.9.2"
   }
@@ -231,8 +231,11 @@ module.exports = {
 **File**: `jest.setup.js`
 
 ```javascript
-// Import Jest Native matchers
-import '@testing-library/jest-native/extend-expect';
+// Import React Native Testing Library matchers (toBeVisible, toHaveTextContent, etc.)
+// Note: @testing-library/jest-native package is deprecated.
+// In RNTL v13+, matchers are built-in and auto-extend when you import from the library.
+// We keep this explicit import for clarity and backwards compatibility.
+require('@testing-library/jest-native/extend-expect');
 
 // Mock React Native modules that don't work in Jest
 jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
@@ -297,9 +300,11 @@ global.console = {
   error: console.error,
 };
 
-// Set up fake timers
+// Set up fake timers with modern implementation
+// Note: For React 19, timer advances must be wrapped in act() to flush concurrent updates
+// Example: act(() => jest.advanceTimersByTime(1000));
 beforeEach(() => {
-  jest.useFakeTimers();
+  jest.useFakeTimers('modern');
 });
 
 afterEach(() => {
@@ -307,6 +312,14 @@ afterEach(() => {
   jest.useRealTimers();
 });
 ```
+
+> **React 19 Timer Note**: When advancing timers in tests, always wrap timer advances
+> in `act()` to ensure React's concurrent/Suspense updates flush correctly:
+>
+> ```javascript
+> import { act } from '@testing-library/react-native';
+> act(() => jest.advanceTimersByTime(1000));
+> ```
 
 ### Directory Structure for Tests
 

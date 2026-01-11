@@ -1,22 +1,16 @@
-const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
-const eslintConfigPrettier = require('eslint-config-prettier');
-const eslintPluginPrettier = require('eslint-plugin-prettier');
+const eslintPluginPrettier = require('eslint-plugin-prettier/recommended');
 
-module.exports = defineConfig([
+/** @type {import('eslint').Linter.Config[]} */
+module.exports = [
   // Expo's flat config (includes TypeScript, React, React Hooks, Expo rules)
-  expoConfig,
+  ...expoConfig,
 
-  // Prettier integration - must come after other configs to override conflicting rules
-  eslintConfigPrettier,
-  {
-    plugins: {
-      prettier: eslintPluginPrettier,
-    },
-    rules: {
-      'prettier/prettier': 'error',
-    },
-  },
+  // Prettier integration - uses recommended config which:
+  // 1. Adds prettier plugin
+  // 2. Sets 'prettier/prettier': 'error'
+  // 3. Disables conflicting ESLint rules (via eslint-config-prettier)
+  eslintPluginPrettier,
 
   // Project-specific configuration for all JS/TS files
   {
@@ -77,4 +71,4 @@ module.exports = defineConfig([
       'playwright-results/',
     ],
   },
-]);
+];

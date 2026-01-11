@@ -25,7 +25,7 @@
 - Avoid duplicated logic
 - Ensure navigation and providers are wired correctly
 - Handle platform differences intentionally
-- Run `npm run check` before committing (typecheck + lint + format)
+- Run `npm run check` before committing (typecheck + lint + format:check)
 
 ## Formatting & Linting
 
