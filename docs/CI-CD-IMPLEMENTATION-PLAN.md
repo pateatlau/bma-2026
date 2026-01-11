@@ -4,17 +4,17 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ## Implementation Status
 
-| Phase   | Description                        | Status     |
-| ------- | ---------------------------------- | ---------- |
-| Phase 1 | Pre-commit hooks (Husky)           | ⏳ Pending |
-| Phase 2 | GitHub Actions - Lint & Type Check | ⏳ Pending |
-| Phase 3 | Testing infrastructure             | ⏳ Pending |
-| Phase 4 | Environment configuration          | ⏳ Pending |
-| Phase 5 | EAS Build setup                    | ⏳ Pending |
-| Phase 6 | Web deployment (Vercel)            | ⏳ Pending |
-| Phase 7 | Android deployment (Play Store)    | ⏳ Pending |
-| Phase 8 | iOS deployment (App Store)         | ⏳ Pending |
-| Phase 9 | Monitoring & analytics             | ⏳ Pending |
+| Phase   | Description                        | Status       |
+| ------- | ---------------------------------- | ------------ |
+| Phase 1 | Pre-commit hooks (Husky)           | ✅ Completed |
+| Phase 2 | GitHub Actions - Lint & Type Check | ✅ Completed |
+| Phase 3 | Testing infrastructure             | ⏳ Pending   |
+| Phase 4 | Environment configuration          | ⏳ Pending   |
+| Phase 5 | EAS Build setup                    | ⏳ Pending   |
+| Phase 6 | Web deployment (Vercel)            | ⏳ Pending   |
+| Phase 7 | Android deployment (Play Store)    | ⏳ Pending   |
+| Phase 8 | iOS deployment (App Store)         | ⏳ Pending   |
+| Phase 9 | Monitoring & analytics             | ⏳ Pending   |
 
 > **Note**: For detailed testing implementation (Unit, Integration, E2E), see [TESTING-IMPLEMENTATION-PLAN.md](./TESTING-IMPLEMENTATION-PLAN.md)
 
@@ -24,16 +24,16 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ### Recommended Stack
 
-| Component          | Solution                | Cost (Monthly)      | Rationale                                   |
-| ------------------ | ----------------------- | ------------------- | ------------------------------------------- |
-| **CI/CD**          | GitHub Actions          | Free (2000 min/mo)  | Native integration, generous free tier      |
-| **Testing**        | Jest + Playwright + Maestro | Free            | Industry standard, cross-platform           |
-| **Web Hosting**    | Vercel                  | Free → $20          | Best DX, auto-scaling, India edge nodes     |
-| **Mobile Builds**  | EAS Build               | Free (30/mo) → $99  | Managed iOS/Android builds, no Mac required |
-| **Mobile Deploy**  | EAS Submit              | Included with EAS   | Automated store submissions                 |
-| **Secrets Mgmt**   | GitHub Secrets + Vercel | Free                | Secure, encrypted, easy rotation            |
-| **Error Tracking** | Sentry (optional)       | Free (5K events/mo) | Cross-platform error monitoring             |
-| **Coverage**       | Codecov                 | Free                | Coverage tracking and PR comments           |
+| Component          | Solution                    | Cost (Monthly)      | Rationale                                   |
+| ------------------ | --------------------------- | ------------------- | ------------------------------------------- |
+| **CI/CD**          | GitHub Actions              | Free (2000 min/mo)  | Native integration, generous free tier      |
+| **Testing**        | Jest + Playwright + Maestro | Free                | Industry standard, cross-platform           |
+| **Web Hosting**    | Vercel                      | Free → $20          | Best DX, auto-scaling, India edge nodes     |
+| **Mobile Builds**  | EAS Build                   | Free (30/mo) → $99  | Managed iOS/Android builds, no Mac required |
+| **Mobile Deploy**  | EAS Submit                  | Included with EAS   | Automated store submissions                 |
+| **Secrets Mgmt**   | GitHub Secrets + Vercel     | Free                | Secure, encrypted, easy rotation            |
+| **Error Tracking** | Sentry (optional)           | Free (5K events/mo) | Cross-platform error monitoring             |
+| **Coverage**       | Codecov                     | Free                | Coverage tracking and PR comments           |
 
 ### Estimated Monthly Costs (5000 Users)
 
@@ -117,33 +117,33 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ### Test Execution Strategy
 
-| Trigger              | Unit Tests | Integration Tests | E2E Tests       |
-| -------------------- | ---------- | ----------------- | --------------- |
-| PR Creation/Update   | ✅ Run     | ✅ Run            | ❌ Skip         |
-| Push to `main`       | ✅ Run     | ✅ Run            | ✅ Web only     |
-| Tag push (`v*`)      | ✅ Run     | ✅ Run            | ✅ All platforms|
-| Manual trigger       | ✅ Run     | ✅ Run            | ✅ All platforms|
+| Trigger            | Unit Tests | Integration Tests | E2E Tests        |
+| ------------------ | ---------- | ----------------- | ---------------- |
+| PR Creation/Update | ✅ Run     | ✅ Run            | ❌ Skip          |
+| Push to `main`     | ✅ Run     | ✅ Run            | ✅ Web only      |
+| Tag push (`v*`)    | ✅ Run     | ✅ Run            | ✅ All platforms |
+| Manual trigger     | ✅ Run     | ✅ Run            | ✅ All platforms |
 
 ### Testing Tools
 
-| Test Type        | Framework                        | Purpose                         |
-| ---------------- | -------------------------------- | ------------------------------- |
-| **Unit**         | Jest + RNTL                      | Components, hooks, utilities    |
-| **Integration**  | Jest + MSW                       | API integration, complex flows  |
-| **E2E (Web)**    | Playwright                       | Browser-based user flows        |
-| **E2E (Mobile)** | Maestro                          | Native app user flows           |
-| **Coverage**     | Jest + Codecov                   | Track and report coverage       |
+| Test Type        | Framework      | Purpose                        |
+| ---------------- | -------------- | ------------------------------ |
+| **Unit**         | Jest + RNTL    | Components, hooks, utilities   |
+| **Integration**  | Jest + MSW     | API integration, complex flows |
+| **E2E (Web)**    | Playwright     | Browser-based user flows       |
+| **E2E (Mobile)** | Maestro        | Native app user flows          |
+| **Coverage**     | Jest + Codecov | Track and report coverage      |
 
 ### Quality Gates
 
-| Check                        | Required for PR | Notes                        |
-| ---------------------------- | --------------- | ---------------------------- |
-| Unit tests pass              | ✅              | All unit tests must pass     |
-| Integration tests pass       | ✅              | All integration tests pass   |
-| Coverage > 60%               | ✅              | Minimum coverage threshold   |
-| TypeScript check passes      | ✅              | No type errors               |
-| ESLint passes                | ✅              | No linting errors            |
-| Prettier check passes        | ✅              | Consistent formatting        |
+| Check                   | Required for PR | Notes                      |
+| ----------------------- | --------------- | -------------------------- |
+| Unit tests pass         | ✅              | All unit tests must pass   |
+| Integration tests pass  | ✅              | All integration tests pass |
+| Coverage > 60%          | ✅              | Minimum coverage threshold |
+| TypeScript check passes | ✅              | No type errors             |
+| ESLint passes           | ✅              | No linting errors          |
+| Prettier check passes   | ✅              | Consistent formatting      |
 
 ---
 
@@ -1175,7 +1175,7 @@ Sentry.init({
 - [ ] Create jest.config.js and jest.setup.js
 - [ ] Install Playwright for E2E web tests
 - [ ] Install Maestro CLI for E2E mobile tests
-- [ ] Create __tests__/ directory structure
+- [ ] Create **tests**/ directory structure
 - [ ] Write initial unit tests (Button, Input, hooks)
 - [ ] Create MSW handlers for API mocking
 - [ ] Write initial integration tests

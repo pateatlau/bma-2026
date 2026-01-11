@@ -4,14 +4,14 @@ This document outlines the comprehensive testing strategy for the BMA 2026 Expo 
 
 ## Implementation Status
 
-| Phase   | Description                          | Status     |
-| ------- | ------------------------------------ | ---------- |
-| Phase 1 | Testing infrastructure setup         | ⏳ Pending |
-| Phase 2 | Unit testing framework               | ⏳ Pending |
-| Phase 3 | Integration testing framework        | ⏳ Pending |
-| Phase 4 | E2E testing framework                | ⏳ Pending |
-| Phase 5 | CI/CD integration                    | ⏳ Pending |
-| Phase 6 | Coverage reporting & quality gates   | ⏳ Pending |
+| Phase   | Description                        | Status     |
+| ------- | ---------------------------------- | ---------- |
+| Phase 1 | Testing infrastructure setup       | ⏳ Pending |
+| Phase 2 | Unit testing framework             | ⏳ Pending |
+| Phase 3 | Integration testing framework      | ⏳ Pending |
+| Phase 4 | E2E testing framework              | ⏳ Pending |
+| Phase 5 | CI/CD integration                  | ⏳ Pending |
+| Phase 6 | Coverage reporting & quality gates | ⏳ Pending |
 
 ---
 
@@ -37,22 +37,22 @@ This document outlines the comprehensive testing strategy for the BMA 2026 Expo 
 
 ### Recommended Stack
 
-| Test Type       | Framework                        | Cost    | Rationale                              |
-| --------------- | -------------------------------- | ------- | -------------------------------------- |
-| **Unit**        | Jest + RNTL                      | Free    | Industry standard, Expo compatible     |
-| **Integration** | Jest + RNTL + MSW                | Free    | API mocking, component integration     |
-| **E2E (Web)**   | Playwright                       | Free    | Fast, reliable, cross-browser          |
-| **E2E (Mobile)**| Maestro                          | Free    | Simple YAML syntax, cross-platform     |
-| **Coverage**    | Jest built-in + Codecov          | Free    | Coverage tracking and PR comments      |
+| Test Type        | Framework               | Cost | Rationale                          |
+| ---------------- | ----------------------- | ---- | ---------------------------------- |
+| **Unit**         | Jest + RNTL             | Free | Industry standard, Expo compatible |
+| **Integration**  | Jest + RNTL + MSW       | Free | API mocking, component integration |
+| **E2E (Web)**    | Playwright              | Free | Fast, reliable, cross-browser      |
+| **E2E (Mobile)** | Maestro                 | Free | Simple YAML syntax, cross-platform |
+| **Coverage**     | Jest built-in + Codecov | Free | Coverage tracking and PR comments  |
 
 ### Test Execution Strategy
 
-| Trigger              | Unit Tests | Integration Tests | E2E Tests |
-| -------------------- | ---------- | ----------------- | --------- |
-| PR Creation/Update   | ✅ Run     | ✅ Run            | ❌ Skip   |
-| Push to `main`       | ✅ Run     | ✅ Run            | ✅ Web    |
-| Tag push (`v*`)      | ✅ Run     | ✅ Run            | ✅ All    |
-| Manual trigger       | ✅ Run     | ✅ Run            | ✅ All    |
+| Trigger            | Unit Tests | Integration Tests | E2E Tests |
+| ------------------ | ---------- | ----------------- | --------- |
+| PR Creation/Update | ✅ Run     | ✅ Run            | ❌ Skip   |
+| Push to `main`     | ✅ Run     | ✅ Run            | ✅ Web    |
+| Tag push (`v*`)    | ✅ Run     | ✅ Run            | ✅ All    |
+| Manual trigger     | ✅ Run     | ✅ Run            | ✅ All    |
 
 ---
 
@@ -110,15 +110,15 @@ npm install --save-dev \
 
 ### Package Descriptions
 
-| Package                          | Purpose                                      |
-| -------------------------------- | -------------------------------------------- |
-| `jest`                           | Test runner                                  |
-| `jest-expo`                      | Expo-specific Jest preset                    |
-| `@testing-library/react-native`  | React Native component testing utilities     |
-| `@testing-library/jest-native`   | Custom Jest matchers for React Native        |
-| `msw`                            | API mocking for integration tests            |
-| `@playwright/test`               | E2E testing for web                          |
-| `maestro` (CLI)                  | E2E testing for mobile (installed globally)  |
+| Package                         | Purpose                                     |
+| ------------------------------- | ------------------------------------------- |
+| `jest`                          | Test runner                                 |
+| `jest-expo`                     | Expo-specific Jest preset                   |
+| `@testing-library/react-native` | React Native component testing utilities    |
+| `@testing-library/jest-native`  | Custom Jest matchers for React Native       |
+| `msw`                           | API mocking for integration tests           |
+| `@playwright/test`              | E2E testing for web                         |
+| `maestro` (CLI)                 | E2E testing for mobile (installed globally) |
 
 ### Updated devDependencies
 
@@ -165,10 +165,7 @@ module.exports = {
   testEnvironment: 'node',
 
   // Test file patterns
-  testMatch: [
-    '**/__tests__/**/*.test.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[jt]s?(x)',
-  ],
+  testMatch: ['**/__tests__/**/*.test.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
 
   // Ignore integration and E2E tests in unit test runs
   testPathIgnorePatterns: [
@@ -362,16 +359,12 @@ describe('Button', () => {
     });
 
     it('renders loading state', () => {
-      renderWithProviders(
-        <Button title="Loading" onPress={() => {}} loading />
-      );
+      renderWithProviders(<Button title="Loading" onPress={() => {}} loading />);
       expect(screen.getByTestId('activity-indicator')).toBeTruthy();
     });
 
     it('renders disabled state', () => {
-      renderWithProviders(
-        <Button title="Disabled" onPress={() => {}} disabled />
-      );
+      renderWithProviders(<Button title="Disabled" onPress={() => {}} disabled />);
       const button = screen.getByRole('button');
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
@@ -388,9 +381,7 @@ describe('Button', () => {
 
     it('does not call onPress when disabled', () => {
       const onPress = jest.fn();
-      renderWithProviders(
-        <Button title="Disabled" onPress={onPress} disabled />
-      );
+      renderWithProviders(<Button title="Disabled" onPress={onPress} disabled />);
 
       fireEvent.press(screen.getByText('Disabled'));
       expect(onPress).not.toHaveBeenCalled();
@@ -398,9 +389,7 @@ describe('Button', () => {
 
     it('does not call onPress when loading', () => {
       const onPress = jest.fn();
-      renderWithProviders(
-        <Button title="Loading" onPress={onPress} loading />
-      );
+      renderWithProviders(<Button title="Loading" onPress={onPress} loading />);
 
       fireEvent.press(screen.getByRole('button'));
       expect(onPress).not.toHaveBeenCalled();
@@ -412,9 +401,7 @@ describe('Button', () => {
 
     variants.forEach((variant) => {
       it(`renders ${variant} variant`, () => {
-        renderWithProviders(
-          <Button title={variant} onPress={() => {}} variant={variant} />
-        );
+        renderWithProviders(<Button title={variant} onPress={() => {}} variant={variant} />);
         expect(screen.getByText(variant)).toBeTruthy();
       });
     });
@@ -524,7 +511,7 @@ const SUPABASE_URL = 'https://test.supabase.co';
 export const handlers = [
   // Auth endpoints
   http.post(`${SUPABASE_URL}/auth/v1/token`, async ({ request }) => {
-    const body = await request.json() as { email?: string; password?: string };
+    const body = (await request.json()) as { email?: string; password?: string };
 
     if (body.email === 'test@example.com' && body.password === 'password123') {
       return HttpResponse.json({
@@ -538,14 +525,11 @@ export const handlers = [
       });
     }
 
-    return HttpResponse.json(
-      { error: 'Invalid credentials' },
-      { status: 401 }
-    );
+    return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }),
 
   http.post(`${SUPABASE_URL}/auth/v1/signup`, async ({ request }) => {
-    const body = await request.json() as { email?: string };
+    const body = (await request.json()) as { email?: string };
 
     return HttpResponse.json({
       user: {
@@ -605,19 +589,10 @@ module.exports = {
   testMatch: ['**/*.integration.test.[jt]s?(x)'],
 
   // Don't ignore integration tests
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/.expo/',
-    '/dist/',
-    '/web-build/',
-    '/e2e/',
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/', '/web-build/', '/e2e/'],
 
   // Setup MSW server
-  setupFilesAfterEnv: [
-    '<rootDir>/jest.setup.js',
-    '<rootDir>/jest.integration.setup.js',
-  ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/jest.integration.setup.js'],
 
   // Longer timeout for integration tests
   testTimeout: 15000,
@@ -700,10 +675,7 @@ describe('AuthContext Integration', () => {
     // Override handler for this test
     server.use(
       http.post('https://test.supabase.co/auth/v1/token', () => {
-        return HttpResponse.json(
-          { error: 'Invalid credentials' },
-          { status: 401 }
-        );
+        return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
       })
     );
 
@@ -986,32 +958,32 @@ appId: com.bma.app2026
 name: Authentication Flow
 ---
 # Test: Login screen displays correctly
-- assertVisible: "Sign In"
+- assertVisible: 'Sign In'
 - assertVisible:
-    id: "email-input"
+    id: 'email-input'
 - assertVisible:
-    id: "password-input"
+    id: 'password-input'
 
 ---
 # Test: Validation errors for empty form
-- tapOn: "Sign In"
-- assertVisible: "Email is required"
+- tapOn: 'Sign In'
+- assertVisible: 'Email is required'
 
 ---
 # Test: Login with valid credentials
 - tapOn:
-    id: "email-input"
-- inputText: "test@example.com"
+    id: 'email-input'
+- inputText: 'test@example.com'
 - tapOn:
-    id: "password-input"
-- inputText: "password123"
-- tapOn: "Sign In"
-- assertVisible: "Welcome"
+    id: 'password-input'
+- inputText: 'password123'
+- tapOn: 'Sign In'
+- assertVisible: 'Welcome'
 
 ---
 # Test: Navigate to signup
-- tapOn: "Sign Up"
-- assertVisible: "Create Account"
+- tapOn: 'Sign Up'
+- assertVisible: 'Create Account'
 ```
 
 **File**: `e2e/mobile/flows/navigation.yaml`
@@ -1022,23 +994,23 @@ name: Navigation Flow
 ---
 # Prerequisites: Login first
 - tapOn:
-    id: "email-input"
-- inputText: "test@example.com"
+    id: 'email-input'
+- inputText: 'test@example.com'
 - tapOn:
-    id: "password-input"
-- inputText: "password123"
-- tapOn: "Sign In"
-- assertVisible: "Welcome"
+    id: 'password-input'
+- inputText: 'password123'
+- tapOn: 'Sign In'
+- assertVisible: 'Welcome'
 
 ---
 # Test: Navigate to profile
-- tapOn: "Profile"
-- assertVisible: "Profile Settings"
+- tapOn: 'Profile'
+- assertVisible: 'Profile Settings'
 
 ---
 # Test: Logout flow
-- tapOn: "Logout"
-- assertVisible: "Sign In"
+- tapOn: 'Logout'
+- assertVisible: 'Sign In'
 ```
 
 **File**: `e2e/mobile/flows/smoke.yaml`
@@ -1050,21 +1022,21 @@ name: Smoke Test
 # Quick smoke test to verify app launches and basic functionality
 
 # App launches successfully
-- assertVisible: "Sign In"
+- assertVisible: 'Sign In'
 
 # Can interact with login form
 - tapOn:
-    id: "email-input"
-- inputText: "smoke@test.com"
-- assertVisible: "smoke@test.com"
+    id: 'email-input'
+- inputText: 'smoke@test.com'
+- assertVisible: 'smoke@test.com'
 
 # Can clear and type again
 - clearText
-- inputText: "test@example.com"
+- inputText: 'test@example.com'
 
 # Navigation elements are present
-- assertVisible: "Sign Up"
-- assertVisible: "Forgot Password"
+- assertVisible: 'Sign Up'
+- assertVisible: 'Forgot Password'
 ```
 
 ### Running Maestro Tests
@@ -1345,7 +1317,7 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "60...90"
+  range: '60...90'
 
   status:
     project:
@@ -1366,7 +1338,7 @@ parsers:
       macro: no
 
 comment:
-  layout: "reach,diff,flags,tree,betaprofiling"
+  layout: 'reach,diff,flags,tree,betaprofiling'
   behavior: default
   require_changes: no
   require_base: no
@@ -1375,12 +1347,12 @@ comment:
 
 ### Coverage Thresholds
 
-| Metric     | Minimum | Target | Notes                                |
-| ---------- | ------- | ------ | ------------------------------------ |
-| Lines      | 60%     | 80%    | Overall line coverage                |
-| Branches   | 60%     | 75%    | Conditional logic coverage           |
-| Functions  | 60%     | 80%    | Function coverage                    |
-| Statements | 60%     | 80%    | Statement coverage                   |
+| Metric     | Minimum | Target | Notes                      |
+| ---------- | ------- | ------ | -------------------------- |
+| Lines      | 60%     | 80%    | Overall line coverage      |
+| Branches   | 60%     | 75%    | Conditional logic coverage |
+| Functions  | 60%     | 80%    | Function coverage          |
+| Statements | 60%     | 80%    | Statement coverage         |
 
 ### Quality Gates (PR Requirements)
 
