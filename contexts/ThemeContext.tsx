@@ -57,7 +57,7 @@ export const lightColors = {
   // Semantic
   background: '#FFFFFF',
   surface: '#FEF2F2', // Light red tint for cards
-  surfaceElevated: '#FFFFFF',
+  surfaceElevated: '#FEF2F2', // Light red tint for elevated cards
   text: '#0A0A0A',
   textSecondary: '#525252',
   textMuted: '#737373',
