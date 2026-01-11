@@ -122,6 +122,18 @@ BMA (Bangalore Mizo Association) Digital Platform - A bilingual (English + Mizo)
 - [API-DESIGN.md](docs/API-DESIGN.md) - API endpoints & Edge Functions
 - [UI-UX-WIREFRAMES.md](docs/UI-UX-WIREFRAMES.md) - Wireframes & Storybook plan
 
+### Implementation Plan (Phased)
+
+- [Implementation Overview](docs/implementation/00-IMPLEMENTATION-OVERVIEW.md) - Overview & architecture
+- [Phase 0: Foundation](docs/implementation/01-PHASE-0-FOUNDATION.md) - Supabase, DB, CI/CD (Days 1-5)
+- [Phase 1: Core Infrastructure](docs/implementation/02-PHASE-1-CORE-INFRASTRUCTURE.md) - Auth, i18n, design system (Days 6-15)
+- [Phase 2: Public Features](docs/implementation/03-PHASE-2-PUBLIC-FEATURES.md) - News, events, content (Days 16-28)
+- [Phase 3: Membership & Payments](docs/implementation/04-PHASE-3-MEMBERSHIP-PAYMENTS.md) - Razorpay, tiers (Days 29-38)
+- [Phase 4: AI Chatbot](docs/implementation/05-PHASE-4-CHATBOT.md) - RAG, Gemini, escalation (Days 39-50)
+- [Phase 5: Admin Dashboard](docs/implementation/06-PHASE-5-ADMIN-DASHBOARD.md) - User/content mgmt (Days 51-60)
+- [Phase 6: Polish & Launch](docs/implementation/07-PHASE-6-POLISH-LAUNCH.md) - Testing, deployment (Days 61-67)
+- [GitHub Issues](docs/implementation/08-GITHUB-ISSUES-TEMPLATE.md) - 51 issue templates
+
 ### Implementation Guides
 
 - [DESIGN-SYSTEM-IMPLEMENTATION.md](docs/DESIGN-SYSTEM-IMPLEMENTATION.md) - Design system guide
