@@ -39,16 +39,16 @@ function resolveSize(size: SpacerSize): number {
 
 export function Spacer({ size, direction = 'vertical', flex }: SpacerProps) {
   // Determine if spacer should flex:
-  // - If size is undefined, default to flex behavior
-  // - If flex is explicitly set, use that value
-  const shouldFlex = size === undefined || Boolean(flex);
+  // - If flex is explicitly provided (true or false), use that value
+  // - Otherwise, default to flex behavior when size is undefined
+  const shouldFlex = flex ?? size === undefined;
 
-  // Build spacer style - only call resolveSize when size is defined
+  // Build spacer style - only call resolveSize when size is defined and not flexing
   const spacerStyle: ViewStyle = shouldFlex
     ? { flex: 1 }
     : direction === 'vertical'
-      ? { height: resolveSize(size) }
-      : { width: resolveSize(size) };
+      ? { height: resolveSize(size!) }
+      : { width: resolveSize(size!) };
 
   return <View style={spacerStyle} />;
 }

@@ -81,3 +81,16 @@ global.console = {
   warn: console.warn,
   error: console.error,
 };
+
+// Timer setup/teardown for consistent test behavior
+// Note: When advancing timers in tests, wrap in act() to flush React updates:
+//   import { act } from '@testing-library/react-native';
+//   act(() => jest.advanceTimersByTime(1000));
+beforeEach(() => {
+  jest.useFakeTimers('modern');
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
+});

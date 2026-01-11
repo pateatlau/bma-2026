@@ -52,7 +52,7 @@ function RootLayoutNav() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(app)/home');
     }
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, segments, router]);
 
   // Show loading screen while checking initial session
   if (isLoading) {
