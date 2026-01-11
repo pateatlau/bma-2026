@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+web-build/
+.expo/
+
+# Native builds
+android/
+ios/
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+*.min.js
+*.bundle.js
+coverage/
+
+# Environment files
+.env*
+
+# Cache
+.cache/
+*.tsbuildinfo

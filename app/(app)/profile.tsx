@@ -1,158 +1,206 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Card, Button } from '@/components';
-import { spacing, typography, borderRadius } from '@/constants/theme';
+import {
+  Card,
+  Button,
+  ScreenContainer,
+  Text,
+  Heading,
+  Spacer,
+  Stack,
+  Row,
+  Avatar,
+  Divider,
+} from '@/components';
+import { spacing, borderRadius } from '@/constants/theme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { iconSizes, maxWidth } from '@/constants/tokens';
+import { withOpacity } from '@/utils/colors';
 
 const MENU_ITEMS = [
-  { icon: 'person-outline' as const, label: 'Edit Profile', description: 'Update your personal information' },
-  { icon: 'notifications-outline' as const, label: 'Notifications', description: 'Manage your notification preferences' },
-  { icon: 'shield-outline' as const, label: 'Privacy', description: 'Control your privacy settings' },
-  { icon: 'color-palette-outline' as const, label: 'Appearance', description: 'Customize the app look and feel' },
-  { icon: 'help-circle-outline' as const, label: 'Help & Support', description: 'Get help or contact support' },
+  {
+    icon: 'person-outline' as const,
+    label: 'Edit Profile',
+    description: 'Update your personal information',
+  },
+  {
+    icon: 'notifications-outline' as const,
+    label: 'Notifications',
+    description: 'Manage your notification preferences',
+  },
+  {
+    icon: 'shield-outline' as const,
+    label: 'Privacy',
+    description: 'Control your privacy settings',
+  },
+  {
+    icon: 'color-palette-outline' as const,
+    label: 'Appearance',
+    description: 'Customize the app look and feel',
+  },
+  {
+    icon: 'help-circle-outline' as const,
+    label: 'Help & Support',
+    description: 'Get help or contact support',
+  },
 ];
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const { isWideScreen } = useMediaQuery();
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={[
-        styles.content,
-        { paddingBottom: insets.bottom + spacing.xl },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={[styles.innerContent, isWideScreen && styles.wideContent]}>
-        <Card style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-              <Text style={styles.avatarText}>
-                {user?.name.split(' ').map(n => n[0]).join('')}
-              </Text>
-            </View>
-            <View style={[styles.avatarBadge, { borderColor: colors.surface, backgroundColor: colors.success }]}>
-              <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-            </View>
-          </View>
-          <Text style={[styles.userName, { color: colors.text }]}>{user?.name}</Text>
-          <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{user?.email}</Text>
-          <View style={[styles.statsRow, { borderTopColor: colors.borderLight }]}>
-            <View style={styles.stat}>
-              <Text style={[styles.statValue, { color: colors.text }]}>128</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Projects</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
-            <View style={styles.stat}>
-              <Text style={[styles.statValue, { color: colors.text }]}>1.2k</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Followers</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
-            <View style={styles.stat}>
-              <Text style={[styles.statValue, { color: colors.text }]}>847</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Following</Text>
-            </View>
-          </View>
-        </Card>
+  const initials =
+    user?.name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('') ||
+    user?.email?.[0]?.toUpperCase() ||
+    '?';
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
-          <Card style={styles.menuCard}>
-            {MENU_ITEMS.map((item, index) => (
-              <TouchableOpacity
-                key={item.label}
+  return (
+    <ScreenContainer
+      scrollable
+      padding="lg"
+      safeAreaBottom
+      contentStyle={{
+        paddingTop: spacing.xl,
+      }}
+    >
+      <View
+        style={[
+          styles.innerContent,
+          isWideScreen && { maxWidth: maxWidth.sm, alignSelf: 'center' as const },
+        ]}
+      >
+        {/* Profile Card */}
+        <Card variant="elevated" padding="lg">
+          <Stack gap="md" style={{ alignItems: 'center' }}>
+            <View style={styles.avatarContainer}>
+              <Avatar name={initials} size="xl" style={styles.avatar} />
+              <View
                 style={[
-                  styles.menuItem,
-                  index < MENU_ITEMS.length - 1 && [
-                    styles.menuItemBorder,
-                    { borderBottomColor: colors.borderLight },
-                  ],
+                  styles.avatarBadge,
+                  { borderColor: colors.surface, backgroundColor: colors.success },
                 ]}
               >
-                <View style={styles.menuIconContainer}>
-                  <Ionicons name={item.icon} size={22} color={colors.primary} />
-                </View>
-                <View style={styles.menuContent}>
-                  <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
-                  <Text style={[styles.menuDescription, { color: colors.textSecondary }]}>
-                    {item.description}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
+                <Ionicons name="checkmark" size={iconSizes.xs} color={colors.textOnPrimary} />
+              </View>
+            </View>
+
+            <Heading level="h2">{user?.name}</Heading>
+            <Text color="secondary">{user?.email}</Text>
+
+            <Divider style={{ width: '100%', marginVertical: spacing.md }} />
+
+            <Row justify="around" style={{ width: '100%' }}>
+              <Stack gap="xs" style={{ alignItems: 'center' }}>
+                <Heading level="h3">128</Heading>
+                <Text variant="small" color="secondary">
+                  Projects
+                </Text>
+              </Stack>
+              <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
+              <Stack gap="xs" style={{ alignItems: 'center' }}>
+                <Heading level="h3">1.2k</Heading>
+                <Text variant="small" color="secondary">
+                  Followers
+                </Text>
+              </Stack>
+              <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
+              <Stack gap="xs" style={{ alignItems: 'center' }}>
+                <Heading level="h3">847</Heading>
+                <Text variant="small" color="secondary">
+                  Following
+                </Text>
+              </Stack>
+            </Row>
+          </Stack>
+        </Card>
+
+        <Spacer size="xl" />
+
+        {/* Settings Section */}
+        <Stack gap="md">
+          <Heading level="h3">Settings</Heading>
+          <Card variant="elevated" padding="none">
+            {MENU_ITEMS.map((item, index) => (
+              <View key={item.label}>
+                <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+                  <View
+                    style={[
+                      styles.menuIconContainer,
+                      { backgroundColor: withOpacity(colors.primary, 0.1) },
+                    ]}
+                  >
+                    <Ionicons name={item.icon} size={iconSizes.md} color={colors.primary} />
+                  </View>
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Text weight="medium">{item.label}</Text>
+                    <Text variant="small" color="secondary">
+                      {item.description}
+                    </Text>
+                  </Stack>
+                  <Ionicons name="chevron-forward" size={iconSizes.md} color={colors.textMuted} />
+                </TouchableOpacity>
+                {index < MENU_ITEMS.length - 1 && (
+                  <Divider style={{ marginLeft: spacing.md + 40 + spacing.md }} />
+                )}
+              </View>
             ))}
           </Card>
-        </View>
+        </Stack>
 
-        <View style={styles.section}>
-          <Card style={styles.dangerZone}>
-            <Text style={[styles.dangerTitle, { color: colors.error }]}>Danger Zone</Text>
-            <Text style={[styles.dangerDescription, { color: colors.textSecondary }]}>
-              Once you log out, you'll need to sign in again to access your account.
+        <Spacer size="xl" />
+
+        {/* Danger Zone */}
+        <Card
+          variant="outlined"
+          padding="lg"
+          style={{
+            borderColor: withOpacity(colors.error, 0.3),
+          }}
+        >
+          <Stack gap="sm">
+            <Text color="error" weight="semibold">
+              Danger Zone
             </Text>
-            <Button
-              title="Logout"
-              onPress={logout}
-              variant="outline"
-              style={[styles.logoutButton, { borderColor: colors.error }]}
-              textStyle={{ color: colors.error }}
-            />
-          </Card>
-        </View>
+            <Text variant="small" color="secondary">
+              Once you log out, you&apos;ll need to sign in again to access your account.
+            </Text>
+            <Spacer size="sm" />
+            <Button title="Logout" onPress={logout} variant="dangerOutline" fullWidth />
+          </Stack>
+        </Card>
 
-        <View style={styles.footer}>
-          <Text style={[styles.version, { color: colors.textMuted }]}>BMA 2026 v1.0.0</Text>
-        </View>
+        <Spacer size="lg" />
+
+        {/* Footer */}
+        <Stack gap="sm" style={{ alignItems: 'center' }}>
+          <Text variant="small" color="muted">
+            BMA 2026 v1.0.0
+          </Text>
+        </Stack>
+
+        <Spacer size="xl" />
       </View>
-    </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
   innerContent: {
     width: '100%',
   },
-  wideContent: {
-    maxWidth: 600,
-    alignSelf: 'center',
-  },
-  profileCard: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-    marginBottom: spacing.xl,
-  },
   avatarContainer: {
     position: 'relative',
-    marginBottom: spacing.md,
   },
   avatar: {
     width: 96,
     height: 96,
-    borderRadius: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontFamily: typography.fontFamily,
-    fontSize: 36,
-    fontWeight: typography.weights.bold,
-    color: '#FFFFFF',
   },
   avatarBadge: {
     position: 'absolute',
@@ -165,109 +213,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 3,
   },
-  userName: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.xxl,
-    fontWeight: typography.weights.bold,
-    marginBottom: spacing.xs,
-  },
-  userEmail: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.md,
-    marginBottom: spacing.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: spacing.lg,
-    borderTopWidth: 1,
-    width: '100%',
-  },
-  stat: {
-    flex: 1,
-    alignItems: 'center',
-  },
   statDivider: {
     width: 1,
     height: 32,
-  },
-  statValue: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.xl,
-    fontWeight: typography.weights.bold,
-  },
-  statLabel: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.sm,
-    marginTop: spacing.xs,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.lg,
-    fontWeight: typography.weights.semibold,
-    marginBottom: spacing.md,
-  },
-  menuCard: {
-    padding: 0,
-    overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
-  },
-  menuItemBorder: {
-    borderBottomWidth: 1,
+    gap: spacing.md,
   },
   menuIconContainer: {
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuLabel: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
-  },
-  menuDescription: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.sm,
-    marginTop: spacing.xs,
-  },
-  dangerZone: {
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    borderWidth: 1,
-  },
-  dangerTitle: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.semibold,
-    marginBottom: spacing.sm,
-  },
-  dangerDescription: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.sm,
-    marginBottom: spacing.md,
-  },
-  logoutButton: {
-    borderWidth: 2,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-  },
-  version: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.sizes.sm,
   },
 });

@@ -1,11 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+  type PressableStateCallbackType,
+} from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { spacing, typography, borderRadius } from '@/constants/theme';
+
+// React Native Web extends PressableStateCallbackType with hovered property
+type WebPressableState = PressableStateCallbackType & { hovered?: boolean };
 
 const NAV_ITEMS = [
   { label: 'Home', path: '/(app)/home', icon: 'home-outline' as const },
@@ -33,10 +43,7 @@ export function WebHeader() {
       ]}
     >
       <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.logoContainer}
-          onPress={() => router.push('/(app)/home')}
-        >
+        <TouchableOpacity style={styles.logoContainer} onPress={() => router.push('/(app)/home')}>
           <View style={[styles.logo, { backgroundColor: colors.primary }]}>
             <Text style={styles.logoText}>B</Text>
           </View>
@@ -47,10 +54,11 @@ export function WebHeader() {
           {NAV_ITEMS.map((item) => (
             <Pressable
               key={item.path}
-              style={({ hovered }) => [
+              style={(state) => [
                 styles.navItem,
                 isActive(item.path) && styles.navItemActive,
-                hovered && !isActive(item.path) && { backgroundColor: colors.surfaceElevated },
+                (state as WebPressableState).hovered &&
+                  !isActive(item.path) && { backgroundColor: colors.surfaceElevated },
               ]}
               onPress={() => router.push(item.path as any)}
             >
@@ -75,9 +83,9 @@ export function WebHeader() {
 
         <View style={styles.userSection}>
           <Pressable
-            style={({ hovered }) => [
+            style={(state) => [
               styles.themeToggle,
-              hovered && { backgroundColor: colors.surfaceElevated },
+              (state as WebPressableState).hovered && { backgroundColor: colors.surfaceElevated },
             ]}
             onPress={toggleTheme}
           >
@@ -91,9 +99,9 @@ export function WebHeader() {
           <Text style={[styles.userName, { color: colors.textSecondary }]}>{user?.name}</Text>
 
           <Pressable
-            style={({ hovered }) => [
+            style={(state) => [
               styles.logoutButton,
-              hovered && { backgroundColor: colors.surfaceElevated },
+              (state as WebPressableState).hovered && { backgroundColor: colors.surfaceElevated },
             ]}
             onPress={logout}
           >

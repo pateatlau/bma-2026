@@ -24,12 +24,20 @@ export const darkColors = {
   text: '#FFFFFF',
   textSecondary: '#A3A3A3',
   textMuted: '#737373',
+  textOnPrimary: '#FFFFFF',
   border: '#404040',
   borderLight: '#2A2A2A',
 
   // States
   error: '#EF4444',
   success: '#22C55E',
+
+  // Accent colors for features
+  accentBlue: '#3B82F6',
+  accentGreen: '#10B981',
+  accentPurple: '#8B5CF6',
+  accentYellow: '#FBBF24',
+  accentIndigo: '#6366F1',
 };
 
 export const lightColors = {
@@ -48,17 +56,25 @@ export const lightColors = {
 
   // Semantic
   background: '#FFFFFF',
-  surface: '#F5F5F5',
+  surface: '#FEF2F2', // Light red tint for cards
   surfaceElevated: '#FFFFFF',
   text: '#0A0A0A',
   textSecondary: '#525252',
   textMuted: '#737373',
-  border: '#E5E5E5',
-  borderLight: '#F0F0F0',
+  textOnPrimary: '#FFFFFF',
+  border: '#FECACA', // Light red border
+  borderLight: '#FEE2E2', // Very light red border
 
   // States
   error: '#DC2626',
   success: '#16A34A',
+
+  // Accent colors for features
+  accentBlue: '#3B82F6',
+  accentGreen: '#10B981',
+  accentPurple: '#8B5CF6',
+  accentYellow: '#FBBF24',
+  accentIndigo: '#6366F1',
 };
 
 export type ThemeColors = typeof darkColors;

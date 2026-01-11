@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-  Modal,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, Modal } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,12 +37,7 @@ export function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
         <View
@@ -64,9 +52,7 @@ export function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
             </View>
             <View style={styles.headerText}>
               <Text style={[styles.brandName, { color: colors.text }]}>BMA 2026</Text>
-              <Text style={[styles.userName, { color: colors.textSecondary }]}>
-                {user?.name}
-              </Text>
+              <Text style={[styles.userName, { color: colors.textSecondary }]}>{user?.name}</Text>
             </View>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.text} />
@@ -110,7 +96,9 @@ export function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
               <View
                 style={[
                   styles.themeIconContainer,
-                  { backgroundColor: isDark ? 'rgba(251, 191, 36, 0.1)' : 'rgba(99, 102, 241, 0.1)' },
+                  {
+                    backgroundColor: isDark ? 'rgba(251, 191, 36, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                  },
                 ]}
               >
                 <Ionicons
@@ -129,10 +117,7 @@ export function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
                 ]}
               >
                 <View
-                  style={[
-                    styles.themeSwitchThumb,
-                    isDark ? styles.themeSwitchThumbActive : null,
-                  ]}
+                  style={[styles.themeSwitchThumb, isDark ? styles.themeSwitchThumbActive : null]}
                 />
               </View>
             </TouchableOpacity>

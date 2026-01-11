@@ -1,3 +1,13 @@
+/**
+ * @deprecated This file is deprecated. Use @/constants/tokens instead.
+ *
+ * Migration guide:
+ * - colors → use ThemeContext or lightSemanticColors/darkSemanticColors from tokens
+ * - spacing → use legacySpacing from tokens
+ * - borderRadius → use borderRadius from tokens
+ * - typography → use fontSizes, fontWeights, fontFamily from tokens
+ * - shadows → use getShadow() from tokens for platform-aware shadows
+ */
 import { Platform } from 'react-native';
 
 export const colors = {
