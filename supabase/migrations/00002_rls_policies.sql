@@ -228,12 +228,24 @@ CREATE POLICY "Authenticated users can create comments"
     )
   );
 
--- Users can update their own comments (within 15 minutes)
+-- Users can update their own comments (within 15 minutes, body only)
 CREATE POLICY "Users can update own recent comments"
   ON comments FOR UPDATE
   USING (
     user_id = auth.uid()
     AND created_at > now() - interval '15 minutes'
+    AND deleted_at IS NULL
+  )
+  WITH CHECK (
+    -- Ensure identity fields remain unchanged
+    user_id = auth.uid()
+    AND content_id = content_id
+    -- Ensure moderation fields cannot be changed by regular users
+    AND is_hidden = false
+    AND hidden_by IS NULL
+    AND hidden_at IS NULL
+    AND hidden_reason IS NULL
+    -- Ensure deleted_at remains NULL (soft-delete has separate policy)
     AND deleted_at IS NULL
   );
 
@@ -243,10 +255,17 @@ CREATE POLICY "Editors can moderate comments"
   USING (is_editor_or_admin());
 
 -- Users can soft-delete their own comments
-CREATE POLICY "Users can delete own comments"
+-- Note: Trigger comments_soft_delete_only enforces that only deleted_at can change
+CREATE POLICY "Users can soft-delete own comments"
   ON comments FOR UPDATE
-  USING (user_id = auth.uid())
-  WITH CHECK (deleted_at IS NOT NULL);  -- Only allow setting deleted_at
+  USING (
+    user_id = auth.uid()
+    AND deleted_at IS NULL  -- Can only soft-delete non-deleted comments
+  )
+  WITH CHECK (
+    deleted_at IS NOT NULL
+    AND user_id = auth.uid()
+  );
 
 -- ============================================================================
 -- LIKES POLICIES
@@ -279,10 +298,11 @@ CREATE POLICY "Anyone can read knowledge base"
   ON knowledge_base FOR SELECT
   USING (true);
 
--- Only admins can manage knowledge base
+-- Only admins can manage knowledge base (INSERT, UPDATE, DELETE)
 CREATE POLICY "Admins can manage knowledge base"
   ON knowledge_base FOR ALL
-  USING (is_admin());
+  USING (is_admin())
+  WITH CHECK (is_admin());
 
 -- ============================================================================
 -- CHAT CONVERSATIONS POLICIES
@@ -354,7 +374,18 @@ CREATE POLICY "Admins can read all escalations"
   ON escalations FOR SELECT
   USING (is_admin());
 
--- Only service role can create escalations (via chatbot function)
+-- Service role bypasses RLS for INSERT (used by chatbot Edge Function)
+-- Users can also create escalations from their own conversations
+CREATE POLICY "Users can create escalations from own conversations"
+  ON escalations FOR INSERT
+  WITH CHECK (
+    user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM chat_conversations c
+      WHERE c.id = conversation_id AND c.user_id = auth.uid()
+    )
+  );
+
 -- Admins can update escalations (for resolution)
 CREATE POLICY "Admins can update escalations"
   ON escalations FOR UPDATE

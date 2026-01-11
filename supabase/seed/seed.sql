@@ -6,10 +6,13 @@
 -- ============================================================================
 
 -- Note: Run this AFTER the migrations and AFTER creating test users via Supabase Auth
+-- Note: Email addresses use example.com domain as placeholders - replace with real emails before production
 
 -- ============================================================================
--- SAMPLE KNOWLEDGE BASE ENTRIES
+-- KNOWLEDGE BASE ENTRIES (Foundation data for RAG chatbot)
 -- ============================================================================
+-- These entries provide the initial knowledge base for the AI chatbot.
+-- Content should be reviewed and updated by BMA admins before production launch.
 
 INSERT INTO knowledge_base (title, category, content_en, content_lus, source_url) VALUES
 

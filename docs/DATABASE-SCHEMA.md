@@ -6,7 +6,7 @@ This document describes the complete database schema for the BMA Digital Platfor
 
 ## Entity Relationship Diagram
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           BMA DATABASE SCHEMA                                │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -79,19 +79,27 @@ This document describes the complete database schema for the BMA Digital Platfor
 
 Extends Supabase auth.users with application-specific data.
 
-| Column                | Type                 | Nullable | Default | Description              |
-| --------------------- | -------------------- | -------- | ------- | ------------------------ |
-| id                    | UUID                 | NO       | -       | PK, FK to auth.users     |
-| full_name             | TEXT                 | YES      | -       | Display name             |
-| phone                 | TEXT                 | YES      | -       | Phone number             |
-| photo_url             | TEXT                 | YES      | -       | Profile photo URL        |
-| app_role              | app_role             | NO       | 'user'  | User role in app         |
-| language_preference   | language_code        | NO       | 'en'    | Preferred language       |
-| is_directory_visible  | BOOLEAN              | NO       | true    | Show in member directory |
-| notifications_enabled | BOOLEAN              | NO       | true    | Receive notifications    |
-| notification_channel  | notification_channel | NO       | 'both'  | Preferred channel        |
-| created_at            | TIMESTAMPTZ          | NO       | now()   | -                        |
-| updated_at            | TIMESTAMPTZ          | NO       | now()   | -                        |
+| Column                           | Type                 | Nullable | Default | Description                          |
+| -------------------------------- | -------------------- | -------- | ------- | ------------------------------------ |
+| id                               | UUID                 | NO       | -       | PK, FK to auth.users                 |
+| full_name                        | TEXT                 | YES      | -       | Display name                         |
+| phone                            | TEXT                 | YES      | -       | Phone number                         |
+| photo_url                        | TEXT                 | YES      | -       | Profile photo URL                    |
+| app_role                         | app_role             | NO       | 'user'  | User role in app                     |
+| language_preference              | language_code        | NO       | 'en'    | Preferred language                   |
+| bangalore_address                | TEXT                 | YES      | -       | Bangalore address (paid members)     |
+| permanent_address                | TEXT                 | YES      | -       | Permanent address (paid members)     |
+| occupation                       | occupation_type      | YES      | -       | Occupation type                      |
+| occupation_other                 | TEXT                 | YES      | -       | Custom occupation if type is 'other' |
+| emergency_contact_name           | TEXT                 | YES      | -       | Emergency contact name               |
+| emergency_contact_phone          | TEXT                 | YES      | -       | Emergency contact phone              |
+| emergency_contact_relation       | relationship_type    | YES      | -       | Relationship to emergency contact    |
+| emergency_contact_relation_other | TEXT                 | YES      | -       | Custom relation if type is 'other'   |
+| is_directory_visible             | BOOLEAN              | NO       | true    | Show in member directory             |
+| notifications_enabled            | BOOLEAN              | NO       | true    | Receive notifications                |
+| notification_channel             | notification_channel | NO       | 'both'  | Preferred channel                    |
+| created_at                       | TIMESTAMPTZ          | NO       | now()   | -                                    |
+| updated_at                       | TIMESTAMPTZ          | NO       | now()   | -                                    |
 
 **Indexes**: `app_role`
 

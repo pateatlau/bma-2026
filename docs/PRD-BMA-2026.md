@@ -74,7 +74,7 @@ Admin and Editor dashboards are **integrated within the main app** as role-prote
 
 **Route Structure**:
 
-```
+```text
 /app
   /(public)          # Public pages (no auth)
   /(auth)            # Auth screens
@@ -140,7 +140,7 @@ Admin and Editor dashboards are **integrated within the main app** as role-prote
 
 #### Technical Approach
 
-```
+```text
 /locales
   /en
     common.json      # Shared UI strings
@@ -171,7 +171,7 @@ Mizo is a low-resource language with limited NLP tooling:
 
 Given BMA's limited resources, Gemini handles the bulk of translation work with human review for cultural accuracy.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │              AI-FIRST TRANSLATION WORKFLOW                   │
 └─────────────────────────────────────────────────────────────┘
@@ -203,7 +203,7 @@ English strings (en.json) ─▶ to Mizo (lus.json)     ─▶  items only
 
 **Gemini Translation Prompt Strategy**:
 
-```
+```text
 System: You are a Mizo language translator for the Bangalore Mizo Association.
 Translate UI strings from English to Mizo. Follow these rules:
 - Use formal, respectful tone appropriate for community app
@@ -440,7 +440,7 @@ Given the target audience extends to rural areas in Mizoram, Karnataka, and othe
 
 #### Technical Approach (Stale-While-Revalidate)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    OFFLINE-LITE ARCHITECTURE                 │
 └─────────────────────────────────────────────────────────────┘
@@ -503,7 +503,7 @@ Given the target audience extends to rural areas in Mizoram, Karnataka, and othe
 
 ### 6.2 Payment Flow - User Journey
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                    MEMBERSHIP PAYMENT FLOW                       │
 └─────────────────────────────────────────────────────────────────┘
@@ -542,7 +542,7 @@ Given the target audience extends to rural areas in Mizoram, Karnataka, and othe
 
 **Critical**: Client-side payment confirmation is **never trusted**. Membership activation happens **only** via server-side webhook verification.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  CLIENT SIDE                     │  SERVER SIDE (TRUSTED)   │
 ├──────────────────────────────────┼──────────────────────────┤
@@ -605,7 +605,7 @@ Every payment must log:
 
 ### 6.4 Membership Lifecycle
 
-```
+```text
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
 │  Free    │───▶│  Pending │───▶│  Active  │───▶│  Expired │
 │  User    │    │  Payment │    │  Member  │    │  Member  │
@@ -706,7 +706,7 @@ The chatbot uses **Retrieval-Augmented Generation (RAG)** to ground responses in
 
 #### RAG Pipeline
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    RAG CHATBOT ARCHITECTURE                  │
 └─────────────────────────────────────────────────────────────┘
@@ -932,7 +932,7 @@ Subset of Admin Dashboard accessible to Editor role. Editors access the same `/(
 
 ### 9.3 Content Workflow
 
-```
+```text
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
 │  Draft   │───▶│  Review  │───▶│ Published│───▶│ Archived │
 │          │    │ (optional)│    │          │    │          │
@@ -1061,7 +1061,9 @@ Database types are auto-generated from Supabase schema to ensure type safety acr
 
 ```bash
 # Generate TypeScript types from Supabase schema
-npx supabase gen types typescript --project-id <project-id> > lib/database.types.ts
+# Project ID can be found in Supabase Dashboard > Project Settings > General
+# Or use: npx supabase projects list
+npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/database.types.ts
 ```
 
 **Usage**:
@@ -1081,7 +1083,7 @@ type MembershipInsert = Database['public']['Tables']['memberships']['Insert'];
 
 ### 12.3 Project Structure
 
-```
+```text
 /bma-2026
 ├── /app                   # Expo Router app directory
 │   ├── /(public)          # Public pages
@@ -1105,7 +1107,7 @@ type MembershipInsert = Database['public']['Tables']['memberships']['Insert'];
 
 ### 12.3 Database Schema (High-Level)
 
-```
+```text
 users
 ├── id (uuid, PK)
 ├── email
@@ -1248,7 +1250,7 @@ audit_logs
 - [ ] Zero critical security vulnerabilities
 - [ ] < 1% payment failure rate (excluding user abandonment)
 - [ ] < 3 second page load time
-- [ ] 95%+ test coverage on critical paths
+- [ ] 80%+ test coverage on critical paths (auth, payments, membership)
 - [ ] All accessibility guidelines met (WCAG 2.1 AA)
 
 ### 14.3 Operational Criteria
@@ -1342,4 +1344,4 @@ For the engineering team (Claude Code):
 
 ---
 
-_End of PRD_
+## End of PRD

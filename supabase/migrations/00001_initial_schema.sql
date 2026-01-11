@@ -242,8 +242,8 @@ CREATE TABLE content (
   likes_count INTEGER NOT NULL DEFAULT 0,
   comments_count INTEGER NOT NULL DEFAULT 0,
 
-  -- Author
-  author_id UUID NOT NULL REFERENCES profiles(id) ON DELETE SET NULL,
+  -- Author (nullable to allow ON DELETE SET NULL when author profile is deleted)
+  author_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
 
   -- Soft delete
   deleted_at TIMESTAMPTZ,
@@ -294,14 +294,8 @@ CREATE TABLE comments (
 
   -- Metadata
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-  -- Constraints: prevent deep nesting
-  CONSTRAINT no_deep_nesting CHECK (
-    parent_id IS NULL OR NOT EXISTS (
-      SELECT 1 FROM comments c WHERE c.id = parent_id AND c.parent_id IS NOT NULL
-    )
-  )
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  -- Note: Deep nesting prevention is enforced via trigger (see comments_prevent_deep_nesting)
 );
 
 -- Indexes
@@ -322,7 +316,7 @@ CREATE TABLE likes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   -- One like per user per content
-  CONSTRAINT unique_user_content_like UNIQUE (content_id, user_id)
+  CONSTRAINT uq_likes_user_content UNIQUE (content_id, user_id)
 );
 
 -- Indexes
@@ -541,7 +535,7 @@ CREATE TABLE daily_message_counts (
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   count INTEGER NOT NULL DEFAULT 0,
 
-  CONSTRAINT unique_user_date UNIQUE (user_id, date)
+  CONSTRAINT uq_daily_message_counts_user_date UNIQUE (user_id, date)
 );
 
 -- Index
@@ -579,13 +573,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to update comments_count on content
+-- Handles INSERT, DELETE, and soft-delete/undelete via UPDATE
 CREATE OR REPLACE FUNCTION update_comments_count()
 RETURNS TRIGGER AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
-    UPDATE content SET comments_count = comments_count + 1 WHERE id = NEW.content_id;
+    -- Only count if not already soft-deleted on insert
+    IF NEW.deleted_at IS NULL THEN
+      UPDATE content SET comments_count = comments_count + 1 WHERE id = NEW.content_id;
+    END IF;
   ELSIF TG_OP = 'DELETE' THEN
-    UPDATE content SET comments_count = GREATEST(0, comments_count - 1) WHERE id = OLD.content_id;
+    -- Only decrement if wasn't soft-deleted
+    IF OLD.deleted_at IS NULL THEN
+      UPDATE content SET comments_count = GREATEST(0, comments_count - 1) WHERE id = OLD.content_id;
+    END IF;
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- Handle soft-delete: deleted_at changes from NULL to NOT NULL
+    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+      UPDATE content SET comments_count = GREATEST(0, comments_count - 1) WHERE id = NEW.content_id;
+    -- Handle undelete: deleted_at changes from NOT NULL to NULL
+    ELSIF OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL THEN
+      UPDATE content SET comments_count = comments_count + 1 WHERE id = NEW.content_id;
+    END IF;
   END IF;
   RETURN NULL;
 END;
@@ -610,6 +619,54 @@ BEGIN
     message_count = message_count + 1,
     last_message_at = NEW.created_at
   WHERE id = NEW.conversation_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to prevent deep nesting in comments (max 1 level of replies)
+CREATE OR REPLACE FUNCTION comments_prevent_deep_nesting()
+RETURNS TRIGGER AS $$
+DECLARE
+  parent_has_parent BOOLEAN;
+BEGIN
+  -- If no parent_id, this is a top-level comment - allow it
+  IF NEW.parent_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- Check if the parent comment itself has a parent
+  SELECT (parent_id IS NOT NULL) INTO parent_has_parent
+  FROM comments
+  WHERE id = NEW.parent_id;
+
+  -- If parent has a parent, this would create deep nesting - reject it
+  IF parent_has_parent THEN
+    RAISE EXCEPTION 'Comments can only be nested one level deep. Cannot reply to a reply.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to enforce soft-delete only changes deleted_at field
+-- Prevents users from modifying other fields during soft-delete
+CREATE OR REPLACE FUNCTION comments_soft_delete_only()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Only apply when transitioning from non-deleted to deleted (soft-delete)
+  IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    -- Ensure no other fields are changed during soft-delete
+    IF NEW.content_id IS DISTINCT FROM OLD.content_id
+       OR NEW.user_id IS DISTINCT FROM OLD.user_id
+       OR NEW.parent_id IS DISTINCT FROM OLD.parent_id
+       OR NEW.body IS DISTINCT FROM OLD.body
+       OR NEW.is_hidden IS DISTINCT FROM OLD.is_hidden
+       OR NEW.hidden_by IS DISTINCT FROM OLD.hidden_by
+       OR NEW.hidden_at IS DISTINCT FROM OLD.hidden_at
+       OR NEW.hidden_reason IS DISTINCT FROM OLD.hidden_reason THEN
+      RAISE EXCEPTION 'Soft-delete operation can only set deleted_at. No other fields may be changed.';
+    END IF;
+  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -650,9 +707,17 @@ CREATE TRIGGER on_like_insert AFTER INSERT ON likes
 CREATE TRIGGER on_like_delete AFTER DELETE ON likes
   FOR EACH ROW EXECUTE FUNCTION decrement_likes_count();
 
--- Comments count management
-CREATE TRIGGER on_comment_change AFTER INSERT OR DELETE ON comments
+-- Comments count management (includes UPDATE for soft-delete/undelete)
+CREATE TRIGGER on_comment_change AFTER INSERT OR DELETE OR UPDATE ON comments
   FOR EACH ROW EXECUTE FUNCTION update_comments_count();
+
+-- Prevent deep nesting in comments (max 1 level of replies)
+CREATE TRIGGER trg_comments_no_deep_nesting BEFORE INSERT OR UPDATE ON comments
+  FOR EACH ROW EXECUTE FUNCTION comments_prevent_deep_nesting();
+
+-- Enforce soft-delete only changes deleted_at field
+CREATE TRIGGER trg_comments_soft_delete_only BEFORE UPDATE ON comments
+  FOR EACH ROW EXECUTE FUNCTION comments_soft_delete_only();
 
 -- Auto-create profile on signup
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users

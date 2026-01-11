@@ -1245,11 +1245,42 @@ X-RateLimit-Reset: 1704067200
 #### Verification
 
 ```typescript
-import * as crypto from 'crypto';
+// Web Crypto API implementation for Supabase Edge Functions (Deno)
 
-function verifyWebhookSignature(body: string, signature: string, secret: string): boolean {
-  const expectedSignature = crypto.createHmac('sha256', secret).update(body).digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+async function verifyWebhookSignature(
+  body: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  const encoder = new TextEncoder();
+
+  // Import the secret key for HMAC-SHA256
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  // Compute the HMAC signature
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+
+  // Convert to hex string
+  const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Constant-time comparison to prevent timing attacks
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < signature.length; i++) {
+    result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+  }
+  return result === 0;
 }
 ```
 
