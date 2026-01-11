@@ -64,3 +64,4 @@
 - [TESTING-IMPLEMENTATION-PLAN.md](docs/TESTING-IMPLEMENTATION-PLAN.md) - Testing strategy
 - [CI-CD-IMPLEMENTATION-PLAN.md](docs/CI-CD-IMPLEMENTATION-PLAN.md) - CI/CD & deployment
 - [ANDROID-DEPLOYMENT.md](docs/ANDROID-DEPLOYMENT.md) - Android/Play Store guide
+- [IOS-DEPLOYMENT.md](docs/IOS-DEPLOYMENT.md) - iOS/App Store guide
