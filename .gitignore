@@ -38,6 +38,13 @@ yarn-error.*
 
 # Testing
 coverage/
+playwright-report/
+playwright-results/
+test-results/
+
+# EAS Build
+google-service-account.json
+*.keystore
 
 # IDE
 .idea/
