@@ -42,6 +42,23 @@ module.exports = defineConfig([
     },
   },
 
+  // Jest setup file - add jest globals
+  {
+    files: ['jest.setup.js', 'jest.config.js', '**/__tests__/**/*', '**/__mocks__/**/*'],
+    languageOptions: {
+      globals: {
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+  },
+
   // Global ignores
   {
     ignores: [
@@ -56,6 +73,8 @@ module.exports = defineConfig([
       '*.bundle.js',
       'babel.config.js',
       'metro.config.js',
+      'playwright-report/',
+      'playwright-results/',
     ],
   },
 ]);
