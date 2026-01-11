@@ -113,11 +113,7 @@ export function useMobileDesktopValue<T>(mobileValue: T, desktopValue: T): T {
  * @example
  * const padding = useResponsiveSpacing(8, 16, 24);
  */
-export function useResponsiveSpacing(
-  compact: number,
-  regular: number,
-  spacious: number
-): number {
+export function useResponsiveSpacing(compact: number, regular: number, spacious: number): number {
   const { width } = useWindowDimensions();
 
   return useMemo(() => {

@@ -37,13 +37,9 @@ function resolveSize(size: SpacerSize): number {
   return spacing[size as Spacing];
 }
 
-export function Spacer({
-  size,
-  direction = 'vertical',
-  flex,
-}: SpacerProps) {
+export function Spacer({ size, direction = 'vertical', flex }: SpacerProps) {
   // Determine if spacer should flex
-  const shouldFlex = flex ?? (size === undefined);
+  const shouldFlex = flex ?? size === undefined;
 
   const spacerStyle: ViewStyle = shouldFlex
     ? { flex: 1 }

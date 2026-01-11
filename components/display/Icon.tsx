@@ -68,21 +68,11 @@ function resolveColor(color: IconColor | string, colors: ThemeColors): string {
   }
 }
 
-export function Icon({
-  name,
-  size = 'md',
-  color = 'inherit',
-}: IconProps) {
+export function Icon({ name, size = 'md', color = 'inherit' }: IconProps) {
   const { colors } = useTheme();
 
   const resolvedSize = resolveSize(size);
   const resolvedColor = resolveColor(color, colors);
 
-  return (
-    <Ionicons
-      name={name}
-      size={resolvedSize}
-      color={resolvedColor}
-    />
-  );
+  return <Ionicons name={name} size={resolvedSize} color={resolvedColor} />;
 }

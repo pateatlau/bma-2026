@@ -80,13 +80,7 @@ export {
 // SHADOW TOKENS
 // =============================================================================
 
-export {
-  shadows,
-  getShadow,
-  legacyShadows,
-  type ShadowDefinition,
-  type Shadow,
-} from './shadows';
+export { shadows, getShadow, legacyShadows, type ShadowDefinition, type Shadow } from './shadows';
 
 // =============================================================================
 // ANIMATION TOKENS
@@ -147,9 +141,4 @@ export {
 // ICON SIZE TOKENS
 // =============================================================================
 
-export {
-  iconSizes,
-  iconContextSizes,
-  type IconSize,
-  type IconContextSize,
-} from './iconSizes';
+export { iconSizes, iconContextSizes, type IconSize, type IconContextSize } from './iconSizes';

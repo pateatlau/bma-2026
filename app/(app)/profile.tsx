@@ -169,15 +169,10 @@ export default function ProfileScreen() {
               Danger Zone
             </Text>
             <Text variant="small" color="secondary">
-              Once you log out, you'll need to sign in again to access your account.
+              Once you log out, you&apos;ll need to sign in again to access your account.
             </Text>
             <Spacer size="sm" />
-            <Button
-              title="Logout"
-              onPress={logout}
-              variant="dangerOutline"
-              fullWidth
-            />
+            <Button title="Logout" onPress={logout} variant="dangerOutline" fullWidth />
           </Stack>
         </Card>
 

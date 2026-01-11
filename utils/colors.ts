@@ -238,9 +238,5 @@ export function darken(hexColor: string, amount: number): string {
   const { r, g, b } = hexToRgb(hexColor);
   const clampedAmount = Math.max(0, Math.min(1, amount));
 
-  return rgbToHex(
-    r * (1 - clampedAmount),
-    g * (1 - clampedAmount),
-    b * (1 - clampedAmount)
-  );
+  return rgbToHex(r * (1 - clampedAmount), g * (1 - clampedAmount), b * (1 - clampedAmount));
 }

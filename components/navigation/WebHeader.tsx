@@ -33,10 +33,7 @@ export function WebHeader() {
       ]}
     >
       <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.logoContainer}
-          onPress={() => router.push('/(app)/home')}
-        >
+        <TouchableOpacity style={styles.logoContainer} onPress={() => router.push('/(app)/home')}>
           <View style={[styles.logo, { backgroundColor: colors.primary }]}>
             <Text style={styles.logoText}>B</Text>
           </View>

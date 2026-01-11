@@ -78,20 +78,14 @@ export function getBreakpoint(width: number): keyof typeof breakpoints {
 /**
  * Check if width is at or above a specific breakpoint
  */
-export function isAtLeast(
-  width: number,
-  breakpoint: keyof typeof breakpoints
-): boolean {
+export function isAtLeast(width: number, breakpoint: keyof typeof breakpoints): boolean {
   return width >= breakpoints[breakpoint];
 }
 
 /**
  * Check if width is below a specific breakpoint
  */
-export function isBelow(
-  width: number,
-  breakpoint: keyof typeof breakpoints
-): boolean {
+export function isBelow(width: number, breakpoint: keyof typeof breakpoints): boolean {
   return width < breakpoints[breakpoint];
 }
 
@@ -103,9 +97,7 @@ export function isBetween(
   minBreakpoint: keyof typeof breakpoints,
   maxBreakpoint: keyof typeof breakpoints
 ): boolean {
-  return (
-    width >= breakpoints[minBreakpoint] && width < breakpoints[maxBreakpoint]
-  );
+  return width >= breakpoints[minBreakpoint] && width < breakpoints[maxBreakpoint];
 }
 
 // =============================================================================

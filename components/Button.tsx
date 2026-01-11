@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
-import { spacing, borderRadius, typography } from '@/constants/theme';
+import { borderRadius, typography } from '@/constants/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -175,9 +175,7 @@ export function Button({
               style={!iconOnly && title ? { marginRight: iconGap } : undefined}
             />
           )}
-          {!iconOnly && title && (
-            <Text style={[buttonTextStyle, textStyle]}>{title}</Text>
-          )}
+          {!iconOnly && title && <Text style={[buttonTextStyle, textStyle]}>{title}</Text>}
           {rightIcon && !iconOnly && (
             <Ionicons
               name={rightIcon}

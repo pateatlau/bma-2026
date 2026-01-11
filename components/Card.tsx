@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  GestureResponderEvent,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ViewStyle, GestureResponderEvent } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { spacing, borderRadius, shadows } from '@/constants/theme';
 
@@ -151,15 +145,7 @@ Card.Footer = function CardFooter({
 }) {
   const { colors } = useTheme();
   return (
-    <View
-      style={[
-        styles.footer,
-        { borderTopColor: colors.borderLight },
-        style,
-      ]}
-    >
-      {children}
-    </View>
+    <View style={[styles.footer, { borderTopColor: colors.borderLight }, style]}>{children}</View>
   );
 };
 

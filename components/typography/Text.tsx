@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  Text as RNText,
-  TextProps as RNTextProps,
-  TextStyle,
-} from 'react-native';
+import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import {
   fontSizes,

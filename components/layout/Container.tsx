@@ -79,35 +79,27 @@ export function Container({
 /**
  * Auth container - optimized for login/signup forms
  */
-Container.Auth = function AuthContainer(
-  props: Omit<ContainerProps, 'type'>
-) {
+Container.Auth = function AuthContainer(props: Omit<ContainerProps, 'type'>) {
   return <Container type="auth" {...props} />;
 };
 
 /**
  * Content container - standard page content
  */
-Container.Content = function ContentContainer(
-  props: Omit<ContainerProps, 'type'>
-) {
+Container.Content = function ContentContainer(props: Omit<ContainerProps, 'type'>) {
   return <Container type="content" {...props} />;
 };
 
 /**
  * Prose container - narrow width for readable text
  */
-Container.Prose = function ProseContainer(
-  props: Omit<ContainerProps, 'type'>
-) {
+Container.Prose = function ProseContainer(props: Omit<ContainerProps, 'type'>) {
   return <Container type="prose" {...props} />;
 };
 
 /**
  * Full width container
  */
-Container.Full = function FullContainer(
-  props: Omit<ContainerProps, 'type'>
-) {
+Container.Full = function FullContainer(props: Omit<ContainerProps, 'type'>) {
   return <Container type="fullWidth" {...props} />;
 };

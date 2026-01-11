@@ -8,12 +8,7 @@
 import React from 'react';
 import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
-import {
-  fontSizes,
-  lineHeights,
-  fontWeights,
-  fontFamily,
-} from '@/constants/tokens';
+import { fontSizes, lineHeights, fontWeights, fontFamily } from '@/constants/tokens';
 
 export type CaptionColor =
   | 'primary'
@@ -45,12 +40,7 @@ function resolveColor(color: CaptionColor, colors: ThemeColors): string | undefi
   return colors[color as keyof ThemeColors];
 }
 
-export function Caption({
-  color = 'muted',
-  style,
-  children,
-  ...props
-}: CaptionProps) {
+export function Caption({ color = 'muted', style, children, ...props }: CaptionProps) {
   const { colors } = useTheme();
 
   const resolvedColor = resolveColor(color, colors);

@@ -6,12 +6,7 @@
 
 export { Icon, type IconProps, type IconName, type IconColor } from './Icon';
 
-export {
-  Avatar,
-  type AvatarProps,
-  type AvatarSize,
-  type AvatarStatus,
-} from './Avatar';
+export { Avatar, type AvatarProps, type AvatarSize, type AvatarStatus } from './Avatar';
 
 export {
   Badge,

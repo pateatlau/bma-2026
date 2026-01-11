@@ -17,10 +17,7 @@ export default function AppLayout() {
       ) : (
         <>
           <MobileHeader onMenuPress={() => setDrawerVisible(true)} />
-          <MobileDrawer
-            visible={drawerVisible}
-            onClose={() => setDrawerVisible(false)}
-          />
+          <MobileDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
         </>
       )}
       <View style={styles.content}>

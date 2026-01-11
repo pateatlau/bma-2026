@@ -3,16 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import {
-  Card,
-  ScreenContainer,
-  Text,
-  Heading,
-  Spacer,
-  Stack,
-  Row,
-  Divider,
-} from '@/components';
+import { Card, ScreenContainer, Text, Heading, Spacer, Stack, Row, Divider } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { iconSizes, maxWidth } from '@/constants/tokens';
@@ -45,14 +36,19 @@ export default function HomeScreen() {
         paddingTop: spacing.xl,
       }}
     >
-      <View style={[styles.innerContent, isWideScreen && { maxWidth: maxWidth.lg, alignSelf: 'center' as const }]}>
+      <View
+        style={[
+          styles.innerContent,
+          isWideScreen && { maxWidth: maxWidth.lg, alignSelf: 'center' as const },
+        ]}
+      >
         {/* Welcome Section */}
         <Stack gap="sm">
           <Text variant="large" color="secondary">
             Welcome back,
           </Text>
           <Heading level="h1">{user?.name}</Heading>
-          <Text color="muted">Here's what's happening today</Text>
+          <Text color="muted">Here&apos;s what&apos;s happening today</Text>
         </Stack>
 
         <Spacer size="xl" />
@@ -122,10 +118,7 @@ export default function HomeScreen() {
               return (
                 <Stack key={index} gap="sm" style={{ alignItems: 'center' }}>
                   <View
-                    style={[
-                      styles.actionIcon,
-                      { backgroundColor: withOpacity(actionColor, 0.1) },
-                    ]}
+                    style={[styles.actionIcon, { backgroundColor: withOpacity(actionColor, 0.1) }]}
                   >
                     <Ionicons name={action.icon} size={iconSizes.lg} color={actionColor} />
                   </View>

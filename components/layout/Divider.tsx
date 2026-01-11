@@ -62,9 +62,7 @@ export function Divider({
   // Base line style
   const lineStyle: ViewStyle = {
     backgroundColor: colors.border,
-    ...(isHorizontal
-      ? { height: thickness, flex: 1 }
-      : { width: thickness, flex: 1 }),
+    ...(isHorizontal ? { height: thickness, flex: 1 } : { width: thickness, flex: 1 }),
     ...(variant === 'dashed' && { borderStyle: 'dashed' }),
     ...(variant === 'dotted' && { borderStyle: 'dotted' }),
   };
@@ -73,9 +71,7 @@ export function Divider({
   const containerStyle: ViewStyle = {
     flexDirection: isHorizontal ? 'row' : 'column',
     alignItems: 'center',
-    ...(isHorizontal
-      ? { marginVertical: spacingValue }
-      : { marginHorizontal: spacingValue }),
+    ...(isHorizontal ? { marginVertical: spacingValue } : { marginHorizontal: spacingValue }),
   };
 
   // Label style
@@ -102,9 +98,7 @@ export function Divider({
     <View
       style={[
         lineStyle,
-        isHorizontal
-          ? { marginVertical: spacingValue }
-          : { marginHorizontal: spacingValue },
+        isHorizontal ? { marginVertical: spacingValue } : { marginHorizontal: spacingValue },
         style,
       ]}
       {...props}

@@ -5,13 +5,9 @@
  * Uses the design system breakpoint tokens for consistent behavior.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
-import {
-  breakpoints,
-  getBreakpoint,
-  type Breakpoint,
-} from '@/constants/tokens';
+import { breakpoints, getBreakpoint, type Breakpoint } from '@/constants/tokens';
 
 export interface BreakpointInfo {
   // Individual breakpoint checks

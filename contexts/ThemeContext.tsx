@@ -56,14 +56,14 @@ export const lightColors = {
 
   // Semantic
   background: '#FFFFFF',
-  surface: '#FEF2F2',        // Light red tint for cards
+  surface: '#FEF2F2', // Light red tint for cards
   surfaceElevated: '#FFFFFF',
   text: '#0A0A0A',
   textSecondary: '#525252',
   textMuted: '#737373',
   textOnPrimary: '#FFFFFF',
-  border: '#FECACA',         // Light red border
-  borderLight: '#FEE2E2',    // Very light red border
+  border: '#FECACA', // Light red border
+  borderLight: '#FEE2E2', // Very light red border
 
   // States
   error: '#DC2626',

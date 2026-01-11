@@ -192,7 +192,7 @@ export default function ForgotPasswordScreen() {
           {isEmailSent && (
             <Row justify="center" align="center" gap="xs">
               <Text color="muted" variant="small">
-                Didn't receive the email?
+                Didn&apos;t receive the email?
               </Text>
               <TouchableOpacity
                 onPress={() => {

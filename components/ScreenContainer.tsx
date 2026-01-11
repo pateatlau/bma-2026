@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ViewStyle,
-  ScrollView,
-  useWindowDimensions,
-} from 'react-native';
+import { View, StyleSheet, ViewStyle, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { spacing } from '@/constants/theme';
@@ -73,8 +67,7 @@ export function ScreenContainer({
   const { width } = useWindowDimensions();
 
   // Handle legacy padded prop
-  const effectivePadding =
-    padded !== undefined ? (padded ? 'lg' : 'none') : padding;
+  const effectivePadding = padded !== undefined ? (padded ? 'lg' : 'none') : padding;
 
   // Calculate horizontal padding
   const horizontalPadding =
@@ -103,12 +96,7 @@ export function ScreenContainer({
   const renderContent = () => {
     if (maxWidth && width > maxWidth) {
       return (
-        <View
-          style={[
-            styles.maxWidthWrapper,
-            { maxWidth, width: '100%', alignSelf: 'center' },
-          ]}
-        >
+        <View style={[styles.maxWidthWrapper, { maxWidth, width: '100%', alignSelf: 'center' }]}>
           {children}
         </View>
       );
@@ -138,9 +126,7 @@ export function ScreenContainer({
     );
   }
 
-  return (
-    <View style={[baseStyle, centeredStyle, style]}>{renderContent()}</View>
-  );
+  return <View style={[baseStyle, centeredStyle, style]}>{renderContent()}</View>;
 }
 
 /**

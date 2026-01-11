@@ -9,6 +9,7 @@ This document provides a comprehensive architecture for the BMA 2026 Design Syst
 **Platforms**: Web, Android, iOS (single shared codebase with platform-aware adaptations)
 
 **Design Principles**:
+
 1. **Consistency** - Unified visual language across all platforms
 2. **Accessibility** - WCAG 2.1 AA compliance, proper contrast ratios, touch targets
 3. **Scalability** - Token-based system that scales from mobile to desktop
@@ -20,7 +21,9 @@ This document provides a comprehensive architecture for the BMA 2026 Design Syst
 ## Current State Analysis
 
 ### Existing Foundation
+
 The project has an initial theme system with:
+
 - ✅ Color palette (dark/light themes)
 - ✅ Spacing scale (xs through xxl)
 - ✅ Border radius tokens
@@ -29,6 +32,7 @@ The project has an initial theme system with:
 - ✅ Basic components (Button, Input, Card, ScreenContainer)
 
 ### Gaps to Address
+
 - ❌ Comprehensive typography system with text components
 - ❌ Icon system with consistent sizing
 - ❌ Animation/motion tokens
@@ -52,6 +56,7 @@ The project has an initial theme system with:
 **File**: `constants/theme.ts` (extend existing)
 
 **Primitive Colors** (raw values):
+
 ```typescript
 const primitives = {
   red: {
@@ -61,7 +66,7 @@ const primitives = {
     300: '#FCA5A5',
     400: '#F87171',
     500: '#EF4444',
-    600: '#DC2626',  // Primary
+    600: '#DC2626', // Primary
     700: '#B91C1C',
     800: '#991B1B',
     900: '#7F1D1D',
@@ -108,6 +113,7 @@ const primitives = {
 | `info` | blue.500 | blue.600 | Info states |
 
 **Contrast Requirements**:
+
 - Text on background: minimum 4.5:1 (AA)
 - Large text (18px+): minimum 3:1
 - Interactive elements: minimum 3:1 against adjacent colors
@@ -137,12 +143,13 @@ const primitives = {
 | `bold` | 700 | Headings |
 
 **Platform Font Stacks**:
+
 ```typescript
 const fontFamily = Platform.select({
   web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  ios: 'System',  // Uses SF Pro automatically
+  ios: 'System', // Uses SF Pro automatically
   android: 'Roboto',
-  default: undefined,  // System default
+  default: undefined, // System default
 });
 ```
 
@@ -152,22 +159,22 @@ const fontFamily = Platform.select({
 
 **Base Unit**: 4px
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `0` | 0 | No spacing |
-| `px` | 1px | Hairline borders |
-| `0.5` | 2px | Micro spacing |
-| `1` | 4px | Tight spacing |
-| `2` | 8px | Small gaps |
-| `3` | 12px | Medium-small gaps |
-| `4` | 16px | Default spacing |
-| `5` | 20px | Medium gaps |
-| `6` | 24px | Large gaps |
-| `8` | 32px | Section spacing |
-| `10` | 40px | Large section spacing |
-| `12` | 48px | Extra large spacing |
-| `16` | 64px | Page margins |
-| `20` | 80px | Hero spacing |
+| Token | Value | Usage                 |
+| ----- | ----- | --------------------- |
+| `0`   | 0     | No spacing            |
+| `px`  | 1px   | Hairline borders      |
+| `0.5` | 2px   | Micro spacing         |
+| `1`   | 4px   | Tight spacing         |
+| `2`   | 8px   | Small gaps            |
+| `3`   | 12px  | Medium-small gaps     |
+| `4`   | 16px  | Default spacing       |
+| `5`   | 20px  | Medium gaps           |
+| `6`   | 24px  | Large gaps            |
+| `8`   | 32px  | Section spacing       |
+| `10`  | 40px  | Large section spacing |
+| `12`  | 48px  | Extra large spacing   |
+| `16`  | 64px  | Page margins          |
+| `20`  | 80px  | Hero spacing          |
 
 **Semantic Spacing**:
 | Token | Value | Usage |
@@ -185,29 +192,30 @@ const fontFamily = Platform.select({
 
 **File**: `constants/borders.ts` (new file)
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `none` | 0 | Sharp corners |
-| `sm` | 4px | Subtle rounding (badges) |
-| `md` | 8px | Default (buttons, inputs) |
-| `lg` | 12px | Cards, containers |
-| `xl` | 16px | Large cards, modals |
-| `2xl` | 24px | Pills, tags |
-| `full` | 9999px | Circles, pills |
+| Token  | Value  | Usage                     |
+| ------ | ------ | ------------------------- |
+| `none` | 0      | Sharp corners             |
+| `sm`   | 4px    | Subtle rounding (badges)  |
+| `md`   | 8px    | Default (buttons, inputs) |
+| `lg`   | 12px   | Cards, containers         |
+| `xl`   | 16px   | Large cards, modals       |
+| `2xl`  | 24px   | Pills, tags               |
+| `full` | 9999px | Circles, pills            |
 
 #### 1.5 Shadow System
 
 **File**: `constants/shadows.ts` (new file)
 
-| Token | Properties | Usage |
-|-------|------------|-------|
-| `none` | none | Flat elements |
-| `sm` | offset: 0,1 / blur: 2 / opacity: 0.1 | Subtle lift |
-| `md` | offset: 0,2 / blur: 4 / opacity: 0.15 | Cards, dropdowns |
-| `lg` | offset: 0,4 / blur: 8 / opacity: 0.2 | Modals, popovers |
-| `xl` | offset: 0,8 / blur: 16 / opacity: 0.25 | Dialogs |
+| Token  | Properties                             | Usage            |
+| ------ | -------------------------------------- | ---------------- |
+| `none` | none                                   | Flat elements    |
+| `sm`   | offset: 0,1 / blur: 2 / opacity: 0.1   | Subtle lift      |
+| `md`   | offset: 0,2 / blur: 4 / opacity: 0.15  | Cards, dropdowns |
+| `lg`   | offset: 0,4 / blur: 8 / opacity: 0.2   | Modals, popovers |
+| `xl`   | offset: 0,8 / blur: 16 / opacity: 0.25 | Dialogs          |
 
 **Platform Considerations**:
+
 - iOS: Uses `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`
 - Android: Uses `elevation` (converts shadow to elevation value)
 - Web: Uses CSS `box-shadow`
@@ -242,16 +250,17 @@ const fontFamily = Platform.select({
 
 **File**: `constants/breakpoints.ts` (new file)
 
-| Token | Min Width | Description |
-|-------|-----------|-------------|
-| `xs` | 0 | Mobile portrait |
-| `sm` | 480px | Mobile landscape |
-| `md` | 768px | Tablet portrait |
-| `lg` | 1024px | Tablet landscape / Desktop |
-| `xl` | 1280px | Large desktop |
-| `2xl` | 1536px | Extra large desktop |
+| Token | Min Width | Description                |
+| ----- | --------- | -------------------------- |
+| `xs`  | 0         | Mobile portrait            |
+| `sm`  | 480px     | Mobile landscape           |
+| `md`  | 768px     | Tablet portrait            |
+| `lg`  | 1024px    | Tablet landscape / Desktop |
+| `xl`  | 1280px    | Large desktop              |
+| `2xl` | 1536px    | Extra large desktop        |
 
 **Hook Implementation**:
+
 ```typescript
 // hooks/useBreakpoint.ts
 export function useBreakpoint() {
@@ -269,7 +278,18 @@ export function useBreakpoint() {
     isTablet: width >= 768 && width < 1024,
     isDesktop: width >= 1024,
     // Current breakpoint
-    current: width < 480 ? 'xs' : width < 768 ? 'sm' : width < 1024 ? 'md' : width < 1280 ? 'lg' : width < 1536 ? 'xl' : '2xl',
+    current:
+      width < 480
+        ? 'xs'
+        : width < 768
+          ? 'sm'
+          : width < 1024
+            ? 'md'
+            : width < 1280
+              ? 'lg'
+              : width < 1536
+                ? 'xl'
+                : '2xl',
   };
 }
 ```
@@ -324,6 +344,7 @@ export function useResponsiveValue<T>(value: ResponsiveValue<T>, defaultValue: T
 | `Caption` | xs | regular | Captions, hints |
 
 **Props**:
+
 ```typescript
 interface TextProps {
   children: React.ReactNode;
@@ -361,6 +382,7 @@ interface TextProps {
 | `xl` | 60px | 24px | 20px | 24px |
 
 **Additional Props**:
+
 ```typescript
 interface ButtonProps {
   // Existing props...
@@ -368,7 +390,7 @@ interface ButtonProps {
   rightIcon?: IconName;
   iconOnly?: boolean;
   fullWidth?: boolean;
-  rounded?: boolean;  // Uses full border radius
+  rounded?: boolean; // Uses full border radius
 }
 ```
 
@@ -387,6 +409,7 @@ interface ButtonProps {
 | `2xl` | 48px | Hero sections |
 
 **Props**:
+
 ```typescript
 interface IconProps {
   name: keyof typeof Ionicons.glyphMap;
@@ -411,12 +434,13 @@ interface IconProps {
 | `2xl` | 120px | 36px | Hero sections |
 
 **Props**:
+
 ```typescript
 interface AvatarProps {
   source?: ImageSourcePropType;
-  name?: string;  // For initials fallback
+  name?: string; // For initials fallback
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  rounded?: boolean;  // Full circle vs rounded square
+  rounded?: boolean; // Full circle vs rounded square
   badge?: 'online' | 'offline' | 'busy' | React.ReactNode;
   style?: ViewStyle;
 }
@@ -447,6 +471,7 @@ interface AvatarProps {
 **File**: `components/Divider.tsx` (new file)
 
 **Props**:
+
 ```typescript
 interface DividerProps {
   orientation?: 'horizontal' | 'vertical';
@@ -454,7 +479,7 @@ interface DividerProps {
   thickness?: number;
   color?: keyof ThemeColors;
   spacing?: 'none' | 'sm' | 'md' | 'lg';
-  label?: string;  // For labeled dividers
+  label?: string; // For labeled dividers
 }
 ```
 
@@ -463,6 +488,7 @@ interface DividerProps {
 **File**: `components/Stack.tsx` (new file)
 
 **Props**:
+
 ```typescript
 interface StackProps {
   children: React.ReactNode;
@@ -483,6 +509,7 @@ export const HStack = (props) => <Stack direction="horizontal" {...props} />;
 #### 3.8 Form Components
 
 **Checkbox** (`components/Checkbox.tsx`):
+
 ```typescript
 interface CheckboxProps {
   checked: boolean;
@@ -496,6 +523,7 @@ interface CheckboxProps {
 ```
 
 **Radio** (`components/Radio.tsx`):
+
 ```typescript
 interface RadioGroupProps {
   value: string;
@@ -508,6 +536,7 @@ interface RadioGroupProps {
 ```
 
 **Switch** (`components/Switch.tsx`):
+
 ```typescript
 interface SwitchProps {
   value: boolean;
@@ -519,6 +548,7 @@ interface SwitchProps {
 ```
 
 **Select** (`components/Select.tsx`):
+
 ```typescript
 interface SelectProps {
   value: string | string[];
@@ -536,6 +566,7 @@ interface SelectProps {
 #### 3.9 Feedback Components
 
 **Toast** (`components/Toast.tsx`):
+
 ```typescript
 interface ToastProps {
   message: string;
@@ -555,6 +586,7 @@ const toast = {
 ```
 
 **Alert** (`components/Alert.tsx`):
+
 ```typescript
 interface AlertProps {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -567,6 +599,7 @@ interface AlertProps {
 ```
 
 **Modal** (`components/Modal.tsx`):
+
 ```typescript
 interface ModalProps {
   visible: boolean;
@@ -598,18 +631,21 @@ interface ModalProps {
 #### 4.2 Platform-Specific Behaviors
 
 **iOS Adaptations**:
+
 - Use `SF Pro` system font
 - Respect `SafeAreaView` for notches
 - Use iOS-style back gestures
 - Haptic feedback for interactions
 
 **Android Adaptations**:
+
 - Use `Roboto` system font
 - Handle Android back button
 - Use Material Design elevation
 - Ripple effect for touch feedback
 
 **Web Adaptations**:
+
 - Keyboard navigation support
 - Focus visible states
 - Hover states
@@ -621,6 +657,7 @@ interface ModalProps {
 **File**: `utils/accessibility.ts` (new file)
 
 **Requirements**:
+
 - All images have `accessibilityLabel`
 - Interactive elements have `accessibilityRole`
 - Form inputs have `accessibilityLabel` and `accessibilityHint`
@@ -628,6 +665,7 @@ interface ModalProps {
 - Proper heading hierarchy with `accessibilityRole="header"`
 
 **Helper Hook**:
+
 ```typescript
 export function useAccessibility(options: {
   label: string;
@@ -650,7 +688,9 @@ export function useAccessibility(options: {
 ## Implementation Plan
 
 ### Step 1: Restructure Token Files
+
 **Files to create/modify**:
+
 - `constants/tokens/colors.ts` - Color primitives and semantic tokens
 - `constants/tokens/typography.ts` - Font sizes, weights, families
 - `constants/tokens/spacing.ts` - Spacing scale
@@ -661,13 +701,17 @@ export function useAccessibility(options: {
 - `constants/tokens/index.ts` - Unified export
 
 ### Step 2: Update Theme Context
+
 **File**: `contexts/ThemeContext.tsx`
+
 - Import tokens from new structure
 - Add complete semantic color mapping
 - Add theme-aware token access
 
 ### Step 3: Create Typography Components
+
 **Files to create**:
+
 - `components/typography/Text.tsx`
 - `components/typography/Heading.tsx`
 - `components/typography/Label.tsx`
@@ -675,7 +719,9 @@ export function useAccessibility(options: {
 - `components/typography/index.ts`
 
 ### Step 4: Create Layout Components
+
 **Files to create**:
+
 - `components/layout/Stack.tsx`
 - `components/layout/Divider.tsx`
 - `components/layout/Spacer.tsx`
@@ -683,14 +729,18 @@ export function useAccessibility(options: {
 - `components/layout/index.ts`
 
 ### Step 5: Create Display Components
+
 **Files to create**:
+
 - `components/display/Icon.tsx`
 - `components/display/Avatar.tsx`
 - `components/display/Badge.tsx`
 - `components/display/index.ts`
 
 ### Step 6: Create Form Components
+
 **Files to create**:
+
 - `components/form/Checkbox.tsx`
 - `components/form/Radio.tsx`
 - `components/form/Switch.tsx`
@@ -699,7 +749,9 @@ export function useAccessibility(options: {
 - `components/form/index.ts`
 
 ### Step 7: Create Feedback Components
+
 **Files to create**:
+
 - `components/feedback/Toast.tsx`
 - `components/feedback/ToastProvider.tsx`
 - `components/feedback/Alert.tsx`
@@ -707,21 +759,27 @@ export function useAccessibility(options: {
 - `components/feedback/index.ts`
 
 ### Step 8: Enhance Existing Components
+
 **Files to modify**:
+
 - `components/Button.tsx` - Add new variants, icons, sizes
 - `components/Input.tsx` - Add variants, enhance accessibility
 - `components/Card.tsx` - Add variants, press states
 - `components/ScreenContainer.tsx` - Add responsive padding
 
 ### Step 9: Create Utility Hooks
+
 **Files to create**:
+
 - `hooks/useBreakpoint.ts`
 - `hooks/useResponsiveValue.ts`
 - `hooks/useAccessibility.ts`
 - `hooks/usePlatform.ts`
 
 ### Step 10: Update Component Index
+
 **File**: `components/index.ts`
+
 - Export all new components
 - Organize by category
 
@@ -803,6 +861,7 @@ utils/
 ## Testing Checklist
 
 ### Visual Testing
+
 - [ ] All components render correctly in light mode
 - [ ] All components render correctly in dark mode
 - [ ] Components scale properly across breakpoints
@@ -810,6 +869,7 @@ utils/
 - [ ] Colors meet contrast requirements
 
 ### Platform Testing
+
 - [ ] Web: Hover states work
 - [ ] Web: Focus states visible and clear
 - [ ] Web: Keyboard navigation functional
@@ -819,12 +879,14 @@ utils/
 - [ ] Android: Back button handled
 
 ### Accessibility Testing
+
 - [ ] Screen reader announces elements correctly
 - [ ] Focus order is logical
 - [ ] Error messages announced
 - [ ] Interactive elements have proper roles
 
 ### Performance Testing
+
 - [ ] Components don't cause unnecessary re-renders
 - [ ] Animations run at 60fps
 - [ ] Memory usage stable
@@ -834,6 +896,7 @@ utils/
 ## Dependencies
 
 No additional dependencies required. The design system is built entirely on:
+
 - React Native core components
 - @expo/vector-icons (already installed)
 - react-native-safe-area-context (already installed)
@@ -868,11 +931,11 @@ This phase ensures all existing code uses design tokens consistently, eliminatin
 ```typescript
 // Accent colors for features (used in home.tsx, etc.)
 export const accentColors = {
-  analytics: { base: '#DC2626', bg: 'rgba(220, 38, 38, 0.1)' },  // red
-  team: { base: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },       // blue
-  settings: { base: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' },   // purple
-  help: { base: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },       // green
-  warning: { base: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' },    // orange
+  analytics: { base: '#DC2626', bg: 'rgba(220, 38, 38, 0.1)' }, // red
+  team: { base: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' }, // blue
+  settings: { base: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' }, // purple
+  help: { base: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' }, // green
+  warning: { base: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' }, // orange
 };
 
 // Opacity values as tokens
@@ -889,6 +952,7 @@ export const opacity = {
 ### Step 13: Retrofit home.tsx
 
 **Current hardcoded values**:
+
 ```typescript
 // ❌ Hardcoded
 { icon: 'stats-chart-outline', label: 'Analytics', color: '#DC2626' },
@@ -898,6 +962,7 @@ backgroundColor: 'rgba(59, 130, 246, 0.1)',
 ```
 
 **Refactored using tokens**:
+
 ```typescript
 // ✅ Using tokens
 import { accentColors } from '@/constants/tokens';
@@ -918,26 +983,28 @@ const QUICK_ACTIONS = [
 ### Step 14: Retrofit profile.tsx
 
 **Current hardcoded values**:
+
 ```typescript
 // ❌ Hardcoded
-color: '#FFFFFF'  // avatar text
-backgroundColor: 'rgba(220, 38, 38, 0.1)'  // menu icon background
-borderColor: 'rgba(239, 68, 68, 0.3)'  // danger zone border
+color: '#FFFFFF'; // avatar text
+backgroundColor: 'rgba(220, 38, 38, 0.1)'; // menu icon background
+borderColor: 'rgba(239, 68, 68, 0.3)'; // danger zone border
 ```
 
 **Refactored using tokens**:
+
 ```typescript
 // ✅ Using tokens
 import { colors, opacity } from '@/constants/tokens';
 
 // Avatar text - use semantic token
-color: colors.white  // or colors.textOnPrimary
+color: colors.white; // or colors.textOnPrimary
 
 // Menu icon background - use accent color token
-backgroundColor: accentColors.analytics.bg
+backgroundColor: accentColors.analytics.bg;
 
 // Danger zone - use semantic error color with opacity
-borderColor: `${colors.error}${Math.round(opacity.medium * 255).toString(16)}`
+borderColor: `${colors.error}${Math.round(opacity.medium * 255).toString(16)}`;
 // Or create a utility function:
 // borderColor: withOpacity(colors.error, opacity.medium)
 ```
@@ -945,6 +1012,7 @@ borderColor: `${colors.error}${Math.round(opacity.medium * 255).toString(16)}`
 ### Step 15: Retrofit Button.tsx
 
 **Current hardcoded values**:
+
 ```typescript
 // ❌ Hardcoded
 primary: { color: '#FFFFFF' },
@@ -952,6 +1020,7 @@ color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#FFFFFF'
 ```
 
 **Refactored using tokens**:
+
 ```typescript
 // ✅ Using tokens - add to ThemeColors
 // In ThemeContext.tsx, add:
@@ -967,6 +1036,7 @@ color={variant === 'outline' || variant === 'ghost' ? colors.primary : colors.te
 ### Step 16: Retrofit Navigation Components
 
 **WebHeader.tsx hardcoded values**:
+
 ```typescript
 // ❌ Hardcoded
 maxWidth: 1200,
@@ -975,6 +1045,7 @@ minWidth: 120,
 ```
 
 **Refactored using tokens**:
+
 ```typescript
 // ✅ Using tokens - add layout tokens
 // In constants/tokens/layout.ts:
@@ -1087,6 +1158,7 @@ export type IconSize = keyof typeof iconSizes;
 ```
 
 **Usage across codebase**:
+
 ```typescript
 // ❌ Hardcoded
 <Ionicons name="home" size={20} />
@@ -1104,6 +1176,7 @@ import { iconSizes } from '@/constants/tokens';
 After retrofitting, verify NO hardcoded values remain:
 
 **Search patterns to find remaining hardcoded values**:
+
 ```bash
 # Find hardcoded hex colors
 grep -r "#[0-9A-Fa-f]\{6\}" --include="*.tsx" --include="*.ts" app/ components/
@@ -1118,6 +1191,7 @@ grep -r "size={[0-9]" --include="*.tsx" --include="*.ts" app/ components/
 ```
 
 **Allowed exceptions**:
+
 - `flex: 1` - Standard flex value
 - `opacity: 0.x` - Should use opacity tokens, but inline is acceptable for one-offs
 - `zIndex` values - Often need to be explicit

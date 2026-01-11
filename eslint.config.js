@@ -1,0 +1,61 @@
+const { defineConfig } = require('eslint/config');
+const expoConfig = require('eslint-config-expo/flat');
+const eslintConfigPrettier = require('eslint-config-prettier');
+const eslintPluginPrettier = require('eslint-plugin-prettier');
+
+module.exports = defineConfig([
+  // Expo's flat config (includes TypeScript, React, React Hooks, Expo rules)
+  expoConfig,
+
+  // Prettier integration - must come after other configs to override conflicting rules
+  eslintConfigPrettier,
+  {
+    plugins: {
+      prettier: eslintPluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  },
+
+  // Project-specific configuration for all JS/TS files
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    rules: {
+      // Console statements - warn in development
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+
+  // TypeScript-specific overrides (plugin only available for TS files)
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+
+  // Global ignores
+  {
+    ignores: [
+      'node_modules/',
+      'dist/',
+      'web-build/',
+      '.expo/',
+      'android/',
+      'ios/',
+      'coverage/',
+      '*.min.js',
+      '*.bundle.js',
+      'babel.config.js',
+      'metro.config.js',
+    ],
+  },
+]);

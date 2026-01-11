@@ -182,9 +182,7 @@ export function Input({
           </TouchableOpacity>
         )}
       </View>
-      {error && (
-        <Text style={[styles.helperText, { color: colors.error }]}>{error}</Text>
-      )}
+      {error && <Text style={[styles.helperText, { color: colors.error }]}>{error}</Text>}
       {helperText && !error && (
         <Text style={[styles.helperText, { color: colors.textMuted }]}>{helperText}</Text>
       )}

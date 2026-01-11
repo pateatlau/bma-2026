@@ -23,6 +23,7 @@ This document outlines the step-by-step implementation plan for integrating Supa
 ### Phase 1: Dependencies & Configuration
 
 #### Step 1.1: Install Supabase Dependencies
+
 Install the required packages for Supabase integration with Expo.
 
 ```bash
@@ -31,15 +32,18 @@ npm install @react-native-async-storage/async-storage
 ```
 
 **Packages**:
+
 - `@supabase/supabase-js` - Official Supabase client
 - `@react-native-async-storage/async-storage` - For session persistence on mobile
 
 #### Step 1.2: Create Supabase Client Configuration
+
 Create a new file `lib/supabase.ts` to initialize the Supabase client.
 
 **File**: `lib/supabase.ts`
 
 **Contents**:
+
 - Import Supabase client
 - Import AsyncStorage for React Native
 - Read environment variables (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`)
@@ -47,14 +51,17 @@ Create a new file `lib/supabase.ts` to initialize the Supabase client.
 - Configure auth options (autoRefreshToken, persistSession, detectSessionInUrl)
 
 **Platform Considerations**:
+
 - Use AsyncStorage for mobile platforms
 - Use default localStorage for web
 - Handle `detectSessionInUrl` differently for web vs mobile
 
 #### Step 1.3: Update .gitignore
+
 Ensure `.env` files are not committed to version control.
 
 **Add to `.gitignore`**:
+
 ```
 .env
 .env.local
@@ -66,11 +73,13 @@ Ensure `.env` files are not committed to version control.
 ### Phase 2: Update Authentication Context
 
 #### Step 2.1: Define Auth Types
+
 Update or create types for authentication state.
 
 **File**: `contexts/AuthContext.tsx`
 
 **Types to define**:
+
 ```typescript
 interface User {
   id: string;
@@ -97,6 +106,7 @@ interface AuthResult {
 ```
 
 #### Step 2.2: Implement Supabase Auth Provider
+
 Replace mock authentication logic with Supabase calls.
 
 **File**: `contexts/AuthContext.tsx`
@@ -140,11 +150,13 @@ Replace mock authentication logic with Supabase calls.
    - Extract `id`, `email`, `user_metadata.name`, `user_metadata.avatar_url`
 
 #### Step 2.3: Handle Loading State in Root Layout
+
 Update the root layout to show loading indicator during initial auth check.
 
 **File**: `app/_layout.tsx`
 
 **Changes**:
+
 - Access `isLoading` from auth context
 - Show splash/loading screen while `isLoading` is true
 - Prevent navigation decisions until loading completes
@@ -154,11 +166,13 @@ Update the root layout to show loading indicator during initial auth check.
 ### Phase 3: Update UI Components
 
 #### Step 3.1: Update Login Screen
+
 Modify the login screen to work with Supabase auth.
 
 **File**: `app/(auth)/login.tsx`
 
 **Changes**:
+
 - Keep existing UI structure
 - Update error handling to display Supabase error messages
 - Remove hardcoded demo credentials hint (or update for testing)
@@ -166,11 +180,13 @@ Modify the login screen to work with Supabase auth.
 - Handle network errors gracefully
 
 #### Step 3.2: Create Sign Up Screen
+
 Add a registration screen for new users.
 
 **File**: `app/(auth)/signup.tsx`
 
 **Features**:
+
 - Email input with validation
 - Password input with strength requirements
 - Name input (optional)
@@ -179,22 +195,26 @@ Add a registration screen for new users.
 - Handle email confirmation flow
 
 #### Step 3.3: Create Forgot Password Screen
+
 Add password reset functionality.
 
 **File**: `app/(auth)/forgot-password.tsx`
 
 **Features**:
+
 - Email input
 - Submit button
 - Success message after email sent
 - Link back to login
 
 #### Step 3.4: Update Auth Layout
+
 Add navigation between auth screens.
 
 **File**: `app/(auth)/_layout.tsx`
 
 **Changes**:
+
 - Add Stack.Screen entries for new screens
 - Configure screen options (titles, animations)
 
@@ -203,36 +223,39 @@ Add navigation between auth screens.
 ### Phase 4: Session Management
 
 #### Step 4.1: Implement Token Refresh
+
 Ensure tokens are automatically refreshed.
 
 **Location**: `lib/supabase.ts` client configuration
 
 **Details**:
+
 - Enable `autoRefreshToken: true`
 - Supabase client handles refresh automatically
 - Verify refresh works across app restarts
 
 #### Step 4.2: Handle Session Expiry
+
 Gracefully handle expired sessions.
 
 **File**: `contexts/AuthContext.tsx`
 
 **Implementation**:
+
 - Listen for `TOKEN_REFRESHED` event
 - Listen for `SIGNED_OUT` event (triggered on refresh failure)
 - Redirect to login when session expires
 - Show appropriate message to user
 
 #### Step 4.3: Secure API Calls (Future)
+
 Prepare for authenticated API calls.
 
 **Pattern to establish**:
+
 ```typescript
 // For future data fetching
-const { data, error } = await supabase
-  .from('table_name')
-  .select('*')
-  .eq('user_id', user.id);
+const { data, error } = await supabase.from('table_name').select('*').eq('user_id', user.id);
 ```
 
 ---
@@ -240,9 +263,11 @@ const { data, error } = await supabase
 ### Phase 5: Testing & Validation
 
 #### Step 5.1: Test Authentication Flows
+
 Verify all auth flows work correctly.
 
 **Test cases**:
+
 - [ ] Login with valid credentials
 - [ ] Login with invalid credentials (wrong password)
 - [ ] Login with non-existent user
@@ -255,22 +280,27 @@ Verify all auth flows work correctly.
 - [ ] Navigate between login, signup, and forgot password screens
 
 #### Step 5.2: Test Cross-Platform
+
 Verify authentication works on all platforms.
 
 **Platforms to test**:
+
 - [ ] Web browser
 - [ ] iOS Simulator / Device
 - [ ] Android Emulator / Device
 
 **Platform-specific checks**:
+
 - Session persistence works on each platform
 - Deep linking for password reset (web)
 - Keyboard handling on mobile
 
 #### Step 5.3: Error Handling
+
 Verify error messages are user-friendly.
 
 **Error scenarios**:
+
 - Network offline
 - Invalid email format
 - Weak password
@@ -281,26 +311,26 @@ Verify error messages are user-friendly.
 
 ## File Changes Summary
 
-| File | Action | Description |
-|------|--------|-------------|
-| `package.json` | Modify | Add Supabase dependencies |
-| `.gitignore` | Modify | Add .env files |
-| `lib/supabase.ts` | Create | Supabase client configuration |
-| `contexts/AuthContext.tsx` | Modify | Replace mock auth with Supabase |
-| `app/_layout.tsx` | Modify | Handle loading state |
-| `app/(auth)/login.tsx` | Modify | Update error handling |
-| `app/(auth)/signup.tsx` | Create | Registration screen |
-| `app/(auth)/forgot-password.tsx` | Create | Password reset screen |
-| `app/(auth)/_layout.tsx` | Modify | Add new screen routes |
+| File                             | Action | Description                     |
+| -------------------------------- | ------ | ------------------------------- |
+| `package.json`                   | Modify | Add Supabase dependencies       |
+| `.gitignore`                     | Modify | Add .env files                  |
+| `lib/supabase.ts`                | Create | Supabase client configuration   |
+| `contexts/AuthContext.tsx`       | Modify | Replace mock auth with Supabase |
+| `app/_layout.tsx`                | Modify | Handle loading state            |
+| `app/(auth)/login.tsx`           | Modify | Update error handling           |
+| `app/(auth)/signup.tsx`          | Create | Registration screen             |
+| `app/(auth)/forgot-password.tsx` | Create | Password reset screen           |
+| `app/(auth)/_layout.tsx`         | Modify | Add new screen routes           |
 
 ---
 
 ## Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | `https://xxx.supabase.co` |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key | `eyJhbGc...` |
+| Variable                        | Description                   | Example                   |
+| ------------------------------- | ----------------------------- | ------------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL`      | Supabase project URL          | `https://xxx.supabase.co` |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key | `eyJhbGc...`              |
 
 **Note**: The `EXPO_PUBLIC_` prefix is required for Expo to expose these variables to the client bundle.
 

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { AccessibilityProps, Platform } from 'react-native';
+import { AccessibilityProps } from 'react-native';
 
 /**
  * Options for generating accessibility props
@@ -63,15 +63,7 @@ export interface AccessibilityOptions {
  * });
  */
 export function useAccessibility(options: AccessibilityOptions): AccessibilityProps {
-  const {
-    label,
-    hint,
-    role,
-    state,
-    value,
-    focusable = true,
-    liveRegion = 'none',
-  } = options;
+  const { label, hint, role, state, value, focusable = true, liveRegion = 'none' } = options;
 
   return useMemo(() => {
     const props: AccessibilityProps = {
@@ -229,9 +221,7 @@ export function useInputAccessibility(
   options?: { hint?: string; error?: string; disabled?: boolean }
 ): AccessibilityProps {
   return useMemo(() => {
-    const fullLabel = options?.error
-      ? `${label}, Error: ${options.error}`
-      : label;
+    const fullLabel = options?.error ? `${label}, Error: ${options.error}` : label;
 
     return {
       accessible: true,

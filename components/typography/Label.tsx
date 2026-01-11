@@ -8,12 +8,7 @@
 import React from 'react';
 import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
-import {
-  fontSizes,
-  lineHeights,
-  fontWeights,
-  fontFamily,
-} from '@/constants/tokens';
+import { fontSizes, lineHeights, fontWeights, fontFamily } from '@/constants/tokens';
 
 export type LabelColor =
   | 'primary'
@@ -67,9 +62,7 @@ export function Label({
   return (
     <RNText style={[labelStyle, style]} {...props}>
       {children}
-      {required && (
-        <RNText style={{ color: colors.error }}> *</RNText>
-      )}
+      {required && <RNText style={{ color: colors.error }}> *</RNText>}
     </RNText>
   );
 }

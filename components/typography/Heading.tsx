@@ -8,20 +8,10 @@
 import React from 'react';
 import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
-import {
-  fontSizes,
-  lineHeights,
-  fontWeights,
-  fontFamily,
-} from '@/constants/tokens';
+import { fontSizes, lineHeights, fontWeights, fontFamily } from '@/constants/tokens';
 
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4';
-export type HeadingColor =
-  | 'primary'
-  | 'secondary'
-  | 'muted'
-  | 'inherit'
-  | keyof ThemeColors;
+export type HeadingColor = 'primary' | 'secondary' | 'muted' | 'inherit' | keyof ThemeColors;
 export type TextAlign = 'left' | 'center' | 'right';
 
 export interface HeadingProps extends Omit<RNTextProps, 'style'> {
@@ -104,11 +94,7 @@ export function Heading({
   };
 
   return (
-    <RNText
-      style={[headingStyle, style]}
-      accessibilityRole="header"
-      {...props}
-    >
+    <RNText style={[headingStyle, style]} accessibilityRole="header" {...props}>
       {children}
     </RNText>
   );

@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  View,
-  Image,
-  Text as RNText,
-  ViewStyle,
-  ImageSourcePropType,
-} from 'react-native';
+import { View, Image, Text as RNText, ViewStyle, ImageSourcePropType } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { fontWeights } from '@/constants/tokens';
 
@@ -67,14 +61,7 @@ function getInitials(name: string): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-export function Avatar({
-  source,
-  name,
-  size = 'md',
-  rounded = true,
-  status,
-  style,
-}: AvatarProps) {
+export function Avatar({ source, name, size = 'md', rounded = true, status, style }: AvatarProps) {
   const { colors } = useTheme();
   const config = sizeConfig[size];
 
@@ -178,9 +165,7 @@ Avatar.Group = function AvatarGroup({
     <View style={[groupStyle, style]}>
       {visibleChildren.map((child, index) => (
         <View key={index} style={itemStyle(index)}>
-          {React.isValidElement<AvatarProps>(child)
-            ? React.cloneElement(child, { size })
-            : child}
+          {React.isValidElement<AvatarProps>(child) ? React.cloneElement(child, { size }) : child}
         </View>
       ))}
       {remainingCount > 0 && (

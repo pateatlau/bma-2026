@@ -9,6 +9,7 @@ This document provides a comprehensive guide for scaffolding the BMA 2026 Expo u
 **Platforms**: Web, Android, iOS (single shared codebase)
 
 **Tech Stack**:
+
 - Expo SDK 52
 - Expo Router 4 (file-based routing)
 - React Native 0.76
@@ -70,6 +71,7 @@ BMA-2026/
 ### Phase 1: Project Configuration
 
 #### Step 1.1: Create package.json
+
 Initialize the project with required dependencies.
 
 **File**: `package.json`
@@ -109,11 +111,13 @@ Initialize the project with required dependencies.
 ```
 
 **Key points**:
+
 - `"main": "expo-router/entry"` - Required for Expo Router
 - Compatible versions for Expo SDK 52
 - TypeScript support included
 
 #### Step 1.2: Create app.json
+
 Configure Expo project settings.
 
 **File**: `app.json`
@@ -159,12 +163,14 @@ Configure Expo project settings.
 ```
 
 **Key points**:
+
 - `scheme` - Required for deep linking
 - `newArchEnabled` - Enables React Native's new architecture
 - `plugins: ["expo-router"]` - Required for file-based routing
 - `experiments.typedRoutes` - Enables TypeScript route checking
 
 #### Step 1.3: Create tsconfig.json
+
 Configure TypeScript with path aliases.
 
 **File**: `tsconfig.json`
@@ -183,11 +189,13 @@ Configure TypeScript with path aliases.
 ```
 
 **Key points**:
+
 - Extends Expo's base TypeScript config
 - `@/*` path alias for cleaner imports
 - Strict mode enabled for better type safety
 
 #### Step 1.4: Create babel.config.js
+
 Configure Babel for Expo.
 
 **File**: `babel.config.js`
@@ -202,6 +210,7 @@ module.exports = function (api) {
 ```
 
 #### Step 1.5: Create metro.config.js
+
 Configure Metro bundler.
 
 **File**: `metro.config.js`
@@ -215,6 +224,7 @@ module.exports = config;
 ```
 
 #### Step 1.6: Create .gitignore
+
 Configure files to exclude from version control.
 
 **File**: `.gitignore`
@@ -266,9 +276,11 @@ coverage/
 ```
 
 #### Step 1.7: Create Placeholder Assets
+
 Generate placeholder images for app icons and splash screen.
 
 **Files to create**:
+
 - `assets/icon.png` - 1024x1024 (or 256x256 placeholder)
 - `assets/adaptive-icon.png` - 1024x1024 (or 256x256 placeholder)
 - `assets/splash-icon.png` - 200x200
@@ -281,11 +293,13 @@ Generate placeholder images for app icons and splash screen.
 ### Phase 2: Theme System
 
 #### Step 2.1: Create Theme Constants
+
 Define the design system tokens.
 
 **File**: `constants/theme.ts`
 
 **Contents**:
+
 1. **Colors** - Dark and light palette (defined in ThemeContext for dynamic use)
 2. **Spacing** - Consistent spacing scale (xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48)
 3. **Border Radius** - Rounded corner values (sm: 4, md: 8, lg: 12, xl: 16, full: 9999)
@@ -313,11 +327,13 @@ Define the design system tokens.
 | border | #E5E5E5 | Borders, dividers |
 
 #### Step 2.2: Create Theme Context
+
 Implement dynamic theme switching.
 
 **File**: `contexts/ThemeContext.tsx`
 
 **Features**:
+
 1. **Theme modes**: 'light', 'dark', 'system'
 2. **State management**: Current mode, resolved isDark boolean
 3. **Color object**: Dynamic colors based on current theme
@@ -325,6 +341,7 @@ Implement dynamic theme switching.
 5. **System detection**: Use `useColorScheme()` for system preference
 
 **Exports**:
+
 - `ThemeProvider` - Context provider component
 - `useTheme()` - Hook returning `{ mode, isDark, colors, setMode, toggleTheme }`
 - `darkColors` - Dark theme color object
@@ -336,15 +353,18 @@ Implement dynamic theme switching.
 ### Phase 3: Authentication System
 
 #### Step 3.1: Create Auth Context
+
 Implement authentication state management.
 
 **File**: `contexts/AuthContext.tsx`
 
 **Mock credentials** (for development):
+
 - Email: `user@example.com`
 - Password: `password123`
 
 **User type**:
+
 ```typescript
 interface User {
   id: string;
@@ -355,6 +375,7 @@ interface User {
 ```
 
 **Context type**:
+
 ```typescript
 interface AuthContextType {
   user: User | null;
@@ -366,6 +387,7 @@ interface AuthContextType {
 ```
 
 **Implementation details**:
+
 1. User state with `useState`
 2. Loading state for async operations
 3. `login` function with simulated delay (800ms)
@@ -378,6 +400,7 @@ interface AuthContextType {
 ### Phase 4: Reusable Components
 
 #### Step 4.1: Create Button Component
+
 Versatile button with multiple variants.
 
 **File**: `components/Button.tsx`
@@ -395,12 +418,14 @@ Versatile button with multiple variants.
 | textStyle | TextStyle | - | Text style override |
 
 **Features**:
+
 - Dynamic theme colors via `useTheme()`
 - Loading state with ActivityIndicator
 - Disabled opacity
 - Touch feedback with `activeOpacity`
 
 #### Step 4.2: Create Input Component
+
 Form input with icons and validation.
 
 **File**: `components/Input.tsx`
@@ -416,6 +441,7 @@ Form input with icons and validation.
 | ...TextInputProps | - | All React Native TextInput props |
 
 **Features**:
+
 - Focus state with border color change
 - Error state styling
 - Password visibility toggle (eye icon)
@@ -423,6 +449,7 @@ Form input with icons and validation.
 - Icon color changes on focus
 
 #### Step 4.3: Create Card Component
+
 Container for content grouping.
 
 **File**: `components/Card.tsx`
@@ -435,12 +462,14 @@ Container for content grouping.
 | elevated | boolean | false | Add shadow/elevation |
 
 **Features**:
+
 - Dynamic background from theme
 - Border and border radius
 - Optional shadow for elevation
 - Flexible padding
 
 #### Step 4.4: Create ScreenContainer Component
+
 Wrapper for screen content.
 
 **File**: `components/ScreenContainer.tsx`
@@ -455,12 +484,14 @@ Wrapper for screen content.
 | style | ViewStyle | - | Style override |
 
 **Features**:
+
 - Safe area insets handling
 - Optional ScrollView wrapper
 - Keyboard-aware scrolling
 - Consistent padding
 
 #### Step 4.5: Create Component Index
+
 Export all components from single entry point.
 
 **File**: `components/index.ts`
@@ -477,34 +508,39 @@ export { Card } from './Card';
 ### Phase 5: Navigation Components
 
 #### Step 5.1: Create useMediaQuery Hook
+
 Detect screen size and platform for adaptive layouts.
 
 **File**: `hooks/useMediaQuery.ts`
 
 **Returns**:
+
 ```typescript
 {
-  width: number;           // Screen width
-  height: number;          // Screen height
-  isWeb: boolean;          // Platform is web
-  isMobile: boolean;       // Platform is iOS/Android
-  isWideScreen: boolean;   // Width >= 768px
+  width: number; // Screen width
+  height: number; // Screen height
+  isWeb: boolean; // Platform is web
+  isMobile: boolean; // Platform is iOS/Android
+  isWideScreen: boolean; // Width >= 768px
   useHorizontalNav: boolean; // Should use horizontal nav
 }
 ```
 
 **Implementation**:
+
 - Use `Dimensions.get('window')`
 - Listen to dimension changes with `Dimensions.addEventListener`
 - Cleanup listener on unmount
 - `useHorizontalNav = isWeb && isWideScreen`
 
 #### Step 5.2: Create WebHeader Component
+
 Horizontal navigation for desktop web.
 
 **File**: `components/navigation/WebHeader.tsx`
 
 **Features**:
+
 - Logo with brand name
 - Horizontal nav links (Home, Profile)
 - Active state highlighting
@@ -516,6 +552,7 @@ Horizontal navigation for desktop web.
 - Max-width container (1200px) for large screens
 
 **Navigation items**:
+
 ```typescript
 const NAV_ITEMS = [
   { label: 'Home', path: '/(app)/home', icon: 'home-outline' },
@@ -524,11 +561,13 @@ const NAV_ITEMS = [
 ```
 
 #### Step 5.3: Create MobileHeader Component
+
 Header bar with hamburger menu for mobile.
 
 **File**: `components/navigation/MobileHeader.tsx`
 
 **Features**:
+
 - Hamburger menu button (left)
 - Centered logo and title
 - Safe area insets
@@ -541,11 +580,13 @@ Header bar with hamburger menu for mobile.
 | title | string | Header title (default: 'BMA 2026') |
 
 #### Step 5.4: Create MobileDrawer Component
+
 Slide-out drawer menu for mobile.
 
 **File**: `components/navigation/MobileDrawer.tsx`
 
 **Features**:
+
 - Modal overlay with backdrop
 - Animated slide-in from left
 - Logo and user info header
@@ -562,6 +603,7 @@ Slide-out drawer menu for mobile.
 | onClose | function | Close handler |
 
 #### Step 5.5: Create Navigation Index
+
 Export all navigation components.
 
 **File**: `components/navigation/index.ts`
@@ -577,11 +619,13 @@ export { MobileDrawer } from './MobileDrawer';
 ### Phase 6: App Routing
 
 #### Step 6.1: Create Root Layout
+
 Set up providers and auth-based navigation.
 
 **File**: `app/_layout.tsx`
 
 **Structure**:
+
 ```tsx
 <SafeAreaProvider>
   <ThemeProvider>
@@ -593,6 +637,7 @@ Set up providers and auth-based navigation.
 ```
 
 **RootLayoutNav features**:
+
 - StatusBar style based on theme (light/dark)
 - Auth state monitoring with useEffect
 - Redirect to login if not authenticated
@@ -600,6 +645,7 @@ Set up providers and auth-based navigation.
 - Stack navigator with fade animation
 
 #### Step 6.2: Create Index Redirect
+
 Entry point that redirects based on auth state.
 
 **File**: `app/index.tsx`
@@ -617,21 +663,25 @@ export default function Index() {
 ```
 
 #### Step 6.3: Create Auth Layout
+
 Stack navigator for auth screens.
 
 **File**: `app/(auth)/_layout.tsx`
 
 **Features**:
+
 - Stack navigator
 - Hidden header
 - Dark background
 
 #### Step 6.4: Create App Layout
+
 Layout with platform-adaptive navigation.
 
 **File**: `app/(app)/_layout.tsx`
 
 **Features**:
+
 - Detect platform with `useMediaQuery`
 - Show WebHeader for wide web screens
 - Show MobileHeader + MobileDrawer for mobile/narrow
@@ -643,11 +693,13 @@ Layout with platform-adaptive navigation.
 ### Phase 7: Screens
 
 #### Step 7.1: Create Login Screen
+
 Authentication screen with email/password.
 
 **File**: `app/(auth)/login.tsx`
 
 **Features**:
+
 - Centered card layout
 - Logo and welcome text
 - Email input with validation
@@ -659,39 +711,46 @@ Authentication screen with email/password.
 - Max-width container for web
 
 **Validation**:
+
 - Required email
 - Required password
 - Display server error messages
 
 #### Step 7.2: Create Home Screen
+
 Dashboard with stats and quick actions.
 
 **File**: `app/(app)/home.tsx`
 
 **Sections**:
+
 1. **Welcome section** - Greeting with user name
 2. **Stats grid** - 3 stat cards (Views, Completion, Tasks)
 3. **Quick actions** - 4 action buttons (Analytics, Team, Settings, Help)
 4. **Recent activity** - List of recent items
 
 **Features**:
+
 - ScrollView with safe area padding
 - Responsive max-width for wide screens
 - Dynamic theme colors
 - Icon integration with @expo/vector-icons
 
 #### Step 7.3: Create Profile Screen
+
 User profile with settings menu.
 
 **File**: `app/(app)/profile.tsx`
 
 **Sections**:
+
 1. **Profile card** - Avatar, name, email, stats
 2. **Settings menu** - List of setting options
 3. **Danger zone** - Logout section
 4. **Footer** - App version
 
 **Features**:
+
 - Avatar with initials
 - Verified badge
 - Stats row (Projects, Followers, Following)
@@ -704,6 +763,7 @@ User profile with settings menu.
 ## Testing Checklist
 
 ### Platform Testing
+
 - [ ] Web browser (Chrome, Safari, Firefox)
 - [ ] iOS Simulator
 - [ ] Android Emulator
@@ -711,6 +771,7 @@ User profile with settings menu.
 - [ ] Physical Android device
 
 ### Feature Testing
+
 - [ ] Login with valid credentials
 - [ ] Login with invalid credentials
 - [ ] Logout functionality
@@ -721,6 +782,7 @@ User profile with settings menu.
 - [ ] Safe area insets (notched devices)
 
 ### Visual Testing
+
 - [ ] Colors match design spec
 - [ ] Typography is consistent
 - [ ] Spacing is uniform
@@ -733,12 +795,14 @@ User profile with settings menu.
 ## Running the App
 
 ### Installation
+
 ```bash
 cd BMA-2026
 npm install
 ```
 
 ### Development
+
 ```bash
 # Start Expo dev server
 npx expo start
@@ -750,6 +814,7 @@ npx expo start
 ```
 
 ### Platform-Specific
+
 ```bash
 # Web only
 npm run web
@@ -766,18 +831,23 @@ npm run android
 ## Common Issues & Solutions
 
 ### Issue: Module not found errors
+
 **Solution**: Run `npm install` and restart Metro bundler
 
 ### Issue: TypeScript path alias not working
+
 **Solution**: Ensure `tsconfig.json` has correct paths configuration and restart IDE
 
 ### Issue: Fonts not loading on web
+
 **Solution**: Expo handles this automatically; ensure @expo/vector-icons is installed
 
 ### Issue: Safe area not working
+
 **Solution**: Wrap app in SafeAreaProvider from react-native-safe-area-context
 
 ### Issue: Navigation not working
+
 **Solution**: Check file naming in app/ directory matches Expo Router conventions
 
 ---
@@ -797,17 +867,17 @@ npm run android
 
 ## Dependencies Reference
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| expo | ~52.0.0 | Core Expo SDK |
-| expo-router | ~4.0.0 | File-based routing |
-| react | 18.3.1 | React library |
-| react-native | 0.76.5 | React Native framework |
-| react-native-web | ~0.19.13 | Web platform support |
-| react-native-safe-area-context | 4.12.0 | Safe area handling |
-| react-native-screens | ~4.1.0 | Native screen containers |
-| @expo/vector-icons | ^14.0.0 | Icon library |
-| expo-status-bar | ~2.0.0 | Status bar control |
-| expo-linking | ~7.0.0 | Deep linking support |
-| expo-constants | ~17.0.0 | App constants access |
-| typescript | ~5.3.3 | TypeScript compiler |
+| Package                        | Version  | Purpose                  |
+| ------------------------------ | -------- | ------------------------ |
+| expo                           | ~52.0.0  | Core Expo SDK            |
+| expo-router                    | ~4.0.0   | File-based routing       |
+| react                          | 18.3.1   | React library            |
+| react-native                   | 0.76.5   | React Native framework   |
+| react-native-web               | ~0.19.13 | Web platform support     |
+| react-native-safe-area-context | 4.12.0   | Safe area handling       |
+| react-native-screens           | ~4.1.0   | Native screen containers |
+| @expo/vector-icons             | ^14.0.0  | Icon library             |
+| expo-status-bar                | ~2.0.0   | Status bar control       |
+| expo-linking                   | ~7.0.0   | Deep linking support     |
+| expo-constants                 | ~17.0.0  | App constants access     |
+| typescript                     | ~5.3.3   | TypeScript compiler      |

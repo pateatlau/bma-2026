@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-} from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
@@ -67,7 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // We just need to wait for the auth state change listener to pick it up
         }
 
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        const {
+          data: { session: initialSession },
+          error,
+        } = await supabase.auth.getSession();
 
         if (error) {
           console.error('Error getting session:', error);
@@ -90,49 +86,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state changed:', event);
 
-        // Handle specific events
-        switch (event) {
-          case 'SIGNED_IN':
-            console.log('User signed in');
-            setSession(newSession);
-            setUser(mapSupabaseUser(newSession?.user ?? null));
-            break;
+      // Handle specific events
+      switch (event) {
+        case 'SIGNED_IN':
+          console.log('User signed in');
+          setSession(newSession);
+          setUser(mapSupabaseUser(newSession?.user ?? null));
+          break;
 
-          case 'SIGNED_OUT':
-            console.log('User signed out');
-            setSession(null);
-            setUser(null);
-            break;
+        case 'SIGNED_OUT':
+          console.log('User signed out');
+          setSession(null);
+          setUser(null);
+          break;
 
-          case 'TOKEN_REFRESHED':
-            console.log('Session token refreshed');
-            setSession(newSession);
-            // User data typically doesn't change on token refresh
-            break;
+        case 'TOKEN_REFRESHED':
+          console.log('Session token refreshed');
+          setSession(newSession);
+          // User data typically doesn't change on token refresh
+          break;
 
-          case 'USER_UPDATED':
-            console.log('User data updated');
-            setSession(newSession);
-            setUser(mapSupabaseUser(newSession?.user ?? null));
-            break;
+        case 'USER_UPDATED':
+          console.log('User data updated');
+          setSession(newSession);
+          setUser(mapSupabaseUser(newSession?.user ?? null));
+          break;
 
-          case 'PASSWORD_RECOVERY':
-            console.log('Password recovery initiated');
-            // This event fires when user clicks password reset link
-            // The app should navigate to a password reset form
-            break;
+        case 'PASSWORD_RECOVERY':
+          console.log('Password recovery initiated');
+          // This event fires when user clicks password reset link
+          // The app should navigate to a password reset form
+          break;
 
-          default:
-            // Handle any other events
-            setSession(newSession);
-            setUser(mapSupabaseUser(newSession?.user ?? null));
-        }
+        default:
+          // Handle any other events
+          setSession(newSession);
+          setUser(mapSupabaseUser(newSession?.user ?? null));
       }
-    );
+    });
 
     // Cleanup subscription on unmount
     return () => {
@@ -215,9 +211,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     try {
       // Build redirect URL only for web platform
-      const redirectTo = Platform.OS === 'web' && typeof window !== 'undefined'
-        ? `${window.location.origin}/reset-password`
-        : undefined;
+      const redirectTo =
+        Platform.OS === 'web' && typeof window !== 'undefined'
+          ? `${window.location.origin}/reset-password`
+          : undefined;
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,

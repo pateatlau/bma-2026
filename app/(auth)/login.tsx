@@ -149,7 +149,7 @@ export default function LoginScreen() {
 
               <Row justify="center" align="center" gap="xs">
                 <Text color="muted" variant="small">
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </Text>
                 <Link href="/signup" asChild>
                   <TouchableOpacity>

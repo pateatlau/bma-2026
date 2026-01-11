@@ -161,11 +161,7 @@ export function useNativeWebValue<T>(nativeValue: T, webValue: T): T {
  *   { paddingTop: 0 },  // Web
  * );
  */
-export function usePlatformStyles<T extends object>(
-  ios: T,
-  android: T,
-  web: T
-): T {
+export function usePlatformStyles<T extends object>(ios: T, android: T, web: T): T {
   return usePlatformValue({
     ios,
     android,
