@@ -29,6 +29,17 @@ module.exports = ({ config }) => {
   return {
     ...config,
     name: getAppName(),
+    // Sentry plugin for source maps and native crash reporting
+    plugins: [
+      ...(config.plugins || []),
+      [
+        '@sentry/react-native',
+        {
+          organization: process.env.SENTRY_ORG || 'your-org',
+          project: process.env.SENTRY_PROJECT || 'bma-2026',
+        },
+      ],
+    ],
     ios: {
       ...config.ios,
       bundleIdentifier: `com.bma.app2026${bundleIdSuffix}`,

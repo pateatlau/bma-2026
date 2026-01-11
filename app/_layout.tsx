@@ -5,6 +5,11 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { initSentry, setUser } from '@/lib/sentry';
+
+// Initialize Sentry as early as possible
+initSentry();
 
 // Import global CSS for web to override browser autofill styles
 if (Platform.OS === 'web') {
@@ -22,10 +27,19 @@ function LoadingScreen() {
 }
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { colors, isDark } = useTheme();
   const segments = useSegments();
   const router = useRouter();
+
+  // Update Sentry user context when auth state changes
+  useEffect(() => {
+    if (user) {
+      setUser({ id: user.id, email: user.email || undefined });
+    } else {
+      setUser(null);
+    }
+  }, [user]);
 
   useEffect(() => {
     // Don't navigate while still loading the initial session
@@ -64,13 +78,15 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <RootLayoutNav />
-        </AuthProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <RootLayoutNav />
+          </AuthProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
