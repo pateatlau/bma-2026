@@ -442,7 +442,7 @@ Individual/personal accounts can be used during development. Only public app sto
 **Proceed with development using individual accounts.** The trade-offs are minimal:
 
 - All development work proceeds without delays
-- Web version can launch on Day 67 as planned
+- Web version can launch on **March 21, 2026** (BMA Annual Day) as planned
 - Mobile apps can be fully tested internally
 - Public mobile release follows when BMA org accounts are ready (2-3 months)
 - No development time is wasted - all code works identically regardless of account type

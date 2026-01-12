@@ -6,6 +6,13 @@ This document outlines the complete implementation plan for the BMA (Bangalore M
 
 **PRD Version:** 1.4 (LOCKED - No feature creep)
 
+> **⚠️ Account & Release Strategy Note:**
+> Development proceeds using individual/personal accounts (Google Cloud, Facebook Dev, etc.). See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md) for details on the App Store account blocker and phased release strategy:
+>
+> - **Web:** Launches on **March 21, 2026** (BMA Annual Day)
+> - **Mobile Internal Testing:** APK + Expo Go + TestFlight (if personal Apple Dev available)
+> - **Mobile Public Release:** Blocked until BMA org accounts ready (~2-3 months after PAN card)
+
 ## Quick Links
 
 | Document                                                              | Description                         |
@@ -104,7 +111,7 @@ Phase 2: Public Features   ░░░░░░░░░░░░█████�
 Phase 3: Membership        ░░░░░░░░░░░░░░░░░░░░░░░░████░░  Days 29-38
 Phase 4: Chatbot           ░░░░░░░░░░░░░░░░░░░░░░░░░░████  Days 39-50
 Phase 5: Admin             ░░░░░░░░░░░░░░░░░░░░░░░░░░░░██  Days 51-60
-Phase 6: Polish & Launch   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█  Days 61-67
+Phase 6: Polish & Launch   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█  Days 61-67 → March 21, 2026
 ```
 
 ## Phase Summary
@@ -237,15 +244,18 @@ Phase 6: Polish & Launch   ░░░░░░░░░░░░░░░░░�
 - Performance optimization
 - Accessibility audit
 - Security review
-- App store submissions (iOS, Android)
-- Production deployment
+- Web production deployment
+- Mobile internal testing builds (APK + TestFlight if available)
+- App store submissions preparation (pending BMA org accounts)
 - Launch monitoring
 
 **Key Deliverables:**
 
 - 95%+ test coverage on critical paths
 - < 3s page load time
-- All 3 platforms live
+- Web deployed to production (Vercel)
+- Mobile builds ready for internal testing
+- Mobile public release: Pending BMA org App Store accounts
 - Monitoring dashboards active
 
 ---
@@ -372,7 +382,9 @@ All CRUD operations on tables go through Supabase client with RLS enforcement.
 
 ### Business
 
-- [ ] All 3 platforms live (Web, iOS, Android)
+- [ ] Web platform live (March 21, 2026 - BMA Annual Day)
+- [ ] Mobile internal testing builds available (APK + TestFlight)
+- [ ] Mobile public release ready (pending BMA org App Store accounts)
 - [ ] Bilingual fully functional (EN + Mizo)
 - [ ] Paid membership flow complete
 - [ ] Chatbot answering accurately
@@ -388,13 +400,15 @@ All CRUD operations on tables go through Supabase client with RLS enforcement.
 
 ## Risk Mitigation
 
-| Risk                           | Impact   | Mitigation                       |
-| ------------------------------ | -------- | -------------------------------- |
-| Mizo translation quality       | High     | Human review for cultural terms  |
-| Razorpay webhook failures      | Critical | Idempotency keys, retry logic    |
-| RAG accuracy                   | High     | Comprehensive knowledge base     |
-| App store rejection            | Medium   | Pre-submission checklist         |
-| Performance on low-end devices | Medium   | Lazy loading, image optimization |
+| Risk                           | Impact   | Mitigation                                                         |
+| ------------------------------ | -------- | ------------------------------------------------------------------ |
+| Mizo translation quality       | High     | Human review for cultural terms                                    |
+| Razorpay webhook failures      | Critical | Idempotency keys, retry logic                                      |
+| RAG accuracy                   | High     | Comprehensive knowledge base                                       |
+| App store rejection            | Medium   | Pre-submission checklist                                           |
+| Performance on low-end devices | Medium   | Lazy loading, image optimization                                   |
+| BMA org account delays         | Medium   | Web launches on time; mobile internal testing via APK + TestFlight |
+| Apple Sign-In without org      | Low      | Use personal Apple Dev account or defer Apple Sign-In feature      |
 
 ## Team Structure
 

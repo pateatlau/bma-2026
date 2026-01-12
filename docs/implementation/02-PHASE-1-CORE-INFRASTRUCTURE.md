@@ -8,11 +8,13 @@ Phase 1 builds the core infrastructure including authentication flows, user prof
 **Prerequisites:** Phase 0 completed (database, RLS, CI/CD)
 **Deliverables:**
 
-- Complete authentication with 4 OAuth providers
+- Complete authentication with 3-4 OAuth providers (see note below)
 - Profile management with avatar upload
 - Bilingual system (English + Mizo)
 - 19 design system components in Storybook
 - Navigation architecture for all route groups
+
+> **Note on Apple Sign-In:** Implementation depends on Phase 0 decision. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites). If deferred, implement 3 providers (Google, Facebook, Email); add Apple later when BMA org account is available.
 
 ---
 
@@ -42,7 +44,7 @@ interface AuthContextType {
   // ... existing
   loginWithGoogle: () => Promise<AuthResult>;
   loginWithFacebook: () => Promise<AuthResult>;
-  loginWithApple: () => Promise<AuthResult>;
+  loginWithApple: () => Promise<AuthResult>; // Conditional - see Phase 0 decision
   verifyEmail: (token: string) => Promise<AuthResult>;
   resendVerificationEmail: () => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
@@ -54,7 +56,8 @@ interface AuthContextType {
 - [ ] Email/password login working
 - [ ] Google OAuth working on all platforms
 - [ ] Facebook OAuth working on all platforms
-- [ ] Apple OAuth working on iOS
+- [ ] Apple OAuth working on iOS (if not deferred per Phase 0 decision)
+- [ ] If Apple OAuth deferred: documented stub/placeholder in place
 - [ ] Email verification flow complete
 - [ ] Password reset flow complete
 - [ ] Session persists across app restarts
@@ -1234,15 +1237,17 @@ npm install @10play/tentap-editor
 
 ### Services to Configure
 
-- [ ] Google OAuth credentials
-- [ ] Facebook App ID
-- [ ] Apple Services ID
+> **Note:** Individual accounts can be used for all OAuth providers. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md).
+
+- [ ] Google OAuth credentials (Individual account OK)
+- [ ] Facebook App ID (Individual account OK)
+- [ ] Apple Services ID (Conditional - depends on Phase 0 decision)
 
 ---
 
 ## Definition of Done
 
-- [ ] All 4 OAuth providers working
+- [ ] 3-4 OAuth providers working (Apple conditional per Phase 0 decision)
 - [ ] Email verification flow complete
 - [ ] Profile CRUD working with avatar upload
 - [ ] All translation files created (EN + Mizo)
