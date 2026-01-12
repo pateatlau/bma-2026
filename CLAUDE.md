@@ -161,3 +161,27 @@ npx supabase db push
 # Deploy Edge Functions
 npx supabase functions deploy <function-name>
 ```
+
+## Known Issues
+
+### Mobile Email Verification (TODO)
+
+**Status:** Parked for later resolution
+
+**Problem:** Email verification does not work properly on mobile (iOS/Android). When a user signs up from the mobile app and clicks the confirmation link in their email:
+
+1. The link opens in the device's browser (not the app)
+2. The browser navigates to the production web URL instead of triggering the app's deep link (`bma2026://auth/confirm`)
+3. User sees the web confirmation page but the mobile app doesn't know about the verification
+
+**Root Cause:** Supabase sends confirmation emails with HTTPS URLs (e.g., `https://[project].supabase.co/auth/v1/verify?...&redirect_to=bma2026://auth/confirm`). The browser intercepts the HTTPS link, and even though Supabase redirects to the custom scheme after verification, the deep link doesn't reliably open the app.
+
+**Current Workaround:** The web `/auth/confirm` page detects mobile browsers and shows a message: "Your email has been verified. You can now close this browser and return to the BMA 2026 app to log in." Users must manually return to the app and log in.
+
+**Potential Solutions to Explore:**
+
+1. **Android App Links / iOS Universal Links:** Configure verified domain association so HTTPS URLs open directly in the app. Requires domain verification and hosting `/.well-known/assetlinks.json` (Android) or `apple-app-site-association` (iOS).
+2. **Magic Link with OTP:** Instead of click-to-verify, send a 6-digit code that users enter in the app.
+3. **Supabase Native Deep Link Support:** Check if Supabase has updated their email templates or auth flow to better support mobile deep links.
+
+**Web verification works correctly.** This issue only affects native mobile apps.

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
 import { supabase } from '@/lib/supabase';
 
 // App User type (mapped from Supabase User)
@@ -70,9 +71,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Clear any invalid session state
           setSession(null);
           setUser(null);
+        } else if (initialSession?.user) {
+          // Verify user still exists in database by attempting to get their profile
+          // This handles the case where a user was deleted from the DB but still has a valid token
+          const { error: userError } = await supabase.auth.getUser();
+
+          if (userError) {
+            // User no longer exists or token is invalid - sign them out
+            console.warn('User validation failed, signing out:', userError.message);
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+          } else {
+            setSession(initialSession);
+            setUser(mapSupabaseUser(initialSession.user));
+          }
         } else {
-          setSession(initialSession);
-          setUser(mapSupabaseUser(initialSession?.user ?? null));
+          setSession(null);
+          setUser(null);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -130,7 +146,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Cleanup subscription on unmount
+    // Handle deep links for mobile email confirmation
+    const handleDeepLink = async (url: string) => {
+      if (!url) return;
+
+      try {
+        const parsedUrl = Linking.parse(url);
+        const tokenHash = parsedUrl.queryParams?.token_hash as string | undefined;
+        const type = parsedUrl.queryParams?.type as string | undefined;
+
+        if (tokenHash && type === 'email') {
+          console.log('Processing email confirmation from deep link...');
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'email',
+          });
+
+          if (error) {
+            console.error('Email confirmation error:', error);
+          } else {
+            console.log('Email confirmed successfully via deep link');
+          }
+        }
+      } catch (error) {
+        console.error('Error handling deep link:', error);
+      }
+    };
+
+    // Check initial URL (app opened via deep link)
+    if (Platform.OS !== 'web') {
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          handleDeepLink(url);
+        }
+      });
+
+      // Listen for deep links while app is running
+      const linkingSubscription = Linking.addEventListener('url', (event) => {
+        handleDeepLink(event.url);
+      });
+
+      // Cleanup subscriptions on unmount
+      return () => {
+        subscription.unsubscribe();
+        linkingSubscription.remove();
+      };
+    }
+
+    // Cleanup subscription on unmount (web only path)
     return () => {
       subscription.unsubscribe();
     };
@@ -161,6 +224,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = useCallback(
     async (email: string, password: string, name?: string): Promise<AuthResult> => {
       try {
+        // Build redirect URL for email confirmation
+        // Web: Use current origin + /auth/confirm path
+        // Mobile: Use deep link scheme (bma2026://)
+        // Note: Supabase email template must use {{ .RedirectTo }} for this to work
+        const emailRedirectTo =
+          Platform.OS === 'web' && typeof window !== 'undefined'
+            ? `${window.location.origin}/auth/confirm`
+            : 'bma2026://auth/confirm';
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -168,6 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: {
               name: name || null,
             },
+            emailRedirectTo,
           },
         });
 
@@ -200,11 +273,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
+        // Ignore "Auth session missing" error - user is already logged out
+        if (error.name === 'AuthSessionMissingError') {
+          // Clear local state anyway to ensure clean logout
+          setSession(null);
+          setUser(null);
+          return;
+        }
         console.error('Logout error:', error);
       }
       // State will be cleared by the auth state change listener
     } catch (error) {
+      // Handle unexpected errors - still clear local state
       console.error('Logout error:', error);
+      setSession(null);
+      setUser(null);
     }
   }, []);
 

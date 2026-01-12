@@ -46,6 +46,11 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const segmentsArray = segments as string[];
+    const inAuthConfirm = segmentsArray[0] === 'auth' && segmentsArray[1] === 'confirm';
+
+    // Don't redirect away from auth confirm page (email verification)
+    if (inAuthConfirm) return;
 
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
@@ -71,6 +76,7 @@ function RootLayoutNav() {
       >
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
+        <Stack.Screen name="auth/confirm" />
       </Stack>
     </>
   );

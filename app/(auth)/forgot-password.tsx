@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import {
   Spacer,
   Stack,
   Row,
+  ThemeToggle,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container, iconSizes } from '@/constants/tokens';
@@ -72,141 +73,160 @@ export default function ForgotPasswordScreen() {
         padding="lg"
         style={{ maxWidth: container.auth.maxWidth, width: '100%', alignSelf: 'center' }}
       >
-        <Stack gap="xl" style={{ width: '100%' }}>
-          {/* Header */}
-          <Stack gap="md" style={{ alignItems: 'center' }}>
-            <View
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: borderRadius.xl,
-                backgroundColor: withOpacity(colors.primary, 0.1),
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Ionicons name="key-outline" size={iconSizes['2xl']} color={colors.primary} />
-            </View>
-            <Spacer size="sm" />
-            <Heading level="h1">Forgot Password?</Heading>
-            <Text color="secondary" align="center">
-              {isEmailSent
-                ? 'Check your email for a password reset link'
-                : "No worries, we'll send you reset instructions"}
-            </Text>
-          </Stack>
+        <View style={{ width: '100%' }}>
+          {/* Theme Toggle - Top Right */}
+          <View style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
+            <ThemeToggle size="md" />
+          </View>
 
-          {/* Form Card */}
-          <Card variant="elevated" padding="lg">
-            <Stack gap="md">
-              {error ? (
-                <View
-                  style={{
-                    padding: spacing.md,
-                    borderRadius: borderRadius.md,
-                    backgroundColor: withOpacity(colors.error, 0.1),
-                    borderWidth: 1,
-                    borderColor: colors.error,
-                  }}
-                >
-                  <Text color="error" variant="small" align="center">
-                    {error}
-                  </Text>
-                </View>
-              ) : null}
+          <Stack gap="xl" style={{ width: '100%' }}>
+            {/* Header */}
+            <Stack gap="md" style={{ alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: borderRadius.xl,
+                  backgroundColor: withOpacity(colors.primary, 0.1),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Ionicons name="key-outline" size={iconSizes['2xl']} color={colors.primary} />
+              </View>
+              <Spacer size="sm" />
+              <Heading level="h1">Forgot Password?</Heading>
+              <Text color="secondary" align="center">
+                {isEmailSent
+                  ? 'Check your email for a password reset link'
+                  : "No worries, we'll send you reset instructions"}
+              </Text>
+            </Stack>
 
-              {successMessage ? (
-                <View
-                  style={{
-                    padding: spacing.md,
-                    borderRadius: borderRadius.md,
-                    backgroundColor: withOpacity(colors.success, 0.1),
-                    borderWidth: 1,
-                    borderColor: colors.success,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={iconSizes.lg}
-                    color={colors.success}
-                    style={{ marginRight: spacing.sm }}
-                  />
-                  <Text color="success" variant="small" style={{ flex: 1 }}>
-                    {successMessage}
-                  </Text>
-                </View>
-              ) : null}
+            {/* Form Card */}
+            <Card variant="elevated" padding="lg">
+              <Stack gap="md">
+                {error ? (
+                  <View
+                    style={{
+                      padding: spacing.md,
+                      borderRadius: borderRadius.md,
+                      backgroundColor: withOpacity(colors.error, 0.1),
+                      borderWidth: 1,
+                      borderColor: colors.error,
+                    }}
+                  >
+                    <Text color="error" variant="small" align="center">
+                      {error}
+                    </Text>
+                  </View>
+                ) : null}
 
-              {!isEmailSent ? (
-                <>
-                  <Input
-                    label="Email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    leftIcon="mail-outline"
-                    disabled={isLoading}
-                    size="lg"
-                  />
+                {successMessage ? (
+                  <View
+                    style={{
+                      padding: spacing.md,
+                      borderRadius: borderRadius.md,
+                      backgroundColor: withOpacity(colors.success, 0.1),
+                      borderWidth: 1,
+                      borderColor: colors.success,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={iconSizes.lg}
+                      color={colors.success}
+                      style={{ marginRight: spacing.sm }}
+                    />
+                    <Text color="success" variant="small" style={{ flex: 1 }}>
+                      {successMessage}
+                    </Text>
+                  </View>
+                ) : null}
 
-                  <Spacer size="sm" />
+                {!isEmailSent ? (
+                  <>
+                    <Input
+                      label="Email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      leftIcon="mail-outline"
+                      disabled={isLoading}
+                      size="lg"
+                    />
 
+                    <Spacer size="sm" />
+
+                    <Button
+                      title="Send Reset Link"
+                      onPress={handleResetPassword}
+                      loading={isLoading}
+                      size="lg"
+                      fullWidth
+                    />
+                  </>
+                ) : (
                   <Button
-                    title="Send Reset Link"
-                    onPress={handleResetPassword}
-                    loading={isLoading}
+                    title="Open Email App"
+                    onPress={async () => {
+                      const mailtoUrl = 'mailto:';
+                      const canOpen = await Linking.canOpenURL(mailtoUrl);
+                      if (canOpen) {
+                        await Linking.openURL(mailtoUrl);
+                      } else {
+                        console.error('Unable to open email app');
+                      }
+                    }}
+                    variant="outline"
                     size="lg"
                     fullWidth
                   />
-                </>
-              ) : (
-                <Button
-                  title="Open Email App"
-                  onPress={() => {}}
-                  variant="outline"
-                  size="lg"
-                  fullWidth
-                />
-              )}
+                )}
 
-              <Spacer size="md" />
+                <Spacer size="md" />
 
-              <Link href="/login" asChild>
-                <TouchableOpacity>
-                  <Row justify="center" align="center" gap="xs">
-                    <Ionicons name="arrow-back" size={iconSizes.sm} color={colors.textSecondary} />
-                    <Text color="secondary" variant="small" weight="medium">
-                      Back to Sign In
-                    </Text>
-                  </Row>
-                </TouchableOpacity>
-              </Link>
-            </Stack>
-          </Card>
+                <Link href="/login" asChild>
+                  <TouchableOpacity>
+                    <Row justify="center" align="center" gap="xs">
+                      <Ionicons
+                        name="arrow-back"
+                        size={iconSizes.sm}
+                        color={colors.textSecondary}
+                      />
+                      <Text color="secondary" variant="small" weight="medium">
+                        Back to Sign In
+                      </Text>
+                    </Row>
+                  </TouchableOpacity>
+                </Link>
+              </Stack>
+            </Card>
 
-          {isEmailSent && (
-            <Row justify="center" align="center" gap="xs">
-              <Text color="muted" variant="small">
-                Didn&apos;t receive the email?
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsEmailSent(false);
-                  setSuccessMessage('');
-                }}
-              >
-                <Text color="primary" variant="small" weight="semibold">
-                  Try again
+            {isEmailSent && (
+              <Row justify="center" align="center" gap="xs">
+                <Text color="muted" variant="small">
+                  Didn&apos;t receive the email?
                 </Text>
-              </TouchableOpacity>
-            </Row>
-          )}
-        </Stack>
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsEmailSent(false);
+                    setSuccessMessage('');
+                  }}
+                >
+                  <Text color="primary" variant="small" weight="semibold">
+                    Try again
+                  </Text>
+                </TouchableOpacity>
+              </Row>
+            )}
+          </Stack>
+        </View>
       </ScreenContainer>
     </KeyboardAvoidingView>
   );

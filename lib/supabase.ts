@@ -21,7 +21,10 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKe
     // Only detect session from URL on web in browser environment
     // This prevents SSR crashes when processing confirmation links
     detectSessionInUrl: Platform.OS === 'web' && isBrowser,
-    // Use PKCE flow for better security with email confirmation
-    flowType: 'pkce',
+    // Use PKCE flow for web (better security), implicit for mobile
+    // PKCE requires persisting code_verifier and using it after deep-link callback.
+    // Mobile deep links currently don't work reliably (see Known Issues in CLAUDE.md).
+    // TODO: Switch mobile to PKCE once deep link handling is properly implemented.
+    flowType: Platform.OS === 'web' ? 'pkce' : 'implicit',
   },
 });

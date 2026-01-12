@@ -3,6 +3,7 @@ export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from '.
 export { Input, type InputProps, type InputVariant, type InputSize } from './Input';
 export { ScreenContainer, type ScreenContainerProps, type ScreenPadding } from './ScreenContainer';
 export { Card, type CardProps, type CardVariant, type CardPadding } from './Card';
+export { ThemeToggle, type ThemeToggleProps } from './ThemeToggle';
 
 // Typography components
 export {
