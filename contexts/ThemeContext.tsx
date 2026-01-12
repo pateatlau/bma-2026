@@ -1,83 +1,88 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
+import { primitives, darkSemanticColors, lightSemanticColors } from '@/constants/tokens/colors';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+// Build theme colors from tokens
 export const darkColors = {
   // Primary palette
-  primary: '#DC2626',
-  primaryDark: '#B91C1C',
-  primaryLight: '#EF4444',
+  primary: darkSemanticColors.primary,
+  primaryDark: darkSemanticColors.primaryDark,
+  primaryLight: darkSemanticColors.primaryLight,
 
   // Neutrals
-  black: '#0A0A0A',
-  darkGray: '#1F1F1F',
-  mediumGray: '#404040',
-  lightGray: '#737373',
-  offWhite: '#F5F5F5',
-  white: '#FFFFFF',
+  black: darkSemanticColors.black,
+  darkGray: darkSemanticColors.darkGray,
+  mediumGray: darkSemanticColors.mediumGray,
+  lightGray: darkSemanticColors.lightGray,
+  offWhite: darkSemanticColors.offWhite,
+  white: darkSemanticColors.white,
 
   // Semantic
-  background: '#0A0A0A',
-  surface: '#1F1F1F',
-  surfaceElevated: '#2A2A2A',
-  text: '#FFFFFF',
-  textSecondary: '#A3A3A3',
-  textMuted: '#737373',
-  textOnPrimary: '#FFFFFF',
-  border: '#404040',
-  borderLight: '#2A2A2A',
+  background: darkSemanticColors.background,
+  surface: darkSemanticColors.surface,
+  surfaceElevated: darkSemanticColors.surfaceElevated,
+  text: darkSemanticColors.text,
+  textSecondary: darkSemanticColors.textSecondary,
+  textMuted: darkSemanticColors.textMuted,
+  textOnPrimary: darkSemanticColors.textOnPrimary,
+  border: darkSemanticColors.border,
+  borderLight: darkSemanticColors.borderLight,
 
   // States
-  error: '#EF4444',
-  success: '#22C55E',
+  error: darkSemanticColors.error,
+  success: darkSemanticColors.success,
 
   // Accent colors for features
-  accentBlue: '#3B82F6',
-  accentGreen: '#10B981',
-  accentPurple: '#8B5CF6',
-  accentYellow: '#FBBF24',
-  accentIndigo: '#6366F1',
+  accentBlue: primitives.blue[500],
+  accentGreen: primitives.green[500],
+  accentPurple: primitives.purple[500],
+  accentYellow: primitives.yellow[500],
+  accentIndigo: primitives.blue[600],
 };
 
 export const lightColors = {
   // Primary palette
-  primary: '#DC2626',
-  primaryDark: '#B91C1C',
-  primaryLight: '#EF4444',
+  primary: lightSemanticColors.primary,
+  primaryDark: lightSemanticColors.primaryDark,
+  primaryLight: lightSemanticColors.primaryLight,
 
   // Neutrals
-  black: '#0A0A0A',
-  darkGray: '#1F1F1F',
-  mediumGray: '#404040',
-  lightGray: '#737373',
-  offWhite: '#F5F5F5',
-  white: '#FFFFFF',
+  black: lightSemanticColors.black,
+  darkGray: lightSemanticColors.darkGray,
+  mediumGray: lightSemanticColors.mediumGray,
+  lightGray: lightSemanticColors.lightGray,
+  offWhite: lightSemanticColors.offWhite,
+  white: lightSemanticColors.white,
 
   // Semantic
-  background: '#FFFFFF',
-  surface: '#FEF2F2', // Light red tint for cards
-  surfaceElevated: '#FEF2F2', // Light red tint for elevated cards
-  text: '#0A0A0A',
-  textSecondary: '#525252',
-  textMuted: '#737373',
-  textOnPrimary: '#FFFFFF',
-  border: '#FECACA', // Light red border
-  borderLight: '#FEE2E2', // Very light red border
+  background: lightSemanticColors.background,
+  surface: lightSemanticColors.surface,
+  surfaceElevated: lightSemanticColors.surfaceElevated,
+  text: lightSemanticColors.text,
+  textSecondary: lightSemanticColors.textSecondary,
+  textMuted: lightSemanticColors.textMuted,
+  textOnPrimary: lightSemanticColors.textOnPrimary,
+  border: lightSemanticColors.border,
+  borderLight: lightSemanticColors.borderLight,
 
   // States
-  error: '#DC2626',
-  success: '#16A34A',
+  error: lightSemanticColors.error,
+  success: lightSemanticColors.success,
 
   // Accent colors for features
-  accentBlue: '#3B82F6',
-  accentGreen: '#10B981',
-  accentPurple: '#8B5CF6',
-  accentYellow: '#FBBF24',
-  accentIndigo: '#6366F1',
+  accentBlue: primitives.blue[500],
+  accentGreen: primitives.green[500],
+  accentPurple: primitives.purple[500],
+  accentYellow: primitives.yellow[500],
+  accentIndigo: primitives.blue[600],
 };
 
-export type ThemeColors = typeof darkColors;
+// Use string type for colors to allow both light and dark variants
+export type ThemeColors = {
+  [K in keyof typeof darkColors]: string;
+};
 
 interface ThemeContextType {
   mode: ThemeMode;
