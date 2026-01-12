@@ -69,9 +69,12 @@ export default function AuthConfirmScreen() {
       }
 
       try {
+        // Use extracted type or default to 'email' for email confirmation
+        // This also handles 'recovery', 'invite', 'email_change' flows
+        const otpType = (type as 'email' | 'recovery' | 'invite' | 'email_change') || 'email';
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
-          type: 'email',
+          type: otpType,
         });
 
         if (error) {

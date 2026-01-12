@@ -22,7 +22,9 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKe
     // This prevents SSR crashes when processing confirmation links
     detectSessionInUrl: Platform.OS === 'web' && isBrowser,
     // Use PKCE flow for web (better security), implicit for mobile
-    // PKCE requires the same browser session, which doesn't work for mobile deep links
+    // PKCE requires persisting code_verifier and using it after deep-link callback.
+    // Mobile deep links currently don't work reliably (see Known Issues in CLAUDE.md).
+    // TODO: Switch mobile to PKCE once deep link handling is properly implemented.
     flowType: Platform.OS === 'web' ? 'pkce' : 'implicit',
   },
 });

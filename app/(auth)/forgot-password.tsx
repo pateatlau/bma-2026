@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -174,7 +174,15 @@ export default function ForgotPasswordScreen() {
                 ) : (
                   <Button
                     title="Open Email App"
-                    onPress={() => {}}
+                    onPress={async () => {
+                      const mailtoUrl = 'mailto:';
+                      const canOpen = await Linking.canOpenURL(mailtoUrl);
+                      if (canOpen) {
+                        await Linking.openURL(mailtoUrl);
+                      } else {
+                        console.error('Unable to open email app');
+                      }
+                    }}
                     variant="outline"
                     size="lg"
                     fullWidth
