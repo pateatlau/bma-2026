@@ -38,7 +38,7 @@ export function ThemeToggle({ size = 'md', style }: ThemeToggleProps) {
         <Ionicons
           name={isDark ? 'sunny-outline' : 'moon-outline'}
           size={sizeConfig.icon}
-          color={isDark ? '#FBBF24' : '#6366F1'}
+          color={isDark ? colors.accentYellow : colors.accentIndigo}
         />
       </View>
     </TouchableOpacity>
