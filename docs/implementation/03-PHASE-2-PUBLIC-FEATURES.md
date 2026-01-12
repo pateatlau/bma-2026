@@ -999,16 +999,62 @@ export default function NewsDetail() {
 
 **GitHub Issue:** #21 - Implement Image Optimization
 
+> **Strategy Note:** See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#image-optimization-strategy) for the full image optimization strategy and service options.
+
+#### Image Optimization Strategy Overview
+
+| Requirement         | Solution                                        | Notes                                |
+| ------------------- | ----------------------------------------------- | ------------------------------------ |
+| **Storage**         | Supabase Storage                                | Already integrated                   |
+| **Transformations** | Cloudinary (recommended) OR Supabase Transforms | On-the-fly resize, format conversion |
+| **Format Delivery** | WebP/AVIF with fallback                         | Automatic via Cloudinary or manual   |
+| **Placeholders**    | Blurhash                                        | Built into expo-image                |
+| **Lazy Loading**    | expo-image                                      | Native support                       |
+| **CDN**             | Cloudinary CDN OR Vercel Edge                   | Global distribution                  |
+
+#### Option A: Cloudinary (Recommended for Photo Gallery)
+
+**Pros:**
+
+- Free tier: 25GB storage, 25GB bandwidth/month
+- On-the-fly transformations (resize, crop, format)
+- Automatic WebP/AVIF delivery
+- Built-in CDN
+- Advanced features (face detection, smart cropping)
+
+**Cons:**
+
+- Additional service to manage
+- May need paid tier for high traffic
+
+#### Option B: Supabase Storage Transforms
+
+**Pros:**
+
+- Already integrated with existing stack
+- Simpler architecture
+- Included in Supabase plan
+
+**Cons:**
+
+- Requires Supabase Pro plan ($25/month) for transforms
+- Fewer transformation options than Cloudinary
+- No automatic format optimization
+
+**Recommendation:** Start with **Cloudinary free tier** for photo gallery and high-traffic images. Use Supabase Storage directly for low-traffic images (avatars, admin uploads).
+
 #### 2.11.1: Create Optimized Image Component
 
 **Files:** `components/OptimizedImage.tsx`
 
 ```typescript
 import { Image } from 'expo-image';
+import { getOptimizedImageUrl, ImageSize } from '@/lib/images';
 
 interface OptimizedImageProps {
   src: string;
   alt: string;
+  size?: ImageSize;
   width?: number;
   height?: number;
   aspectRatio?: number;
@@ -1020,6 +1066,7 @@ interface OptimizedImageProps {
 export function OptimizedImage({
   src,
   alt,
+  size,
   width,
   height,
   aspectRatio,
@@ -1027,64 +1074,230 @@ export function OptimizedImage({
   placeholder = 'blur',
   contentFit = 'cover',
 }: OptimizedImageProps) {
-  // Generate Supabase transform URL for different sizes
-  const transformedSrc = getTransformedImageUrl(src, { width, height });
+  // Generate optimized URL (Cloudinary or Supabase transform)
+  const optimizedSrc = getOptimizedImageUrl(src, { size, width, height });
 
   return (
     <Image
-      source={{ uri: transformedSrc }}
+      source={{ uri: optimizedSrc }}
       alt={alt}
-      style={{ width, height, aspectRatio }}
+      style={{ width: width ?? size?.width, height: height ?? size?.height, aspectRatio }}
       contentFit={contentFit}
-      placeholder={placeholder === 'blur' ? blurhash : undefined}
+      placeholder={placeholder === 'blur' ? { blurhash: generateBlurhash(src) } : undefined}
       transition={200}
       priority={priority}
+      cachePolicy="memory-disk"
     />
   );
 }
 ```
 
-#### 2.11.2: Configure Supabase Image Transforms
+#### 2.11.2: Configure Image Transformation Service
 
 **Files:** `lib/images.ts`
 
 ```typescript
-export function getTransformedImageUrl(
-  url: string,
-  options: {
-    width?: number;
-    height?: number;
-    quality?: number;
-    format?: 'webp' | 'jpg' | 'png';
-  }
-) {
-  if (!url || !url.includes('supabase')) return url;
-
-  const params = new URLSearchParams();
-  if (options.width) params.set('width', String(options.width));
-  if (options.height) params.set('height', String(options.height));
-  if (options.quality) params.set('quality', String(options.quality));
-  if (options.format) params.set('format', options.format);
-
-  return `${url}?${params.toString()}`;
-}
-
-// Preset sizes
+// Image size presets
 export const ImageSizes = {
   thumbnail: { width: 150, height: 150 },
   card: { width: 400, height: 300 },
   hero: { width: 1200, height: 600 },
   gallery: { width: 800, height: 800 },
+  galleryThumb: { width: 200, height: 200 },
   avatar: { width: 200, height: 200 },
-};
+  fullscreen: { width: 1920, height: 1080 },
+} as const;
+
+export type ImageSize = (typeof ImageSizes)[keyof typeof ImageSizes];
+
+interface ImageTransformOptions {
+  size?: ImageSize;
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'auto' | 'webp' | 'avif' | 'jpg' | 'png';
+}
+
+// Cloudinary configuration (recommended)
+const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+export function getOptimizedImageUrl(url: string, options: ImageTransformOptions): string {
+  if (!url) return '';
+
+  const width = options.width ?? options.size?.width;
+  const height = options.height ?? options.size?.height;
+  const quality = options.quality ?? 80;
+  const format = options.format ?? 'auto';
+
+  // Option A: Cloudinary transforms (recommended)
+  if (CLOUDINARY_CLOUD_NAME && url.includes('cloudinary')) {
+    return getCloudinaryUrl(url, { width, height, quality, format });
+  }
+
+  // Option B: Supabase transforms (fallback)
+  if (url.includes('supabase')) {
+    return getSupabaseTransformUrl(url, { width, height, quality });
+  }
+
+  // External URLs - return as-is
+  return url;
+}
+
+// Cloudinary URL builder
+function getCloudinaryUrl(
+  url: string,
+  options: { width?: number; height?: number; quality?: number; format?: string }
+): string {
+  const transforms = [
+    options.width && `w_${options.width}`,
+    options.height && `h_${options.height}`,
+    'c_fill', // Smart crop
+    'g_auto', // Auto gravity (face detection)
+    `q_${options.quality ?? 'auto'}`,
+    `f_${options.format ?? 'auto'}`, // Auto format (WebP/AVIF)
+  ]
+    .filter(Boolean)
+    .join(',');
+
+  // Insert transforms into Cloudinary URL
+  return url.replace('/upload/', `/upload/${transforms}/`);
+}
+
+// Supabase transform URL builder
+function getSupabaseTransformUrl(
+  url: string,
+  options: { width?: number; height?: number; quality?: number }
+): string {
+  const params = new URLSearchParams();
+  if (options.width) params.set('width', String(options.width));
+  if (options.height) params.set('height', String(options.height));
+  if (options.quality) params.set('quality', String(options.quality));
+
+  return params.toString() ? `${url}?${params.toString()}` : url;
+}
+
+// Blurhash generation (run on upload or cache)
+export function generateBlurhash(url: string): string {
+  // In practice, generate and store blurhash when image is uploaded
+  // This is a placeholder - actual implementation uses blurhash library
+  return 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'; // Default placeholder
+}
+```
+
+#### 2.11.3: Upload with Cloudinary Integration
+
+**Files:** `lib/upload.ts`
+
+```typescript
+import * as ImagePicker from 'expo-image-picker';
+
+interface UploadOptions {
+  folder: string;
+  generateBlurhash?: boolean;
+}
+
+// For gallery/high-traffic images - upload to Cloudinary
+export async function uploadToCloudinary(
+  uri: string,
+  options: UploadOptions
+): Promise<{ url: string; blurhash?: string }> {
+  const formData = new FormData();
+  formData.append('file', {
+    uri,
+    type: 'image/jpeg',
+    name: 'upload.jpg',
+  } as any);
+  formData.append('upload_preset', 'bma_unsigned'); // Configure in Cloudinary
+  formData.append('folder', options.folder);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  const data = await response.json();
+  return {
+    url: data.secure_url,
+    blurhash: options.generateBlurhash ? await generateBlurhashFromUrl(data.secure_url) : undefined,
+  };
+}
+
+// For low-traffic images - upload to Supabase Storage
+export async function uploadToSupabase(uri: string, bucket: string, path: string): Promise<string> {
+  // Existing Supabase upload logic
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(path, await fetch(uri).then((r) => r.blob()));
+
+  if (error) throw error;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(bucket).getPublicUrl(path);
+
+  return publicUrl;
+}
+```
+
+#### 2.11.4: Gallery-Specific Optimizations
+
+**Files:** `app/(public)/gallery/[album].tsx`
+
+```typescript
+// Use responsive image sizes based on screen width
+import { useWindowDimensions } from 'react-native';
+
+function GalleryGrid({ photos }: { photos: Photo[] }) {
+  const { width } = useWindowDimensions();
+  const columns = width > 768 ? 4 : width > 480 ? 3 : 2;
+  const thumbSize = Math.floor(width / columns);
+
+  return (
+    <FlashList
+      data={photos}
+      numColumns={columns}
+      estimatedItemSize={thumbSize}
+      renderItem={({ item }) => (
+        <Pressable onPress={() => openLightbox(item)}>
+          <OptimizedImage
+            src={item.url}
+            alt={item.caption}
+            size={ImageSizes.galleryThumb}
+            width={thumbSize}
+            height={thumbSize}
+            placeholder="blur"
+          />
+        </Pressable>
+      )}
+    />
+  );
+}
+
+// Lightbox uses full-size image
+function Lightbox({ photo }: { photo: Photo }) {
+  return (
+    <OptimizedImage
+      src={photo.url}
+      alt={photo.caption}
+      size={ImageSizes.fullscreen}
+      priority // Load immediately
+      placeholder="blur"
+      contentFit="contain"
+    />
+  );
+}
 ```
 
 **Acceptance Criteria:**
 
-- [ ] Images load with correct sizes
-- [ ] Blur placeholder works
-- [ ] WebP format used when supported
-- [ ] Lazy loading for off-screen images
+- [ ] Images load with correct sizes for each context
+- [ ] Blur placeholder displays while loading
+- [ ] WebP/AVIF format delivered when browser supports
+- [ ] Lazy loading for off-screen images (gallery grid)
+- [ ] Priority loading for above-fold images (hero, lightbox)
+- [ ] CDN caching working (check response headers)
+- [ ] Gallery thumbnails < 50KB each
+- [ ] Hero images < 200KB
 
 ---
 

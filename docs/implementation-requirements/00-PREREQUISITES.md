@@ -22,6 +22,7 @@ This document lists all prerequisites required from stakeholders before and duri
 | **Vercel Account**       | [vercel.com](https://vercel.com)                                          | Web hosting            | 0     | ✅ Yes                         | ⬜     |
 | **Gupshup Account**      | [gupshup.io](https://gupshup.io)                                          | WhatsApp notifications | 3     | ⚠️ Needs business verification | ⬜     |
 | **Resend Account**       | [resend.com](https://resend.com)                                          | Email notifications    | 3     | ✅ Yes                         | ⬜     |
+| **Cloudinary Account**   | [cloudinary.com](https://cloudinary.com)                                  | Image optimization     | 2     | ✅ Yes                         | ⬜     |
 | **Sentry Account**       | [sentry.io](https://sentry.io)                                            | Error monitoring       | 6     | ✅ Yes                         | ⬜     |
 | **Google Play Console**  | [play.google.com/console](https://play.google.com/console) ($25 one-time) | Android distribution   | 6     | ❌ Org only for release        | ⬜     |
 | **CodeRabbit**           | [coderabbit.ai](https://coderabbit.ai)                                    | Automated code review  | 0     | ✅ Yes                         | ⬜     |
@@ -102,12 +103,13 @@ This document lists all prerequisites required from stakeholders before and duri
 
 These are safe to expose in client-side code:
 
-| Variable                        | Service  | Where to Set                   | Phase | Status |
-| ------------------------------- | -------- | ------------------------------ | ----- | ------ |
-| `EXPO_PUBLIC_SUPABASE_URL`      | Supabase | `.env`, GitHub Secrets, Vercel | 0     | ⬜     |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase | `.env`, GitHub Secrets, Vercel | 0     | ⬜     |
-| `EXPO_PUBLIC_RAZORPAY_KEY_ID`   | Razorpay | `.env`, GitHub Secrets, Vercel | 3     | ⬜     |
-| `EXPO_PUBLIC_SENTRY_DSN`        | Sentry   | `.env`, GitHub Secrets, Vercel | 6     | ⬜     |
+| Variable                            | Service    | Where to Set                   | Phase | Status |
+| ----------------------------------- | ---------- | ------------------------------ | ----- | ------ |
+| `EXPO_PUBLIC_SUPABASE_URL`          | Supabase   | `.env`, GitHub Secrets, Vercel | 0     | ⬜     |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY`     | Supabase   | `.env`, GitHub Secrets, Vercel | 0     | ⬜     |
+| `EXPO_PUBLIC_RAZORPAY_KEY_ID`       | Razorpay   | `.env`, GitHub Secrets, Vercel | 3     | ⬜     |
+| `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary | `.env`, GitHub Secrets, Vercel | 2     | ⬜     |
+| `EXPO_PUBLIC_SENTRY_DSN`            | Sentry     | `.env`, GitHub Secrets, Vercel | 6     | ⬜     |
 
 ### 2.2 Server-Side Secrets (Supabase Edge Functions)
 
@@ -144,6 +146,134 @@ Configure in Supabase Dashboard → Authentication → Providers:
 | `CODECOV_TOKEN`         | Codecov  | Coverage reports (optional) | 0     | ⬜     |
 | `SUPABASE_ACCESS_TOKEN` | Supabase | CLI operations              | 0     | ⬜     |
 | `SUPABASE_PROJECT_ID`   | Supabase | CLI operations              | 0     | ⬜     |
+
+---
+
+## 2.5 Image Optimization Strategy
+
+### Overview
+
+The BMA app includes a photo gallery and uses images throughout (news, events, profiles). Proper image optimization is critical for performance, especially on mobile devices and slower networks common in India.
+
+### Requirements
+
+| Requirement            | Target                  | Notes                    |
+| ---------------------- | ----------------------- | ------------------------ |
+| **Gallery thumbnails** | < 50KB each             | Fast grid loading        |
+| **Hero images**        | < 200KB                 | Above-fold performance   |
+| **Format**             | WebP/AVIF with fallback | 25-35% smaller than JPEG |
+| **Lazy loading**       | Below-fold images       | Reduce initial load      |
+| **Placeholders**       | Blurhash                | Smooth loading UX        |
+| **CDN delivery**       | Global edge caching     | Low latency worldwide    |
+
+### Recommended Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    IMAGE OPTIMIZATION FLOW                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Upload Flow:                                                  │
+│   ┌──────────┐    ┌─────────────┐    ┌──────────────────┐      │
+│   │  Admin   │───▶│  Cloudinary │───▶│ Store URL in DB  │      │
+│   │  Upload  │    │  (gallery)  │    │ + Blurhash       │      │
+│   └──────────┘    └─────────────┘    └──────────────────┘      │
+│                                                                 │
+│   ┌──────────┐    ┌─────────────┐    ┌──────────────────┐      │
+│   │  User    │───▶│  Supabase   │───▶│ Store URL in DB  │      │
+│   │  Avatar  │    │  Storage    │    │ (profiles table) │      │
+│   └──────────┘    └─────────────┘    └──────────────────┘      │
+│                                                                 │
+│   Display Flow:                                                 │
+│   ┌──────────┐    ┌─────────────┐    ┌──────────────────┐      │
+│   │  Client  │───▶│ Transform   │───▶│ CDN Edge Cache   │      │
+│   │  Request │    │ URL Builder │    │ (WebP/AVIF)      │      │
+│   └──────────┘    └─────────────┘    └──────────────────┘      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Service Options
+
+#### Option A: Cloudinary (Recommended)
+
+| Feature             | Free Tier         | Pro ($99/month)   |
+| ------------------- | ----------------- | ----------------- |
+| **Storage**         | 25GB              | 225GB             |
+| **Bandwidth**       | 25GB/month        | 225GB/month       |
+| **Transformations** | 25K/month         | 225K/month        |
+| **CDN**             | ✅ Included       | ✅ Included       |
+| **Auto format**     | ✅ WebP/AVIF      | ✅ WebP/AVIF      |
+| **Smart crop**      | ✅ Face detection | ✅ Face detection |
+
+**Why Cloudinary:**
+
+- On-the-fly transformations (no pre-generation needed)
+- Automatic WebP/AVIF delivery based on browser support
+- Built-in CDN with global edge locations
+- Face-aware cropping for profile photos and group shots
+- Free tier sufficient for BMA's expected usage (~500 members)
+
+**Setup:**
+
+1. Create account at [cloudinary.com](https://cloudinary.com)
+2. Create unsigned upload preset named `bma_unsigned`
+3. Configure folder structure: `bma/gallery`, `bma/news`, `bma/events`
+4. Add `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` to environment
+
+#### Option B: Supabase Storage Transforms
+
+| Feature        | Free Tier       | Pro ($25/month) |
+| -------------- | --------------- | --------------- |
+| **Storage**    | 1GB             | 100GB           |
+| **Bandwidth**  | 2GB/month       | 200GB/month     |
+| **Transforms** | ❌ Not included | ✅ Included     |
+| **CDN**        | ✅ Basic        | ✅ Full         |
+
+**When to use:**
+
+- Already on Supabase Pro plan
+- Simpler architecture preferred
+- Lower image volume
+
+#### Option C: Hybrid Approach (Recommended for BMA)
+
+| Image Type            | Service          | Rationale                     |
+| --------------------- | ---------------- | ----------------------------- |
+| **Photo gallery**     | Cloudinary       | High volume, needs transforms |
+| **News/Event images** | Cloudinary       | Public, high traffic          |
+| **User avatars**      | Supabase Storage | Low traffic, simple uploads   |
+| **Admin uploads**     | Supabase Storage | Internal, low volume          |
+
+**Estimated Cloudinary Usage for BMA:**
+
+- ~20 gallery albums × 50 photos = 1,000 gallery images
+- ~100 news/event images per year
+- ~500 member avatars (Supabase)
+- Monthly transforms: ~10K (well within free tier)
+- Monthly bandwidth: ~5GB (well within free tier)
+
+### Environment Variables
+
+| Variable                            | Service    | Where to Set   | Phase |
+| ----------------------------------- | ---------- | -------------- | ----- |
+| `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary | `.env`, Vercel | 2     |
+
+**Note:** Cloudinary unsigned uploads don't require API secret on client. For server-side operations, add `CLOUDINARY_API_SECRET` to Supabase Edge Function secrets.
+
+### Cost Summary
+
+| Scenario                            | Monthly Cost | Notes                          |
+| ----------------------------------- | ------------ | ------------------------------ |
+| **Cloudinary Free + Supabase Free** | $0           | Sufficient for launch          |
+| **Cloudinary Free + Supabase Pro**  | $25          | If needing Supabase transforms |
+| **Cloudinary Pro**                  | $99          | Only if exceeding free tier    |
+
+**Recommendation:** Start with **Cloudinary Free tier** for gallery/news images + **Supabase Free** for avatars. Monitor usage and upgrade only if limits are hit.
+
+### Implementation Reference
+
+See [Phase 2 - Task 2.11: Image Optimization](implementation/03-PHASE-2-PUBLIC-FEATURES.md#task-211-image-optimization) for implementation details.
 
 ---
 
@@ -742,6 +872,7 @@ If active development is concentrated in ~3 months:
 
 | Date       | Changes                                                                                                                                                                      |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-01-13 | Added Section 2.5: Image Optimization Strategy (Cloudinary recommended); Added Cloudinary to accounts and env vars                                                           |
 | 2026-01-13 | Added summary of individual account trade-offs; Updated Section 1 with "Individual Account OK?" column; Reorganized Priority Order with individual vs org account indicators |
 | 2026-01-13 | Added individual account usage for development (Google OAuth, Gemini, Facebook OAuth, Apple OAuth options)                                                                   |
 | 2026-01-13 | Added Section 6.0: App Store blocker documentation, alternate testing plan without store accounts                                                                            |

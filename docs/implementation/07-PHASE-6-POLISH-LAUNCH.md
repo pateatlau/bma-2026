@@ -298,23 +298,72 @@ npx expo export --platform web --analyze
 
 #### 6.2.2: Image Optimization
 
-**Files:** `lib/images.ts`, components using images
+**Files:** `lib/images.ts`, `components/OptimizedImage.tsx`, components using images
 
-**Techniques:**
+**Reference:** See [Phase 2 - Task 2.11](03-PHASE-2-PUBLIC-FEATURES.md#task-211-image-optimization) and [Prerequisites - Image Optimization Strategy](../implementation-requirements/00-PREREQUISITES.md#25-image-optimization-strategy).
 
-1. Use WebP format where supported
-2. Implement responsive images
-3. Lazy load below-fold images
-4. Use blur placeholders
+**Verification Checklist:**
+
+1. **Format Delivery:**
+   - [ ] WebP/AVIF served to supporting browsers (check response headers)
+   - [ ] JPEG fallback for older browsers
+   - [ ] Cloudinary `f_auto` parameter working
+
+2. **Responsive Images:**
+   - [ ] Gallery thumbnails use `galleryThumb` preset (200x200)
+   - [ ] Hero images use `hero` preset (1200x600)
+   - [ ] Card images use `card` preset (400x300)
+   - [ ] Fullscreen lightbox uses `fullscreen` preset (1920x1080)
+
+3. **Loading Strategy:**
+   - [ ] Above-fold images use `priority={true}`
+   - [ ] Below-fold images lazy load (default)
+   - [ ] Blurhash placeholders display during load
+
+4. **CDN & Caching:**
+   - [ ] Cloudinary CDN headers present (`x-cache: HIT`)
+   - [ ] Cache-Control headers set appropriately
+   - [ ] Images served from edge location (check response time)
+
+**Size Targets:**
+
+| Image Type         | Max Size | Verification      |
+| ------------------ | -------- | ----------------- |
+| Gallery thumbnails | < 50KB   | Check network tab |
+| Card images        | < 100KB  | Check network tab |
+| Hero images        | < 200KB  | Check network tab |
+| Fullscreen         | < 500KB  | Check network tab |
+
+**Testing Commands:**
+
+```bash
+# Check image sizes from Cloudinary
+curl -sI "https://res.cloudinary.com/YOUR_CLOUD/image/upload/w_200,h_200,c_fill,f_auto,q_80/bma/gallery/photo.jpg" | grep -i content-length
+
+# Check WebP delivery
+curl -sI -H "Accept: image/webp" "https://res.cloudinary.com/YOUR_CLOUD/image/upload/f_auto/bma/gallery/photo.jpg" | grep -i content-type
+```
+
+**Component Usage:**
 
 ```typescript
 // Ensure all images use OptimizedImage component
+import { OptimizedImage, ImageSizes } from '@/components/OptimizedImage';
+
+// Gallery thumbnail
 <OptimizedImage
-  src={imageUrl}
+  src={photo.url}
+  alt={photo.caption}
+  size={ImageSizes.galleryThumb}
+  placeholder="blur"
+/>
+
+// Hero image (above fold)
+<OptimizedImage
+  src={heroUrl}
   alt={title}
-  width={400}
-  height={300}
-  priority={false} // Lazy load
+  size={ImageSizes.hero}
+  priority={true}
   placeholder="blur"
 />
 ```
@@ -369,6 +418,10 @@ import { FlashList } from '@shopify/flash-list';
 - [ ] Time to interactive < 5 seconds
 - [ ] Interaction response < 100ms
 - [ ] Bundle size < 1MB (gzipped)
+- [ ] Gallery thumbnails < 50KB each
+- [ ] Hero images < 200KB
+- [ ] WebP/AVIF format delivered (85%+ of image requests)
+- [ ] Image CDN cache hit ratio > 90%
 
 ---
 
