@@ -71,9 +71,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Clear any invalid session state
           setSession(null);
           setUser(null);
+        } else if (initialSession?.user) {
+          // Verify user still exists in database by attempting to get their profile
+          // This handles the case where a user was deleted from the DB but still has a valid token
+          const { error: userError } = await supabase.auth.getUser();
+
+          if (userError) {
+            // User no longer exists or token is invalid - sign them out
+            console.warn('User validation failed, signing out:', userError.message);
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+          } else {
+            setSession(initialSession);
+            setUser(mapSupabaseUser(initialSession.user));
+          }
         } else {
-          setSession(initialSession);
-          setUser(mapSupabaseUser(initialSession?.user ?? null));
+          setSession(null);
+          setUser(null);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
