@@ -46,7 +46,8 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
-    const inAuthConfirm = segments[0] === 'auth' && segments[1] === 'confirm';
+    const inAuthConfirm =
+      segments.length >= 2 && segments[0] === 'auth' && segments[1] === 'confirm';
 
     // Don't redirect away from auth confirm page (email verification)
     if (inAuthConfirm) return;
