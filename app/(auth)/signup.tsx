@@ -72,6 +72,11 @@ export default function SignUpScreen() {
     setIsLoading(false);
 
     if (result.success) {
+      // Clear form fields on successful signup
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
       if (result.message) {
         setSuccessMessage(result.message);
       }
