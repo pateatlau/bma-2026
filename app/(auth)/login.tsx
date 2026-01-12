@@ -14,6 +14,7 @@ import {
   Stack,
   Row,
   Avatar,
+  ThemeToggle,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
@@ -62,6 +63,11 @@ export default function LoginScreen() {
         padding="lg"
         style={{ maxWidth: container.auth.maxWidth, width: '100%', alignSelf: 'center' }}
       >
+        {/* Theme Toggle - Top Right */}
+        <View style={{ position: 'absolute', top: spacing.lg, right: spacing.lg, zIndex: 10 }}>
+          <ThemeToggle size="md" />
+        </View>
+
         <Stack gap="xl" style={{ width: '100%' }}>
           {/* Header */}
           <Stack gap="md" style={{ alignItems: 'center' }}>

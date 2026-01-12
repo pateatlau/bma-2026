@@ -161,6 +161,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = useCallback(
     async (email: string, password: string, name?: string): Promise<AuthResult> => {
       try {
+        // Build redirect URL for email confirmation
+        // Web: Use current origin (works for both local and production)
+        // Mobile: Use deep link scheme (bma2026://)
+        const emailRedirectTo =
+          Platform.OS === 'web' && typeof window !== 'undefined'
+            ? `${window.location.origin}`
+            : 'bma2026://';
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -168,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: {
               name: name || null,
             },
+            emailRedirectTo,
           },
         });
 

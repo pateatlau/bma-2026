@@ -4,7 +4,18 @@ import { Link } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Button, Input, Card, Text, Heading, Spacer, Stack, Row, Avatar } from '@/components';
+import {
+  Button,
+  Input,
+  Card,
+  Text,
+  Heading,
+  Spacer,
+  Stack,
+  Row,
+  Avatar,
+  ThemeToggle,
+} from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
 import { withOpacity } from '@/utils/colors';
@@ -92,6 +103,11 @@ export default function SignUpScreen() {
             alignSelf: 'center',
           }}
         >
+          {/* Theme Toggle - Top Right */}
+          <View style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
+            <ThemeToggle size="md" />
+          </View>
+
           <Stack gap="xl">
             {/* Header */}
             <Stack gap="md" style={{ alignItems: 'center' }}>
