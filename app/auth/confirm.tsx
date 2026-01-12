@@ -28,6 +28,24 @@ export default function AuthConfirmScreen() {
     setIsMobileWeb(isMobileBrowser());
 
     const confirmEmail = async () => {
+      // First, check if user is already authenticated
+      // (Supabase PKCE flow may have already processed the token automatically)
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        // Already authenticated - verification was handled automatically by Supabase
+        setStatus('success');
+        // Don't auto-redirect on mobile web - let user manually return to app
+        if (!isMobileBrowser()) {
+          setTimeout(() => {
+            router.replace('/(app)/home');
+          }, 1500);
+        }
+        return;
+      }
+
       // Get token_hash and type from query params
       let tokenHash = params.token_hash;
       let type = params.type;
@@ -44,21 +62,7 @@ export default function AuthConfirmScreen() {
       }
 
       if (!tokenHash) {
-        // No token - check if user is already authenticated (auto-detection worked)
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) {
-          setStatus('success');
-          // Don't auto-redirect on mobile web - let user manually return to app
-          if (!isMobileBrowser()) {
-            setTimeout(() => {
-              router.replace('/(app)/home');
-            }, 1500);
-          }
-          return;
-        }
-
+        // No token and not authenticated - invalid link
         setStatus('error');
         setErrorMessage('Invalid confirmation link. Please request a new one.');
         return;
