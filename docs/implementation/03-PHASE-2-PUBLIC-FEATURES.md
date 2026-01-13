@@ -1142,6 +1142,36 @@ interface ImageTransformOptions {
 // Cloudinary configuration (recommended)
 const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
+// Helper: Check if URL is from Cloudinary
+function isCloudinaryUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    return (
+      hostname.endsWith('.cloudinary.com') ||
+      hostname === 'cloudinary.com' ||
+      hostname.includes('res.cloudinary.com')
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Helper: Check if URL is from Supabase Storage
+function isSupabaseUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    return (
+      hostname.endsWith('.supabase.co') ||
+      hostname.endsWith('.supabase.in') ||
+      parsed.pathname.includes('/storage/v1/')
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function getOptimizedImageUrl(url: string, options: ImageTransformOptions): string {
   if (!url) return '';
 
@@ -1151,16 +1181,19 @@ export function getOptimizedImageUrl(url: string, options: ImageTransformOptions
   const format = options.format ?? 'auto';
 
   // Option A: Cloudinary transforms (recommended)
-  if (CLOUDINARY_CLOUD_NAME && url.includes('cloudinary')) {
+  if (CLOUDINARY_CLOUD_NAME && isCloudinaryUrl(url)) {
     return getCloudinaryUrl(url, { width, height, quality, format });
   }
 
   // Option B: Supabase transforms (fallback)
-  if (url.includes('supabase')) {
+  if (isSupabaseUrl(url)) {
     return getSupabaseTransformUrl(url, { width, height, quality });
   }
 
   // External URLs - return as-is
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[OptimizedImage] Unknown image host, returning original URL:', url);
+  }
   return url;
 }
 
@@ -1180,8 +1213,19 @@ function getCloudinaryUrl(
     .filter(Boolean)
     .join(',');
 
-  // Insert transforms into Cloudinary URL
-  return url.replace('/upload/', `/upload/${transforms}/`);
+  // Only transform if URL contains standard /upload/ segment
+  if (url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/${transforms}/`);
+  }
+
+  // Fallback: return original URL for non-standard Cloudinary URLs
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      '[OptimizedImage] Cloudinary URL missing /upload/ segment, skipping transforms:',
+      url
+    );
+  }
+  return url;
 }
 
 // Supabase transform URL builder
@@ -1229,7 +1273,7 @@ export function generateBlurhashOnUpload(imageBuffer: Buffer): string {
 - Set `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` environment variable in `.env`
 
 ```typescript
-import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '@/lib/supabase';
 
 // Import Cloudinary cloud name from environment config
 const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;

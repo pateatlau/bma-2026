@@ -98,13 +98,13 @@ Single shared codebase deployed to:
 
 #### Android
 
-| Requirement     | Specification                             |
-| --------------- | ----------------------------------------- |
-| Minimum Android | Android 8.0 (Oreo, API 26)                |
-| Google Play     | Required for payments, notifications      |
-| Android Go      | Best effort (performance may vary)        |
-| Tablet Support  | Responsive layout (no specific optimized) |
-| Screen Sizes    | 320px width minimum (small budget phones) |
+| Requirement     | Specification                                  |
+| --------------- | ---------------------------------------------- |
+| Minimum Android | Android 8.0 (Oreo, API 26)                     |
+| Google Play     | Required for payments, notifications           |
+| Android Go      | Best effort (performance may vary)             |
+| Tablet Support  | Responsive layout (not specifically optimized) |
+| Screen Sizes    | 320px width minimum (small budget phones)      |
 
 #### Device Performance Targets
 

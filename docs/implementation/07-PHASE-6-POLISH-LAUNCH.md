@@ -42,7 +42,7 @@ Due to BMA lacking a PAN card (required for D-U-N-S Number → Apple/Google org 
 
 ## Launch Checklist Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      LAUNCH READINESS CHECKLIST                      │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -351,31 +351,50 @@ curl -sI -H "Accept: image/webp" "https://res.cloudinary.com/YOUR_CLOUD/image/up
 // Component is defined in Phase 2, Task 2.11.1
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { ImageSizes } from '@/lib/images';
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
-// Gallery thumbnail (with blurhash from database)
-// Note: blurhash should be fetched from database alongside image URL
-const { data: photo } = await supabase
-  .from('media')
-  .select('url, blurhash, caption')
-  .eq('id', photoId)
-  .single();
+// Gallery Photo Component - fetches blurhash from database
+function GalleryPhoto({ photoId }: { photoId: string }) {
+  const [photo, setPhoto] = useState<{ url: string; blurhash?: string; caption?: string } | null>(null);
 
-<OptimizedImage
-  src={photo.url}
-  alt={photo.caption}
-  size={ImageSizes.galleryThumb}
-  blurhash={photo.blurhash}  // Pre-computed blurhash from DB
-  placeholder="blur"
-/>
+  useEffect(() => {
+    async function fetchPhoto() {
+      const { data } = await supabase
+        .from('media')
+        .select('url, blurhash, caption')
+        .eq('id', photoId)
+        .single();
+      setPhoto(data);
+    }
+    fetchPhoto();
+  }, [photoId]);
 
-// Hero image (above fold, without blurhash)
-<OptimizedImage
-  src={heroUrl}
-  alt={title}
-  size={ImageSizes.hero}
-  priority={true}
-  placeholder="none"  // Or "blur" with blurhash prop if available
-/>
+  if (!photo) return null;
+
+  return (
+    <OptimizedImage
+      src={photo.url}
+      alt={photo.caption || 'Gallery photo'}
+      size={ImageSizes.galleryThumb}
+      blurhash={photo.blurhash}  // Pre-computed blurhash from DB
+      placeholder="blur"
+    />
+  );
+}
+
+// Hero Image Component - simple wrapper without database fetch
+function HeroImage({ heroUrl, title }: { heroUrl: string; title: string }) {
+  return (
+    <OptimizedImage
+      src={heroUrl}
+      alt={title}
+      size={ImageSizes.hero}
+      priority={true}
+      placeholder="none"  // Or "blur" with blurhash prop if available
+    />
+  );
+}
 ```
 
 #### 6.2.3: Query Optimization
@@ -909,7 +928,7 @@ export function captureException(error: Error, context?: Record<string, any>) {
 
 > **Note:** This checklist reflects the phased release strategy. Mobile public release is pending BMA org accounts.
 
-```
+```text
 Day 61-62: Final Testing
 □ Run full test suite
 □ Fix any failing tests
