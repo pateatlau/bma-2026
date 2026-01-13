@@ -2,7 +2,7 @@
 
 ## Overview
 
-Phase 6 is the final sprint focused on testing, performance optimization, accessibility, security hardening, and deployment to production across all three platforms (Web, iOS, Android).
+Phase 6 is the final sprint focused on testing, performance optimization, accessibility, security hardening, and deployment. Due to the App Store account blocker (see below), this phase follows a **phased release strategy**.
 
 **Duration:** 7 days
 **Prerequisites:** Phases 0-5 completed (all features implemented)
@@ -12,14 +12,37 @@ Phase 6 is the final sprint focused on testing, performance optimization, access
 - Performance optimization (< 3s load time)
 - Accessibility compliance (WCAG 2.1 AA)
 - Security audit completion
-- Production deployment (Web + iOS + Android)
+- Web production deployment (Vercel) ✅
+- Mobile internal testing builds (APK + TestFlight if available)
+- Mobile public release preparation (pending BMA org App Store accounts)
 - Monitoring and alerting setup
+
+---
+
+## ⚠️ Phased Release Strategy
+
+> **Important:** See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites) for full details on the App Store account blocker.
+
+Due to BMA lacking a PAN card (required for D-U-N-S Number → Apple/Google org accounts), the launch follows a phased approach:
+
+| Platform    | March 21, 2026 Status                                           | Public Release                                                       |
+| ----------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Web**     | ✅ Production on Vercel                                         | **March 21, 2026** (BMA Annual Day)                                  |
+| **Android** | APK for internal testing                                        | When BMA has Google Play Console org account (~2-3 months after PAN) |
+| **iOS**     | TestFlight (if personal Apple Dev available) OR Expo Go testing | When BMA has Apple Developer org account (~2-3 months after PAN)     |
+
+### What This Means for Phase 6
+
+1. **Web deployment proceeds as planned** - Full production release on **March 21, 2026** (BMA Annual Day)
+2. **Mobile builds are created** - For internal testing, not public stores
+3. **Store submission tasks are documented** - Ready to execute once BMA org accounts are available
+4. **Mobile public release is not blocked** - Just delayed until org accounts ready
 
 ---
 
 ## Launch Checklist Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      LAUNCH READINESS CHECKLIST                      │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -50,9 +73,9 @@ Phase 6 is the final sprint focused on testing, performance optimization, access
 │  □ Rate limiting enforced                                          │
 │                                                                     │
 │  Deployment                                                         │
-│  □ Web deployed to Vercel (production)                             │
-│  □ iOS submitted to App Store                                      │
-│  □ Android submitted to Play Store                                 │
+│  □ Web deployed to Vercel (production) ✅                          │
+│  □ iOS build for TestFlight/internal (store submission: pending)   │
+│  □ Android APK for internal testing (store submission: pending)    │
 │  □ Environment variables set                                       │
 │  □ SSL certificates valid                                          │
 │                                                                     │
@@ -275,25 +298,103 @@ npx expo export --platform web --analyze
 
 #### 6.2.2: Image Optimization
 
-**Files:** `lib/images.ts`, components using images
+**Files:** `lib/images.ts`, `components/OptimizedImage.tsx`, components using images
 
-**Techniques:**
+**Reference:** See [Phase 2 - Task 2.11](03-PHASE-2-PUBLIC-FEATURES.md#task-211-image-optimization) and [Prerequisites - Image Optimization Strategy](../implementation-requirements/00-PREREQUISITES.md#25-image-optimization-strategy).
 
-1. Use WebP format where supported
-2. Implement responsive images
-3. Lazy load below-fold images
-4. Use blur placeholders
+**Verification Checklist:**
+
+1. **Format Delivery:**
+   - [ ] WebP/AVIF served to supporting browsers (check response headers)
+   - [ ] JPEG fallback for older browsers
+   - [ ] Cloudinary `f_auto` parameter working
+
+2. **Responsive Images:**
+   - [ ] Gallery thumbnails use `galleryThumb` preset (200x200)
+   - [ ] Hero images use `hero` preset (1200x600)
+   - [ ] Card images use `card` preset (400x300)
+   - [ ] Fullscreen lightbox uses `fullscreen` preset (1920x1080)
+
+3. **Loading Strategy:**
+   - [ ] Above-fold images use `priority={true}`
+   - [ ] Below-fold images lazy load (default)
+   - [ ] Blurhash placeholders display during load
+
+4. **CDN & Caching:**
+   - [ ] Cloudinary CDN headers present (`x-cache: HIT`)
+   - [ ] Cache-Control headers set appropriately
+   - [ ] Images served from edge location (check response time)
+
+**Size Targets:**
+
+| Image Type         | Max Size | Verification      |
+| ------------------ | -------- | ----------------- |
+| Gallery thumbnails | < 50KB   | Check network tab |
+| Card images        | < 100KB  | Check network tab |
+| Hero images        | < 200KB  | Check network tab |
+| Fullscreen         | < 500KB  | Check network tab |
+
+**Testing Commands:**
+
+```bash
+# Check image sizes from Cloudinary
+curl -sI "https://res.cloudinary.com/YOUR_CLOUD/image/upload/w_200,h_200,c_fill,f_auto,q_80/bma/gallery/photo.jpg" | grep -i content-length
+
+# Check WebP delivery
+curl -sI -H "Accept: image/webp" "https://res.cloudinary.com/YOUR_CLOUD/image/upload/f_auto/bma/gallery/photo.jpg" | grep -i content-type
+```
+
+**Component Usage:**
 
 ```typescript
 // Ensure all images use OptimizedImage component
-<OptimizedImage
-  src={imageUrl}
-  alt={title}
-  width={400}
-  height={300}
-  priority={false} // Lazy load
-  placeholder="blur"
-/>
+// Component is defined in Phase 2, Task 2.11.1
+import { OptimizedImage } from '@/components/OptimizedImage';
+import { ImageSizes } from '@/lib/images';
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
+
+// Gallery Photo Component - fetches blurhash from database
+function GalleryPhoto({ photoId }: { photoId: string }) {
+  const [photo, setPhoto] = useState<{ url: string; blurhash?: string; caption?: string } | null>(null);
+
+  useEffect(() => {
+    async function fetchPhoto() {
+      const { data } = await supabase
+        .from('media')
+        .select('url, blurhash, caption')
+        .eq('id', photoId)
+        .single();
+      setPhoto(data);
+    }
+    fetchPhoto();
+  }, [photoId]);
+
+  if (!photo) return null;
+
+  return (
+    <OptimizedImage
+      src={photo.url}
+      alt={photo.caption || 'Gallery photo'}
+      size={ImageSizes.galleryThumb}
+      blurhash={photo.blurhash}  // Pre-computed blurhash from DB
+      placeholder="blur"
+    />
+  );
+}
+
+// Hero Image Component - simple wrapper without database fetch
+function HeroImage({ heroUrl, title }: { heroUrl: string; title: string }) {
+  return (
+    <OptimizedImage
+      src={heroUrl}
+      alt={title}
+      size={ImageSizes.hero}
+      priority={true}
+      placeholder="none"  // Or "blur" with blurhash prop if available
+    />
+  );
+}
 ```
 
 #### 6.2.3: Query Optimization
@@ -346,6 +447,10 @@ import { FlashList } from '@shopify/flash-list';
 - [ ] Time to interactive < 5 seconds
 - [ ] Interaction response < 100ms
 - [ ] Bundle size < 1MB (gzipped)
+- [ ] Gallery thumbnails < 50KB each
+- [ ] Hero images < 200KB
+- [ ] WebP/AVIF format delivered (85%+ of image requests)
+- [ ] Image CDN cache hit ratio > 90%
 
 ---
 
@@ -590,7 +695,17 @@ vercel --prod
 
 **Reference:** [IOS-DEPLOYMENT.md](../IOS-DEPLOYMENT.md)
 
-#### 6.6.1: App Store Connect Setup
+> **⚠️ Phased Release Note:**
+> App Store submission is blocked until BMA has an Apple Developer org account. For March 21, 2026 launch:
+>
+> - **If personal Apple Dev account available:** Build for TestFlight internal testing
+> - **If no Apple Dev account:** Use Expo Go for testing, document submission steps for later
+>
+> See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites).
+
+#### 6.6.1: App Store Connect Setup (Pending BMA Org Account)
+
+> These steps should be documented now but executed when BMA org account is available.
 
 1. Create App Store Connect app record
 2. Configure app metadata (name, description, keywords)
@@ -634,9 +749,14 @@ eas submit --platform ios --profile production
 3. Respond to privacy questionnaire
 4. Provide contact information
 
-**Acceptance Criteria:**
+**Acceptance Criteria (March 21, 2026 - Internal Testing):**
 
-- [ ] Build successful
+- [ ] iOS build successful
+- [ ] TestFlight distribution working (if personal Apple Dev available)
+- [ ] OR: Expo Go testing documented
+
+**Acceptance Criteria (Post-BMA Org Account):**
+
 - [ ] App submitted to App Store
 - [ ] Review approved
 - [ ] App published
@@ -649,7 +769,17 @@ eas submit --platform ios --profile production
 
 **Reference:** [ANDROID-DEPLOYMENT.md](../ANDROID-DEPLOYMENT.md)
 
-#### 6.7.1: Play Console Setup
+> **⚠️ Phased Release Note:**
+> Play Store submission is blocked until BMA has a Google Play Console org account. For March 21, 2026 launch:
+>
+> - Build APK for internal testing and direct distribution
+> - Document store submission steps for later
+>
+> See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites).
+
+#### 6.7.1: Play Console Setup (Pending BMA Org Account)
+
+> These steps should be documented now but executed when BMA org account is available.
 
 1. Create app in Play Console
 2. Complete app details
@@ -678,15 +808,21 @@ eas build --platform android --profile production
 eas submit --platform android --profile production
 ```
 
-#### 6.7.4: Internal Testing Track
+#### 6.7.4: Internal Testing (March 21, 2026)
 
-1. Upload to internal testing track first
-2. Test with internal testers
-3. Promote to production track
+1. Build APK for internal distribution
+2. Distribute to internal testers via direct download or EAS internal distribution
+3. Document Play Store submission steps for later
 
-**Acceptance Criteria:**
+**Acceptance Criteria (March 21, 2026 - Internal Testing):**
 
-- [ ] Build successful (AAB format)
+- [ ] Android APK build successful
+- [ ] APK distributed to internal testers
+- [ ] Store submission steps documented
+
+**Acceptance Criteria (Post-BMA Org Account):**
+
+- [ ] Build AAB format for Play Store
 - [ ] App submitted to Play Console
 - [ ] Review approved
 - [ ] App published to production
@@ -790,7 +926,9 @@ export function captureException(error: Error, context?: Record<string, any>) {
 
 ## Launch Day Checklist
 
-```
+> **Note:** This checklist reflects the phased release strategy. Mobile public release is pending BMA org accounts.
+
+```text
 Day 61-62: Final Testing
 □ Run full test suite
 □ Fix any failing tests
@@ -803,24 +941,30 @@ Day 63-64: Performance & Security
 □ Security review
 □ Penetration testing (basic)
 
-Day 65: Web Deployment
+Day 65: Web Deployment ✅
 □ Deploy to Vercel production
 □ Verify all features
-□ Test payment flow (live mode)
+□ Test payment flow (Razorpay - test mode if no BMA account yet)
 □ Monitor for errors
 
-Day 66: Mobile Submission
-□ Build iOS production
-□ Submit to App Store
-□ Build Android production
-□ Submit to Play Store
+Day 66: Mobile Internal Testing Builds
+□ Build iOS (TestFlight if available, or Expo Go testing)
+□ Build Android APK for internal distribution
+□ Distribute to internal testers
+□ Document store submission steps for later
 
-Day 67: Launch & Monitoring
-□ App Store approval (monitor)
-□ Play Store approval (monitor)
-□ Announce launch
+March 21, 2026: Launch Day (BMA Annual Day)
+□ Web app live - announce web launch
+□ Mobile internal testing ongoing
 □ Monitor dashboards
 □ Respond to user feedback
+□ Track BMA org account progress (PAN → D-U-N-S → Store accounts)
+
+Post-Launch (When BMA Org Accounts Ready):
+□ Submit iOS to App Store
+□ Submit Android to Play Store
+□ Monitor approvals
+□ Announce mobile public release
 ```
 
 ---
@@ -914,34 +1058,51 @@ npm install @shopify/flash-list
 
 ### External Services
 
+> **Note:** App Store accounts are blocked until BMA org accounts are ready. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md).
+
 - [ ] Sentry account and project
-- [ ] App Store Connect account
-- [ ] Google Play Console account
-- [ ] Vercel team/pro account (for production)
+- [ ] App Store Connect account (Pending BMA org - use personal if available for TestFlight)
+- [ ] Google Play Console account (Pending BMA org - APK internal testing OK)
+- [ ] Vercel team/pro account (for production) - Hobby plan OK initially
 
 ---
 
 ## Definition of Done
 
+### March 21, 2026 Definition of Done (Phased Release)
+
 - [ ] All tests passing (unit, integration, E2E)
 - [ ] Performance targets met (< 3s load, Lighthouse > 90)
 - [ ] Accessibility audit passed (WCAG 2.1 AA)
 - [ ] Security review completed
-- [ ] Web deployed to production (Vercel)
-- [ ] iOS submitted and approved
-- [ ] Android submitted and approved
+- [ ] Web deployed to production (Vercel) ✅
+- [ ] iOS internal testing build ready (TestFlight or Expo Go)
+- [ ] Android APK available for internal testing
+- [ ] Mobile store submission steps documented
 - [ ] Monitoring and alerting active
 - [ ] Runbook documented
-- [ ] All GitHub Issues for Phase 6 closed
+- [ ] All March 21, 2026 GitHub Issues for Phase 6 closed
+
+### Post-BMA Org Account Definition of Done
+
+- [ ] iOS submitted and approved on App Store
+- [ ] Android submitted and approved on Play Store
+- [ ] All platforms publicly available
 
 ---
 
 ## Project Complete
 
-Congratulations! The BMA 2026 Digital Platform is now live.
+Congratulations! The BMA 2026 Digital Platform web version is now live.
+
+> **Phased Release Reminder:**
+>
+> - **Web:** Live on **March 21, 2026** (BMA Annual Day) ✅
+> - **Mobile:** Internal testing available; public release pending BMA org App Store accounts (~2-3 months after PAN card)
 
 **Post-Launch Resources:**
 
 - [GitHub Issues](./08-GITHUB-ISSUES-TEMPLATE.md) - For tracking ongoing work
 - [RUNBOOK.md](../RUNBOOK.md) - For incident response
 - [PRD-BMA-2026.md](../PRD-BMA-2026.md) - For future feature planning
+- [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md) - Track BMA org account progress

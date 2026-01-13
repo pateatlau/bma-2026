@@ -14,6 +14,14 @@ Phase 3 implements the paid membership system with Razorpay integration. This ph
 - Payment history and receipts
 - WhatsApp and Email notifications
 
+> **⚠️ Individual Account Note:**
+> During development with individual accounts (before BMA organization accounts are ready):
+>
+> - **Razorpay:** Use **test mode only**. Real payments require BMA's business account with proper KYC.
+> - **Resend/Gupshup:** Can use individual accounts for testing; production may require BMA org accounts.
+>
+> See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#30-razorpay-payment-gateway) for setup details.
+
 ---
 
 ## Critical Security Notes
@@ -1355,9 +1363,11 @@ supabase secrets set GUPSHUP_APP_NAME=xxx
 
 ### External Services
 
-- [ ] Razorpay account with test mode
-- [ ] Resend account
-- [ ] Gupshup WhatsApp Business account
+> **Note:** Individual accounts can be used for development. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md).
+
+- [ ] Razorpay account with test mode (Individual OK for testing; BMA org account needed for production)
+- [ ] Resend account (Individual OK)
+- [ ] Gupshup WhatsApp Business account (Individual OK for testing)
 
 ---
 

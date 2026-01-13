@@ -64,7 +64,91 @@ Single shared codebase deployed to:
 
 **Target Users**: General public, free users, paid members
 
-### 2.2 Admin & Editor Dashboard (Integrated)
+### 2.2 Browser Support (Web Platform)
+
+| Browser          | Minimum Version  | Notes                              |
+| ---------------- | ---------------- | ---------------------------------- |
+| Chrome           | Last 2 versions  | ~95% coverage                      |
+| Firefox          | Last 2 versions  | Desktop + mobile                   |
+| Safari           | Last 2 versions  | macOS + iOS 14+ (iOS 15+ for PWA)  |
+| Edge             | Last 2 versions  | Chromium-based only                |
+| Mobile Safari    | iOS 14+          | iOS 15+ required for PWA features  |
+| Chrome Mobile    | Android 8+       | Primary mobile browser for Android |
+| Samsung Internet | Current + prev   | Popular in India, South Korea      |
+| UC Browser       | Best effort      | Popular in rural India (optional)  |
+| IE11             | ❌ Not supported | End of life                        |
+
+**Progressive Web App (PWA)**:
+
+- Web app must be installable as PWA
+- Offline-Lite capabilities via service worker
+- Add to home screen support (Android, iOS)
+- **iOS PWA Requirements**: iOS 15+ required for full PWA support (service workers, add to home screen). The native Expo app supports iOS 14+, but web PWA features require iOS 15+ due to Safari limitations.
+
+### 2.3 Device & Platform Requirements
+
+#### iOS
+
+| Requirement    | Specification                    |
+| -------------- | -------------------------------- |
+| Minimum iOS    | iOS 14+                          |
+| Devices        | iPhone 8 and newer               |
+| Tablet Support | iPad (responsive, not optimized) |
+| Screen Sizes   | 375px width minimum (iPhone SE)  |
+
+#### Android
+
+| Requirement     | Specification                                  |
+| --------------- | ---------------------------------------------- |
+| Minimum Android | Android 8.0 (Oreo, API 26)                     |
+| Google Play     | Required for payments, notifications           |
+| Android Go      | Best effort (performance may vary)             |
+| Tablet Support  | Responsive layout (not specifically optimized) |
+| Screen Sizes    | 320px width minimum (small budget phones)      |
+
+#### Device Performance Targets
+
+Given the target audience includes rural India with budget devices:
+
+| Device Category | Specs                    | Performance Target         |
+| --------------- | ------------------------ | -------------------------- |
+| Entry-level     | 2GB RAM, older chipsets  | Functional, acceptable lag |
+| Mid-range       | 4GB RAM, mid-tier chips  | Smooth performance         |
+| High-end        | 6GB+ RAM, flagship chips | Optimal performance        |
+
+**Low-end Device Optimizations**:
+
+- Image lazy loading and compression
+- Code splitting and lazy loading
+- Reduced animations on low-memory devices
+- Stale-while-revalidate caching for offline
+
+#### Network Conditions
+
+| Network Type | Target Experience                      |
+| ------------ | -------------------------------------- |
+| 4G/5G        | Optimal performance                    |
+| 3G           | Functional with image compression      |
+| 2G           | Offline-Lite mode, cached content only |
+| Offline      | Read-only access to cached content     |
+
+**Testing Requirements**:
+
+- Test on throttled 3G networks
+- Test offline transitions (online → offline → online)
+- Test on entry-level devices (2GB RAM Android)
+
+### 2.4 Responsive Breakpoints
+
+| Breakpoint | Width          | Target Devices         |
+| ---------- | -------------- | ---------------------- |
+| Mobile     | 320px - 767px  | Phones                 |
+| Tablet     | 768px - 1023px | Tablets, small laptops |
+| Desktop    | 1024px+        | Laptops, desktops      |
+
+Admin dashboard optimized for desktop but functional on tablet/mobile.
+
+### 2.5 Admin & Editor Dashboard (Integrated)
 
 Admin and Editor dashboards are **integrated within the main app** as role-protected routes.
 

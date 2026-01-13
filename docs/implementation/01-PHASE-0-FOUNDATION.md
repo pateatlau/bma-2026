@@ -41,29 +41,33 @@ Phase 0 establishes the foundational infrastructure for the BMA 2026 platform. T
 
 **Files:** N/A (Supabase Dashboard)
 
+> **Note:** Individual/personal accounts can be used for all OAuth providers during development. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#using-individual-accounts-for-development) for details on account setup and transfer strategy.
+
 1. Enable Email/Password authentication
    - Enable email confirmations
    - Set site URL for redirects
    - Configure email templates
-2. Enable Google OAuth
-   - Create Google Cloud OAuth credentials
+2. Enable Google OAuth (✅ Individual account OK)
+   - Create Google Cloud OAuth credentials (personal Google Cloud project)
    - Add authorized redirect URI
    - Configure in Supabase
-3. Enable Facebook OAuth
-   - Create Facebook App
+3. Enable Facebook OAuth (✅ Individual account OK)
+   - Create Facebook App (personal Facebook Developer account)
    - Configure OAuth settings
    - Add to Supabase
-4. Enable Apple OAuth (for iOS)
-   - Create Apple Services ID
-   - Configure Sign in with Apple
-   - Add to Supabase
+4. Enable Apple OAuth (⚠️ Requires decision - see note below)
+   - **Option A:** Use personal Apple Developer account ($99/yr) - full functionality
+   - **Option B:** Defer Apple Sign-In until BMA org account ready
+   - **Option C:** Skip Apple Sign-In (Google + Facebook + Email only)
+
+> **Decision Required:** Apple Sign-In approach must be decided before Phase 0 starts. See [00-PREREQUISITES.md Section 6.0](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites) for options.
 
 **Acceptance Criteria:**
 
 - [ ] Email/Password auth working
 - [ ] Google OAuth configured
 - [ ] Facebook OAuth configured
-- [ ] Apple OAuth configured
+- [ ] Apple OAuth configured OR documented as deferred/skipped
 - [ ] Email templates customized with BMA branding
 
 #### 0.1.3: Configure Storage Buckets
@@ -1586,13 +1590,15 @@ file_size_limit = "50MiB"
 
 ### External Services to Configure
 
-- [ ] Supabase project created
-- [ ] Google Cloud OAuth credentials
-- [ ] Facebook Developer App
-- [ ] Apple Developer account (for Sign in with Apple)
+> **Note:** Individual/personal accounts can be used during development. See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md) for account transfer strategy when BMA org accounts become available.
+
+- [ ] Supabase project created (Free tier)
+- [ ] Google Cloud OAuth credentials (Individual account OK)
+- [ ] Facebook Developer App (Individual account OK)
+- [ ] Apple Developer account (Individual OR deferred - decision required)
 - [ ] GitHub repository with secrets
-- [ ] Vercel project linked
-- [ ] EAS account configured
+- [ ] Vercel project linked (Free Hobby plan)
+- [ ] EAS account configured (Free tier)
 
 ### Secrets Required
 
