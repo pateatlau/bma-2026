@@ -891,64 +891,184 @@ serve(async (req) => {
 
 ---
 
-### Task 5.9: Analytics Dashboard
+### Task 5.9: Analytics Dashboard (Enhanced)
 
 **GitHub Issue:** #43 - Implement Analytics Dashboard
 
-#### 5.9.1: Create Analytics Screen
+> **📊 Complete Implementation Guide**: See [ANALYTICS-IMPLEMENTATION.md](../ANALYTICS-IMPLEMENTATION.md) for full analytics strategy, charts, business metrics, and user behavior tracking.
+
+This task creates a comprehensive analytics dashboard for admins and editors.
+
+#### 5.9.1: Install Chart Library
+
+```bash
+npm install recharts
+```
+
+**Why Recharts?**
+
+- Web-compatible (works with React Native Web)
+- Rich chart types (line, bar, pie, area)
+- Responsive and customizable
+- Well-maintained and documented
+
+#### 5.9.2: Create Analytics Edge Function
+
+**Files:** `supabase/functions/admin/analytics.ts`, `supabase/migrations/create_analytics_functions.sql`
+
+**Database Functions** (see ANALYTICS-IMPLEMENTATION.md §1.2):
+
+- `get_user_analytics()` - User growth, active users, platform split
+- `get_membership_analytics()` - Conversions, churn rate, tier breakdown
+- `get_revenue_analytics()` - MRR, ARPU, LTV, payment success rate
+- `get_content_analytics()` - Views, likes, comments, engagement rate
+- `get_chatbot_analytics()` - Messages, escalations, resolution time
+
+**Edge Function Response:**
+
+```typescript
+{
+  users: {
+    total_users: 1500,
+    total_members: 350,
+    active_users_30d: 890,
+    new_users_30d: 120,
+    growth_rate_30d: 8.5,
+    users_by_tier: { free: 1150, premium: 300, lifetime: 50 }
+  },
+  revenue: {
+    mrr: 150000,
+    arpu: 428.57,
+    ltv: 5000,
+    revenue_30d: 180000,
+    payment_success_rate: 96.5
+  },
+  memberships: {
+    total_members: 350,
+    conversion_rate: 23.3,
+    churn_rate_30d: 2.5,
+    tier_breakdown: { premium: 300, lifetime: 50 }
+  },
+  content: {
+    total_views_30d: 12500,
+    total_likes_30d: 450,
+    total_comments_30d: 180,
+    engagement_rate: 5.04,
+    popular_content: [...]
+  },
+  chatbot: {
+    total_messages_30d: 3200,
+    escalations_30d: 45,
+    escalation_rate: 1.4,
+    avg_resolution_time_hours: 4.5
+  }
+}
+```
+
+#### 5.9.3: Create Analytics Dashboard UI
 
 **Files:** `app/(admin)/analytics/index.tsx`
 
-**Metrics to Display:**
+**Dashboard Sections:**
 
-1. User growth over time (line chart)
-2. Revenue by month (bar chart)
-3. Membership tier breakdown (pie chart)
-4. Content engagement (views, likes, comments)
-5. Chatbot usage (messages per day)
-6. Escalation resolution time
+1. **Key Metrics Cards** (4 cards at top)
+   - Total Users (+new this week)
+   - Total Members (conversion rate)
+   - MRR (ARPU)
+   - Active Users 30d (growth rate)
 
-**Charts Library:**
+2. **User Growth Chart** (Line chart, 30 days)
+   - X-axis: Date
+   - Y-axis: User count
+   - Shows daily signup trend
+
+3. **Membership Tier Breakdown** (Pie chart)
+   - Free users (gray)
+   - Premium members (red)
+   - Lifetime members (black)
+
+4. **Revenue Chart** (Bar chart, 6 months)
+   - X-axis: Month
+   - Y-axis: Revenue (₹)
+   - Shows monthly revenue trend
+
+5. **Content Engagement** (Metrics + table)
+   - Total views, likes, comments
+   - Engagement rate
+   - Top 10 popular content table
+
+6. **Chatbot Performance** (Metrics)
+   - Total conversations
+   - Messages per day
+   - Escalation rate
+   - Avg resolution time
+
+**Implementation**: See ANALYTICS-IMPLEMENTATION.md §1.3 for complete React component with Recharts.
+
+#### 5.9.4: Create Business Metrics Aggregation
+
+**Files:** `supabase/functions/cron/daily-metrics.ts`, `supabase/migrations/create_analytics_metrics_table.sql`
+
+**Purpose**: Pre-aggregate metrics daily for fast dashboard loading
+
+**Metrics Stored:**
+
+- User metrics (total, new, active)
+- Membership metrics (total, new, churned)
+- Revenue metrics (MRR, daily revenue, ARPU)
+- Content metrics (views, likes, comments)
+- Chatbot metrics (conversations, escalations)
+
+**Cron Job**: Runs daily at 00:00 UTC
+
+```sql
+-- Schedule daily metrics aggregation
+SELECT cron.schedule(
+  'daily-metrics-aggregation',
+  '0 0 * * *',
+  $$
+  SELECT net.http_post(
+    url := 'https://[project-id].supabase.co/functions/v1/cron/daily-metrics',
+    headers := '{"Content-Type": "application/json"}'::jsonb
+  );
+  $$
+);
+```
+
+**Implementation**: See ANALYTICS-IMPLEMENTATION.md §3.2 for complete cron job code.
+
+#### 5.9.5: User Behavior Tracking (Optional - Phase 7)
+
+**Install Mixpanel:**
 
 ```bash
-npm install victory-native react-native-svg
+npm install mixpanel-react-native
 ```
 
-#### 5.9.2: Create Analytics Hooks
+**Events to Track** (see ANALYTICS-IMPLEMENTATION.md §2.2):
 
-**Files:** `hooks/useAnalytics.ts`
+- User signup, login, logout
+- Membership purchase, renewal, cancellation
+- Content view, like, comment
+- Chatbot message, escalation
+- Directory search, profile view
 
-```typescript
-export function useUserGrowthAnalytics(days = 30) {
-  return useQuery({
-    queryKey: ['analytics', 'user-growth', days],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .gte('created_at', getDateNDaysAgo(days));
-
-      // Group by date
-      return groupByDate(data, 'created_at');
-    },
-  });
-}
-
-export function useRevenueAnalytics(months = 6) {
-  // ...
-}
-
-export function useEngagementAnalytics() {
-  // ...
-}
-```
+**Implementation**: See ANALYTICS-IMPLEMENTATION.md §2 for complete Mixpanel integration.
 
 **Acceptance Criteria:**
 
-- [ ] Charts render correctly
-- [ ] Data accurate
-- [ ] Date range selectable
-- [ ] Responsive on all screens
+- [ ] Recharts library installed
+- [ ] Analytics Edge Function created with 5 database functions
+- [ ] `analytics_metrics` table created for time-series data
+- [ ] Dashboard UI created with 6 sections
+- [ ] Charts render correctly (line, bar, pie)
+- [ ] Key metrics cards display correctly
+- [ ] Popular content table shows top 10
+- [ ] Data accurate (verify against database)
+- [ ] Date range selectable (30d, 90d, 1y)
+- [ ] Responsive on all screens (mobile, tablet, desktop)
+- [ ] Daily metrics cron job configured
+- [ ] Test with sample data
 
 ---
 
