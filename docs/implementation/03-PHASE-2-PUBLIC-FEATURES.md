@@ -1223,8 +1223,16 @@ export function generateBlurhashOnUpload(imageBuffer: Buffer): string {
 
 **Files:** `lib/upload.ts`
 
+**Prerequisites:**
+
+- Create an unsigned upload preset named `bma_unsigned` in your Cloudinary account (Settings → Upload → Upload presets)
+- Set `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` environment variable in `.env`
+
 ```typescript
 import * as ImagePicker from 'expo-image-picker';
+
+// Import Cloudinary cloud name from environment config
+const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 interface UploadOptions {
   folder: string;
@@ -1235,19 +1243,27 @@ interface UploadOptions {
 // after upload completes, then stored in database alongside the image URL.
 // See generateBlurhashOnUpload() documentation above for the correct workflow.
 export async function uploadToCloudinary(uri: string, options: UploadOptions): Promise<string> {
+  if (!CLOUDINARY_CLOUD_NAME) {
+    throw new Error('EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME environment variable is not set');
+  }
+
   const formData = new FormData();
   formData.append('file', {
     uri,
     type: 'image/jpeg',
     name: 'upload.jpg',
   } as any);
-  formData.append('upload_preset', 'bma_unsigned'); // Configure in Cloudinary
+  formData.append('upload_preset', 'bma_unsigned'); // Must be configured in Cloudinary
   formData.append('folder', options.folder);
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
     { method: 'POST', body: formData }
   );
+
+  if (!response.ok) {
+    throw new Error(`Cloudinary upload failed: ${response.statusText}`);
+  }
 
   const data = await response.json();
   return data.secure_url;
