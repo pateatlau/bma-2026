@@ -348,23 +348,33 @@ curl -sI -H "Accept: image/webp" "https://res.cloudinary.com/YOUR_CLOUD/image/up
 
 ```typescript
 // Ensure all images use OptimizedImage component
-import { OptimizedImage, ImageSizes } from '@/components/OptimizedImage';
+// Component is defined in Phase 2, Task 2.11.1
+import { OptimizedImage } from '@/components/OptimizedImage';
+import { ImageSizes } from '@/lib/images';
 
-// Gallery thumbnail
+// Gallery thumbnail (with blurhash from database)
+// Note: blurhash should be fetched from database alongside image URL
+const { data: photo } = await supabase
+  .from('media')
+  .select('url, blurhash, caption')
+  .eq('id', photoId)
+  .single();
+
 <OptimizedImage
   src={photo.url}
   alt={photo.caption}
   size={ImageSizes.galleryThumb}
+  blurhash={photo.blurhash}  // Pre-computed blurhash from DB
   placeholder="blur"
 />
 
-// Hero image (above fold)
+// Hero image (above fold, without blurhash)
 <OptimizedImage
   src={heroUrl}
   alt={title}
   size={ImageSizes.hero}
   priority={true}
-  placeholder="blur"
+  placeholder="none"  // Or "blur" with blurhash prop if available
 />
 ```
 

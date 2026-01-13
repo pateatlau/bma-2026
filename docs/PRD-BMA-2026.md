@@ -70,9 +70,9 @@ Single shared codebase deployed to:
 | ---------------- | ---------------- | ---------------------------------- |
 | Chrome           | Last 2 versions  | ~95% coverage                      |
 | Firefox          | Last 2 versions  | Desktop + mobile                   |
-| Safari           | Last 2 versions  | macOS + iOS 15+                    |
+| Safari           | Last 2 versions  | macOS + iOS 14+ (iOS 15+ for PWA)  |
 | Edge             | Last 2 versions  | Chromium-based only                |
-| Mobile Safari    | iOS 15+          | Primary mobile browser for iOS     |
+| Mobile Safari    | iOS 14+          | iOS 15+ required for PWA features  |
 | Chrome Mobile    | Android 8+       | Primary mobile browser for Android |
 | Samsung Internet | Current + prev   | Popular in India, South Korea      |
 | UC Browser       | Best effort      | Popular in rural India (optional)  |
@@ -83,6 +83,7 @@ Single shared codebase deployed to:
 - Web app must be installable as PWA
 - Offline-Lite capabilities via service worker
 - Add to home screen support (Android, iOS)
+- **iOS PWA Requirements**: iOS 15+ required for full PWA support (service workers, add to home screen). The native Expo app supports iOS 14+, but web PWA features require iOS 15+ due to Safari limitations.
 
 ### 2.3 Device & Platform Requirements
 

@@ -1228,14 +1228,13 @@ import * as ImagePicker from 'expo-image-picker';
 
 interface UploadOptions {
   folder: string;
-  generateBlurhash?: boolean;
 }
 
 // For gallery/high-traffic images - upload to Cloudinary
-export async function uploadToCloudinary(
-  uri: string,
-  options: UploadOptions
-): Promise<{ url: string; blurhash?: string }> {
+// NOTE: Blurhash generation should happen server-side via Edge Function
+// after upload completes, then stored in database alongside the image URL.
+// See generateBlurhashOnUpload() documentation above for the correct workflow.
+export async function uploadToCloudinary(uri: string, options: UploadOptions): Promise<string> {
   const formData = new FormData();
   formData.append('file', {
     uri,
@@ -1251,10 +1250,7 @@ export async function uploadToCloudinary(
   );
 
   const data = await response.json();
-  return {
-    url: data.secure_url,
-    blurhash: options.generateBlurhash ? await generateBlurhashFromUrl(data.secure_url) : undefined,
-  };
+  return data.secure_url;
 }
 
 // For low-traffic images - upload to Supabase Storage
