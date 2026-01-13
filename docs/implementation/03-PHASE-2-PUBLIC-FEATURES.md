@@ -1060,6 +1060,7 @@ interface OptimizedImageProps {
   aspectRatio?: number;
   priority?: boolean;
   placeholder?: 'blur' | 'none';
+  blurhash?: string; // Pre-computed blurhash from database (generated during upload)
   contentFit?: 'cover' | 'contain' | 'fill';
 }
 
@@ -1072,6 +1073,7 @@ export function OptimizedImage({
   aspectRatio,
   priority = false,
   placeholder = 'blur',
+  blurhash, // Should be passed from parent (stored in DB during upload)
   contentFit = 'cover',
 }: OptimizedImageProps) {
   // Generate optimized URL (Cloudinary or Supabase transform)
@@ -1083,13 +1085,32 @@ export function OptimizedImage({
       alt={alt}
       style={{ width: width ?? size?.width, height: height ?? size?.height, aspectRatio }}
       contentFit={contentFit}
-      placeholder={placeholder === 'blur' ? { blurhash: generateBlurhash(src) } : undefined}
+      placeholder={
+        placeholder === 'blur' && blurhash
+          ? { blurhash }
+          : undefined
+      }
       transition={200}
       priority={priority}
       cachePolicy="memory-disk"
     />
   );
 }
+
+// Usage example: Pass blurhash from database
+// const { data: photo } = await supabase
+//   .from('media')
+//   .select('url, blurhash')
+//   .eq('id', photoId)
+//   .single();
+//
+// <OptimizedImage
+//   src={photo.url}
+//   alt="Gallery photo"
+//   size={ImageSizes.galleryThumb}
+//   blurhash={photo.blurhash}  // Pre-computed from DB
+//   placeholder="blur"
+// />
 ```
 
 #### 2.11.2: Configure Image Transformation Service
@@ -1176,11 +1197,25 @@ function getSupabaseTransformUrl(
   return params.toString() ? `${url}?${params.toString()}` : url;
 }
 
-// Blurhash generation (run on upload or cache)
-export function generateBlurhash(url: string): string {
-  // In practice, generate and store blurhash when image is uploaded
-  // This is a placeholder - actual implementation uses blurhash library
-  return 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'; // Default placeholder
+// Blurhash generation (server-side during upload)
+// NOTE: This function should NOT be called during render.
+// Blurhash should be:
+// 1. Generated server-side when image is uploaded (using blurhash library)
+// 2. Stored in database alongside image URL
+// 3. Passed as a prop to OptimizedImage component
+//
+// Example database schema:
+// CREATE TABLE media (
+//   id UUID PRIMARY KEY,
+//   url TEXT NOT NULL,
+//   blurhash TEXT,  -- Store pre-computed blurhash here
+//   ...
+// );
+export function generateBlurhashOnUpload(imageBuffer: Buffer): string {
+  // Server-side implementation using 'blurhash' library
+  // const blurhash = encode(pixels, width, height, componentX, componentY);
+  // return blurhash;
+  throw new Error('generateBlurhashOnUpload should only be called server-side during image upload');
 }
 ```
 
