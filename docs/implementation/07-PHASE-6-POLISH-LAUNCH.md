@@ -909,7 +909,7 @@ npm install @sentry/react-native web-vitals
 - API Health: `https://[project-id].supabase.co/functions/v1/health` (5-minute checks)
 - Supabase: `https://[project-id].supabase.co` (5-minute checks)
 
-**Alert Contacts**: admin@bma2026.org
+**Alert Contacts**: [admin@bma2026.org](mailto:admin@bma2026.org)
 
 **Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §4.1-4.2 for health check code and UptimeRobot configuration.
 

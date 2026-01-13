@@ -692,7 +692,10 @@ export function resetAnalytics() {
 trackEvent('User Signup', {
   method: 'email' | 'google' | 'facebook',
   source: 'web' | 'ios' | 'android',
-  referrer: document.referrer || 'direct',
+  referrer:
+    Platform.OS === 'web' && typeof document !== 'undefined'
+      ? document.referrer || 'direct'
+      : 'direct',
 });
 
 // User Login
@@ -873,10 +876,15 @@ CREATE INDEX idx_analytics_metrics_name_date ON analytics_metrics(metric_name, m
 -- Enable RLS
 ALTER TABLE analytics_metrics ENABLE ROW LEVEL SECURITY;
 
--- Admin-only access
+-- Admin-only access (matches pattern from Phase 0)
 CREATE POLICY "Admin can view metrics" ON analytics_metrics
   FOR SELECT
-  USING (auth.jwt() ->> 'role' = 'admin');
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
 ```
 
 #### 3.2 Daily Metrics Aggregation

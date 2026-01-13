@@ -95,14 +95,16 @@ export function initSentry() {
     // Error sampling
     sampleRate: 1.0, // Capture 100% of errors
 
+    // Trace propagation targets (top-level config)
+    tracePropagationTargets: [
+      'localhost',
+      /^https:\/\/.*\.supabase\.co/,
+      /^https:\/\/bma2026\.org/,
+    ],
+
     // Integrations
     integrations: [
       new Sentry.ReactNativeTracing({
-        tracePropagationTargets: [
-          'localhost',
-          /^https:\/\/.*\.supabase\.co/,
-          /^https:\/\/bma2026\.org/,
-        ],
         routingInstrumentation: new Sentry.ReactNavigationInstrumentation(),
       }),
     ],

@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // On web, check if there's a hash fragment with auth tokens (from email confirmation)
         if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hash) {
-          console.log('Detected URL hash, checking for auth tokens...');
+          console.warn('Detected URL hash, checking for auth tokens...');
           // Supabase will automatically handle the hash tokens when detectSessionInUrl is true
           // We just need to wait for the auth state change listener to pick it up
         }
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('Auth state changed:', event, {
+      console.warn('Auth state changed:', event, {
         hasSession: !!newSession,
         hasUser: !!newSession?.user,
         userId: newSession?.user?.id,
@@ -132,38 +132,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Handle specific events
       switch (event) {
         case 'SIGNED_IN':
-          console.log('User signed in:', newSession?.user?.email);
+          console.warn('User signed in:', newSession?.user?.email);
           setSession(newSession);
           setUser(mapSupabaseUser(newSession?.user ?? null));
           break;
 
         case 'SIGNED_OUT':
-          console.log('User signed out');
+          console.warn('User signed out');
           setSession(null);
           setUser(null);
           break;
 
         case 'TOKEN_REFRESHED':
-          console.log('Session token refreshed');
+          console.warn('Session token refreshed');
           setSession(newSession);
           // User data typically doesn't change on token refresh
           break;
 
         case 'USER_UPDATED':
-          console.log('User data updated');
+          console.warn('User data updated');
           setSession(newSession);
           setUser(mapSupabaseUser(newSession?.user ?? null));
           break;
 
         case 'PASSWORD_RECOVERY':
-          console.log('Password recovery initiated');
+          console.warn('Password recovery initiated');
           // This event fires when user clicks password reset link
           // The app should navigate to a password reset form
           break;
 
         default:
           // Handle any other events
-          console.log('Other auth event:', event);
+          console.warn('Other auth event:', event);
           setSession(newSession);
           setUser(mapSupabaseUser(newSession?.user ?? null));
       }
@@ -179,7 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const type = parsedUrl.queryParams?.type as string | undefined;
 
         if (tokenHash && type === 'email') {
-          console.log('Processing email confirmation from deep link...');
+          console.warn('Processing email confirmation from deep link...');
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type: 'email',
@@ -188,7 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (error) {
             console.error('Email confirmation error:', error);
           } else {
-            console.log('Email confirmed successfully via deep link');
+            console.warn('Email confirmed successfully via deep link');
           }
         }
       } catch (error) {
@@ -436,10 +436,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   return null;
                 }
 
+                if (!refreshToken) {
+                  console.error('No refresh token found in OAuth callback');
+                  return null;
+                }
+
                 // Set the session with the extracted tokens
                 const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
                   access_token: accessToken,
-                  refresh_token: refreshToken || '',
+                  refresh_token: refreshToken,
                 });
 
                 if (sessionError) {
