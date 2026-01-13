@@ -1293,44 +1293,89 @@ export async function uploadToSupabase(uri: string, bucket: string, path: string
 ```typescript
 // Use responsive image sizes based on screen width
 import { useWindowDimensions } from 'react-native';
+import { useState } from 'react';
 
-function GalleryGrid({ photos }: { photos: Photo[] }) {
+// Photo type should include blurhash field
+interface Photo {
+  id: string;
+  url: string;
+  caption?: string;
+  blurhash?: string; // Pre-computed blurhash from database
+}
+
+interface GalleryGridProps {
+  photos: Photo[];
+}
+
+function GalleryGrid({ photos }: GalleryGridProps) {
   const { width } = useWindowDimensions();
   const columns = width > 768 ? 4 : width > 480 ? 3 : 2;
   const thumbSize = Math.floor(width / columns);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+
+  // Handler to open lightbox with selected photo
+  const openLightbox = (photo: Photo) => {
+    setSelectedPhoto(photo);
+  };
+
+  const closeLightbox = () => {
+    setSelectedPhoto(null);
+  };
 
   return (
-    <FlashList
-      data={photos}
-      numColumns={columns}
-      estimatedItemSize={thumbSize}
-      renderItem={({ item }) => (
-        <Pressable onPress={() => openLightbox(item)}>
-          <OptimizedImage
-            src={item.url}
-            alt={item.caption}
-            size={ImageSizes.galleryThumb}
-            width={thumbSize}
-            height={thumbSize}
-            placeholder="blur"
-          />
-        </Pressable>
+    <>
+      <FlashList
+        data={photos}
+        numColumns={columns}
+        estimatedItemSize={thumbSize}
+        renderItem={({ item }) => (
+          <Pressable onPress={() => openLightbox(item)}>
+            <OptimizedImage
+              src={item.url}
+              alt={item.caption || 'Gallery photo'}
+              size={ImageSizes.galleryThumb}
+              width={thumbSize}
+              height={thumbSize}
+              blurhash={item.blurhash} // Pass blurhash from database
+              placeholder="blur"
+            />
+          </Pressable>
+        )}
+      />
+
+      {/* Lightbox modal */}
+      {selectedPhoto && (
+        <Lightbox
+          photo={selectedPhoto}
+          onClose={closeLightbox}
+        />
       )}
-    />
+    </>
   );
 }
 
 // Lightbox uses full-size image
-function Lightbox({ photo }: { photo: Photo }) {
+interface LightboxProps {
+  photo: Photo;
+  onClose: () => void;
+}
+
+function Lightbox({ photo, onClose }: LightboxProps) {
   return (
-    <OptimizedImage
-      src={photo.url}
-      alt={photo.caption}
-      size={ImageSizes.fullscreen}
-      priority // Load immediately
-      placeholder="blur"
-      contentFit="contain"
-    />
+    <Modal visible onRequestClose={onClose}>
+      <OptimizedImage
+        src={photo.url}
+        alt={photo.caption || 'Gallery photo'}
+        size={ImageSizes.fullscreen}
+        blurhash={photo.blurhash} // Pass blurhash for smooth loading
+        priority // Load immediately
+        placeholder="blur"
+        contentFit="contain"
+      />
+      <Pressable onPress={onClose} style={styles.closeButton}>
+        <Text>Close</Text>
+      </Pressable>
+    </Modal>
   );
 }
 ```
