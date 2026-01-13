@@ -191,6 +191,7 @@ npm run android  # Android Emulator
 - **[Prettier & ESLint Setup](docs/PRETTIER-ESLINT-IMPLEMENTATION.md)** - Code quality tooling
 - **[Testing Strategy](docs/TESTING-IMPLEMENTATION-PLAN.md)** - Unit, integration, E2E testing
 - **[CI/CD & Deployment](docs/CI-CD-IMPLEMENTATION-PLAN.md)** - GitHub Actions, EAS Build, Vercel
+- **[Observability Implementation](docs/OBSERVABILITY-IMPLEMENTATION.md)** - Error tracking, logging, monitoring, alerting (NEW!)
 - **[Android Deployment](docs/ANDROID-DEPLOYMENT.md)** - Play Store submission guide
 - **[iOS Deployment](docs/IOS-DEPLOYMENT.md)** - App Store submission guide
 
@@ -216,6 +217,7 @@ npm run android  # Android Emulator
 - [API-DESIGN.md](docs/API-DESIGN.md) - API contracts
 - [Design System Implementation](docs/DESIGN-SYSTEM-IMPLEMENTATION.md) - UI components
 - [Testing Strategy](docs/TESTING-IMPLEMENTATION-PLAN.md) - Testing approach
+- [Observability Implementation](docs/OBSERVABILITY-IMPLEMENTATION.md) - Monitoring & error tracking
 
 **For QA/Testing:**
 

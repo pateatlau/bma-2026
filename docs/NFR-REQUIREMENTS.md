@@ -402,18 +402,28 @@ NFRs apply to all components of the BMA platform:
 
 ### 5.3 Monitoring & Alerting
 
-| Requirement                                        | Target                | Measurement                | Priority    | Verification Method      | Source                  |
-| -------------------------------------------------- | --------------------- | -------------------------- | ----------- | ------------------------ | ----------------------- |
-| **NFR-AVAIL-007**: Error monitoring                | Active (Sentry)       | Error tracking enabled     | Must Have   | Sentry dashboard         | PRD §11.4, Phase-6 §6.8 |
-| **NFR-AVAIL-008**: Health check endpoints          | Available             | HTTP 200 response          | Should Have | Endpoint testing         | PRD §11.4               |
-| **NFR-AVAIL-009**: Alert on website down           | < 5 minutes detection | Monitoring alert triggered | Must Have   | Monitoring configuration | Phase-6 §6.8            |
-| **NFR-AVAIL-010**: Alert on error rate > 1%        | Real-time             | Monitoring alert triggered | Should Have | Monitoring configuration | Phase-6 §6.8            |
-| **NFR-AVAIL-011**: Alert on API response time > 3s | Real-time             | Monitoring alert triggered | Should Have | Monitoring configuration | Phase-6 §6.8            |
+| Requirement                                           | Target                        | Measurement                | Priority    | Verification Method     | Source                           |
+| ----------------------------------------------------- | ----------------------------- | -------------------------- | ----------- | ----------------------- | -------------------------------- |
+| **NFR-AVAIL-007**: Frontend error monitoring (Sentry) | 100% error capture            | Error tracking enabled     | Must Have   | Sentry dashboard        | PRD §11.4, Phase-6 §6.8          |
+| **NFR-AVAIL-008**: Backend error monitoring           | 100% error capture            | Edge Function logs         | Must Have   | Supabase logs           | OBSERVABILITY §3                 |
+| **NFR-AVAIL-009**: Structured logging                 | JSON format, 5 log levels     | Log format validation      | Must Have   | Supabase logs           | OBSERVABILITY §3.1               |
+| **NFR-AVAIL-010**: Request tracing                    | Trace ID, span ID, request ID | Log context inspection     | Should Have | Supabase logs           | OBSERVABILITY §3.1.3             |
+| **NFR-AVAIL-011**: Health check endpoints             | Available, < 1s response      | HTTP 200 response          | Must Have   | Endpoint testing        | PRD §11.4, OBSERVABILITY §4.1    |
+| **NFR-AVAIL-012**: Uptime monitoring                  | 5-minute checks               | UptimeRobot active         | Must Have   | UptimeRobot dashboard   | Phase-6 §6.8.3                   |
+| **NFR-AVAIL-013**: Alert on website down              | < 2 minutes detection         | Monitoring alert triggered | Must Have   | Alert testing           | Phase-6 §6.8.4, OBSERVABILITY §5 |
+| **NFR-AVAIL-014**: Alert on high error rate (> 5%)    | < 5 minutes detection         | Monitoring alert triggered | Must Have   | Alert testing           | Phase-6 §6.8.4                   |
+| **NFR-AVAIL-015**: Alert on API response time (> 3s)  | < 10 minutes detection        | Monitoring alert triggered | Should Have | Alert testing           | Phase-6 §6.8.4                   |
+| **NFR-AVAIL-016**: Alert on payment webhook failure   | Immediate                     | Monitoring alert triggered | Must Have   | Alert testing           | OBSERVABILITY §5.1               |
+| **NFR-AVAIL-017**: Error context capture              | User ID, session, request ID  | Sentry event inspection    | Must Have   | Sentry dashboard        | OBSERVABILITY §2.1               |
+| **NFR-AVAIL-018**: Source map uploads                 | Every production build        | Stack traces resolved      | Must Have   | Sentry release tracking | OBSERVABILITY §2.1.3             |
+| **NFR-AVAIL-019**: Performance monitoring (APM)       | 20% transaction sampling      | Sentry Performance enabled | Should Have | Sentry Performance      | OBSERVABILITY §2.2               |
+| **NFR-AVAIL-020**: Incident response runbook          | Documented procedures         | Runbook completeness       | Must Have   | Manual review           | Phase-6 §6.8.6, OBSERVABILITY §6 |
 
 **Traceability:**
 
 - PRD-BMA-2026.md §11.4 (Reliability - Error monitoring, health checks)
 - Phase-6-POLISH-LAUNCH.md §6.8 (Monitoring setup)
+- OBSERVABILITY-IMPLEMENTATION.md (Complete observability strategy)
 
 ---
 
@@ -421,9 +431,9 @@ NFRs apply to all components of the BMA platform:
 
 | Requirement                                           | Target                     | Measurement                | Priority    | Verification Method     | Source    |
 | ----------------------------------------------------- | -------------------------- | -------------------------- | ----------- | ----------------------- | --------- |
-| **NFR-AVAIL-012**: Offline-Lite mode (read-only)      | Cached content accessible  | Network disconnection test | Should Have | Offline testing         | PRD §5.6  |
-| **NFR-AVAIL-013**: Offline banner notification        | Visible when offline       | UI testing                 | Should Have | Manual testing          | PRD §5.6  |
-| **NFR-AVAIL-014**: Graceful external service failures | Error messages, no crashes | Failure simulation         | Should Have | Fault injection testing | PRD §11.4 |
+| **NFR-AVAIL-021**: Offline-Lite mode (read-only)      | Cached content accessible  | Network disconnection test | Should Have | Offline testing         | PRD §5.6  |
+| **NFR-AVAIL-022**: Offline banner notification        | Visible when offline       | UI testing                 | Should Have | Manual testing          | PRD §5.6  |
+| **NFR-AVAIL-023**: Graceful external service failures | Error messages, no crashes | Failure simulation         | Should Have | Fault injection testing | PRD §11.4 |
 
 **Traceability:**
 
