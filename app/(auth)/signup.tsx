@@ -15,13 +15,14 @@ import {
   Row,
   Avatar,
   ThemeToggle,
+  GoogleSignInButton,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
 import { withOpacity } from '@/utils/colors';
 
 export default function SignUpScreen() {
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -32,6 +33,7 @@ export default function SignUpScreen() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -82,6 +84,18 @@ export default function SignUpScreen() {
       }
     } else {
       setError(result.error || 'Sign up failed');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setSuccessMessage('');
+    setIsGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setIsGoogleLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Google sign-in failed');
     }
   };
 
@@ -227,6 +241,27 @@ export default function SignUpScreen() {
                   loading={isLoading}
                   size="lg"
                   fullWidth
+                />
+
+                <Spacer size="md" />
+
+                {/* Divider with "OR" text */}
+                <Row align="center" gap="md">
+                  <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+                  <Text color="muted" variant="small">
+                    OR
+                  </Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+                </Row>
+
+                <Spacer size="md" />
+
+                {/* Google Sign-In Button */}
+                <GoogleSignInButton
+                  onPress={handleGoogleSignIn}
+                  loading={isGoogleLoading}
+                  disabled={isLoading || isGoogleLoading}
+                  label="Sign up with Google"
                 />
 
                 <Spacer size="md" />

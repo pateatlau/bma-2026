@@ -829,98 +829,187 @@ eas submit --platform android --profile production
 
 ---
 
-### Task 6.8: Monitoring Setup
+### Task 6.8: Monitoring & Observability Setup
 
 **GitHub Issue:** #51 - Setup Production Monitoring
 
-#### 6.8.1: Error Tracking (Sentry)
+> **📋 Complete Implementation Guide**: See [OBSERVABILITY-IMPLEMENTATION.md](../OBSERVABILITY-IMPLEMENTATION.md) for full observability strategy, code examples, and runbooks.
 
-**Files:** `lib/sentry.ts`, `app/_layout.tsx`
+This task establishes production-ready observability for frontend, backend, and infrastructure monitoring.
+
+#### 6.8.1: Error Tracking (Sentry) - Enhanced
+
+**Files:** `lib/sentry.ts`, `components/ErrorBoundary.tsx`, `app/_layout.tsx`
 
 ```bash
-npm install @sentry/react-native
+npm install @sentry/react-native web-vitals
 ```
 
-```typescript
-// lib/sentry.ts
-import * as Sentry from '@sentry/react-native';
+**Core Features**:
 
-export function initSentry() {
-  Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    environment: process.env.EXPO_PUBLIC_APP_ENV,
-    enableAutoSessionTracking: true,
-    tracesSampleRate: 0.2, // 20% of transactions
-  });
-}
+- ✅ Error capture with context (user ID, session, request)
+- ✅ Performance monitoring (20% transaction sampling)
+- ✅ Source map uploads for stack traces
+- ✅ Error boundaries for graceful failures
+- ✅ PII redaction (passwords, tokens, credit cards)
+- ✅ Release tracking (git commits tied to errors)
+- ✅ Web Vitals tracking (CLS, FID, FCP, LCP, TTFB)
 
-// Wrap error boundaries
-export function captureException(error: Error, context?: Record<string, any>) {
-  Sentry.captureException(error, { extra: context });
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §2.1-2.2 for complete Sentry setup with:
+
+- Enhanced configuration (release tracking, PII filtering)
+- Error boundary component
+- Source map upload to CI/CD
+- Performance monitoring
+- Custom error capture helpers
+
+#### 6.8.2: Backend Logging & Tracing
+
+**Files:** `supabase/functions/_shared/logger.ts`, `supabase/functions/_shared/error-handler.ts`, `supabase/functions/_shared/tracing.ts`
+
+**Core Features**:
+
+- ✅ Structured JSON logging (debug, info, warn, error, fatal)
+- ✅ Request tracing (trace ID, span ID, request ID)
+- ✅ Error handling with context
+- ✅ Query performance tracking
+- ✅ Edge Function timeout monitoring
+
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §3.1-3.2 for:
+
+- Logger utility class
+- Error handler wrapper
+- Request tracing middleware
+- Database query logging
+
+#### 6.8.3: Health Checks & Uptime Monitoring
+
+**Files:** `supabase/functions/health/index.ts`
+
+**Health Check Endpoint**: `https://[project-id].supabase.co/functions/v1/health`
+
+**Response Format**:
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-01-13T10:00:00Z",
+  "duration": 45,
+  "checks": {
+    "database": "healthy",
+    "storage": "healthy",
+    "auth": "healthy"
+  }
 }
 ```
 
-#### 6.8.2: Uptime Monitoring
+**Uptime Monitoring** (UptimeRobot - Free Tier):
 
-**Services:** Vercel Analytics, UptimeRobot, Better Uptime
+- Website: `https://bma2026.org` (5-minute checks)
+- API Health: `https://[project-id].supabase.co/functions/v1/health` (5-minute checks)
+- Supabase: `https://[project-id].supabase.co` (5-minute checks)
 
-**Configure alerts for:**
+**Alert Contacts**: [admin@bma2026.org](mailto:admin@bma2026.org)
 
-- Website down
-- API response time > 3s
-- Error rate > 1%
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §4.1-4.2 for health check code and UptimeRobot configuration.
 
-#### 6.8.3: Supabase Monitoring
+#### 6.8.4: Alerting Strategy
 
-1. Enable Supabase Logs
-2. Set up database alerts
-3. Monitor Edge Function invocations
-4. Track storage usage
+**Critical Alerts** (Immediate Response - Email + SMS):
 
-#### 6.8.4: Create Runbook
+- Website down (HTTP ≠ 200 for 2 minutes)
+- Database down (health check fails for 1 minute)
+- High error rate (> 5% for 5 minutes)
+- Edge Function timeout (latency > 10s for 5 minutes)
+- Payment webhook failure (> 3 failed webhooks)
+
+**Warning Alerts** (Monitor - Slack):
+
+- Slow API response (p95 > 3s for 10 minutes)
+- High database connections (> 80% for 5 minutes)
+- Storage usage high (> 80% daily check)
+- Error rate elevated (> 1% for 15 minutes)
+
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §5 for complete alert rules and notification channels (Email via Resend, Slack webhooks).
+
+#### 6.8.5: User Behavior Analytics (Optional - Phase 7)
+
+**Service**: Mixpanel or PostHog
+
+**Key Events**:
+
+- User signup, login, logout
+- Membership purchase, renewal
+- Content view, like, comment
+- Chatbot message, escalation
+- Payment success, failure
+- Profile update
+- Directory search
+
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §2.3 for analytics setup.
+
+#### 6.8.6: Production Runbook
 
 **Files:** `docs/RUNBOOK.md`
 
-```markdown
-# BMA 2026 Production Runbook
+**Incident Response Process**:
 
-## Incident Response
+1. **Detect** - Alert triggered or user report
+2. **Acknowledge** - Confirm incident, assess severity
+3. **Investigate** - Check logs, metrics, traces
+4. **Mitigate** - Apply immediate fix or workaround
+5. **Resolve** - Deploy permanent fix
+6. **Post-Mortem** - Document learnings
 
-### Website Down
+**Incident Severity**:
 
-1. Check Vercel status
-2. Check Supabase status
-3. Review recent deployments
-4. Check DNS configuration
-5. Escalate if unresolved in 15 minutes
+- **P0 - Critical**: Complete outage, data loss, security breach (< 15 min response)
+- **P1 - High**: Major feature broken, significant impact (< 1 hour response)
+- **P2 - Medium**: Minor feature broken, workaround available (< 4 hours)
+- **P3 - Low**: Cosmetic issue, low impact (< 1 day)
 
-### High Error Rate
+**Common Incident Runbooks**:
 
-1. Check Sentry for error patterns
-2. Review recent code changes
-3. Check external service status (Razorpay, Gemini)
-4. Rollback if necessary
+- Website Down (P0)
+- High Error Rate (P1)
+- Payment Webhook Failure (P0)
+- Database Connection Pool Exhausted (P1)
+- Slow API Response (P2)
 
-### Database Issues
+**Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §6 for complete runbook with investigation steps, resolution procedures, and contact information.
 
-1. Check Supabase dashboard
-2. Review slow query logs
-3. Check connection pool usage
-4. Contact Supabase support if needed
+#### 6.8.7: Cost Analysis
 
-## Contacts
+**Free Tier (Phase 6 - MVP)**:
 
-- On-call: [phone number]
-- Supabase Support: support@supabase.io
-- Vercel Support: support@vercel.com
-```
+- Sentry Developer: 5K errors/month, 10K transactions/month - **$0/month**
+- UptimeRobot Free: 50 monitors, 5-minute checks - **$0/month**
+- Supabase Logs: Native logging, 7-day retention - **$0/month** (included)
+- Vercel Analytics Hobby: Basic traffic - **$0/month** (included)
+- **Total: $0/month**
+
+**Paid Tier (Phase 7 - Production)**:
+
+- Sentry Team: 50K errors/month, 100K transactions, APM - **$26/month**
+- Mixpanel Growth: 100K MTU, unlimited events - **$25/month**
+- Better Uptime Basic: Unlimited monitors, 1-min checks - **$18/month**
+- **Total: ~$69/month**
 
 **Acceptance Criteria:**
 
-- [ ] Sentry configured and receiving errors
-- [ ] Uptime monitoring active
-- [ ] Alerts configured
-- [ ] Runbook documented
+- [ ] Sentry configured with enhanced error context
+- [ ] Error boundaries implemented
+- [ ] Source map uploads working
+- [ ] Structured logging in Edge Functions
+- [ ] Request tracing implemented
+- [ ] Health check endpoint created and tested
+- [ ] UptimeRobot monitors configured
+- [ ] Critical alerts configured (website down, high error rate)
+- [ ] Email and Slack notification channels setup
+- [ ] Production runbook documented
+- [ ] Test alert delivery (Sentry, UptimeRobot)
+- [ ] Verify logs in Supabase dashboard
+- [ ] Document escalation procedures
 
 ---
 

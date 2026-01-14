@@ -15,19 +15,21 @@ import {
   Row,
   Avatar,
   ThemeToggle,
+  GoogleSignInButton,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
 import { withOpacity } from '@/utils/colors';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, signInWithGoogle } = useAuth();
   const { colors } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     setError('');
@@ -48,6 +50,17 @@ export default function LoginScreen() {
 
     if (!result.success) {
       setError(result.error || 'Login failed');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setIsGoogleLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Google sign-in failed');
     }
   };
 
@@ -150,6 +163,26 @@ export default function LoginScreen() {
                   loading={isLoading}
                   size="lg"
                   fullWidth
+                />
+
+                <Spacer size="md" />
+
+                {/* Divider with "OR" text */}
+                <Row align="center" gap="md">
+                  <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+                  <Text color="muted" variant="small">
+                    OR
+                  </Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+                </Row>
+
+                <Spacer size="md" />
+
+                {/* Google Sign-In Button */}
+                <GoogleSignInButton
+                  onPress={handleGoogleSignIn}
+                  loading={isGoogleLoading}
+                  disabled={isLoading || isGoogleLoading}
                 />
 
                 <Spacer size="md" />

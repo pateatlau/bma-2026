@@ -5,6 +5,9 @@ export { ScreenContainer, type ScreenContainerProps, type ScreenPadding } from '
 export { Card, type CardProps, type CardVariant, type CardPadding } from './Card';
 export { ThemeToggle, type ThemeToggleProps } from './ThemeToggle';
 
+// Auth components
+export { GoogleSignInButton } from './auth/GoogleSignInButton';
+
 // Typography components
 export {
   Text,
