@@ -34,6 +34,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, name?: string) => Promise<AuthResult>;
   signInWithGoogle: () => Promise<AuthResult>;
+  signInWithFacebook: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
 }
@@ -488,6 +489,160 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signInWithFacebook = useCallback(async (): Promise<AuthResult> => {
+    try {
+      // Build redirect URL based on platform
+      // Web: Use current origin (will redirect back to the app)
+      // Mobile: Use Expo's makeRedirectUri for proper deep link handling
+      let redirectTo: string;
+
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        redirectTo = window.location.origin;
+      } else {
+        // For mobile (both iOS and Android), generate the redirect URI
+        // In Expo Go, this generates: exp://ip:port/--/auth/callback
+        // In standalone builds, this generates: bma2026://auth/callback
+        redirectTo = makeRedirectUri({
+          scheme: 'bma2026',
+          path: 'auth/callback',
+        });
+      }
+
+      console.warn('[Facebook OAuth] Generated redirect URI:', redirectTo);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: Platform.OS !== 'web', // Don't auto-redirect on mobile
+          // Facebook specific scopes (email and public_profile are default)
+          scopes: 'email public_profile',
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // For OAuth, signInWithOAuth returns a URL that the user needs to visit
+      // The actual session will be established after the OAuth flow completes
+      if (data?.url) {
+        // On web, the browser will automatically redirect
+        // On mobile, we need to open the URL (handled by Expo's WebBrowser)
+        if (Platform.OS !== 'web') {
+          console.warn('[Facebook OAuth] Opening browser for authentication...');
+          console.warn('[Facebook OAuth] Platform:', Platform.OS);
+
+          // Use different approach for Android vs iOS
+          let result: WebBrowser.WebBrowserAuthSessionResult;
+
+          if (Platform.OS === 'android') {
+            // For Android, use auth session with options
+            try {
+              result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
+                showInRecents: true,
+                createTask: false,
+              });
+            } catch (e) {
+              console.warn('[Facebook OAuth] Android auth session error, trying alternative:', e);
+              // Fallback: open in browser and rely on deep link handling
+              await WebBrowser.openBrowserAsync(data.url);
+              return {
+                success: true,
+                message: 'Please complete sign-in in your browser and return to the app.',
+              };
+            }
+          } else {
+            result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+          }
+
+          console.warn('[Facebook OAuth] Browser result type:', result.type);
+
+          if (result.type === 'success' && result.url) {
+            const url = result.url;
+            console.warn('[Facebook OAuth] Callback URL received');
+
+            // Extract tokens from callback URL
+            const createSession = async (callbackUrl: string) => {
+              try {
+                let params: URLSearchParams;
+
+                if (callbackUrl.includes('#')) {
+                  const hashPart = callbackUrl.split('#')[1];
+                  params = new URLSearchParams(hashPart);
+                } else if (callbackUrl.includes('?')) {
+                  const queryPart = callbackUrl.split('?')[1];
+                  params = new URLSearchParams(queryPart);
+                } else {
+                  console.error('No tokens found in callback URL');
+                  return null;
+                }
+
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+
+                console.warn('[Facebook OAuth] Token extraction:', {
+                  hasAccessToken: !!accessToken,
+                  hasRefreshToken: !!refreshToken,
+                });
+
+                if (!accessToken) {
+                  console.error('No access token found');
+                  return null;
+                }
+
+                if (!refreshToken) {
+                  console.error('No refresh token found in OAuth callback');
+                  return null;
+                }
+
+                // Set the session with the extracted tokens
+                const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                });
+
+                if (sessionError) {
+                  console.error('Error setting session:', sessionError);
+                  return null;
+                }
+
+                console.warn('[Facebook OAuth] Session set successfully:', {
+                  hasUser: !!sessionData.user,
+                  hasSession: !!sessionData.session,
+                  userEmail: sessionData.user?.email,
+                });
+
+                return sessionData;
+              } catch (err) {
+                console.error('Error creating session:', err);
+                return null;
+              }
+            };
+
+            const sessionData = await createSession(url);
+
+            if (sessionData && sessionData.session) {
+              return { success: true };
+            }
+
+            return { success: false, error: 'Failed to establish session after Facebook sign-in.' };
+          } else if (result.type === 'cancel') {
+            return { success: false, error: 'Facebook sign-in was cancelled.' };
+          } else {
+            return { success: false, error: 'Facebook sign-in failed.' };
+          }
+        }
+        return { success: true }; // Web will auto-redirect
+      }
+
+      return { success: false, error: 'Facebook sign-in failed. Please try again.' };
+    } catch (error) {
+      console.error('Facebook sign-in error:', error);
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
+    }
+  }, []);
+
   const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     try {
       // Build redirect URL only for web platform
@@ -523,10 +678,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       signUp,
       signInWithGoogle,
+      signInWithFacebook,
       logout,
       resetPassword,
     }),
-    [user, session, isLoading, login, signUp, signInWithGoogle, logout, resetPassword]
+    [
+      user,
+      session,
+      isLoading,
+      login,
+      signUp,
+      signInWithGoogle,
+      signInWithFacebook,
+      logout,
+      resetPassword,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

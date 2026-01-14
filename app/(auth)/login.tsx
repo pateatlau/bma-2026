@@ -16,13 +16,14 @@ import {
   Avatar,
   ThemeToggle,
   GoogleSignInButton,
+  FacebookSignInButton,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
 import { withOpacity } from '@/utils/colors';
 
 export default function LoginScreen() {
-  const { login, signInWithGoogle } = useAuth();
+  const { login, signInWithGoogle, signInWithFacebook } = useAuth();
   const { colors } = useTheme();
 
   const [email, setEmail] = useState('');
@@ -30,6 +31,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
 
   const handleLogin = async () => {
     setError('');
@@ -61,6 +63,17 @@ export default function LoginScreen() {
 
     if (!result.success) {
       setError(result.error || 'Google sign-in failed');
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    setError('');
+    setIsFacebookLoading(true);
+    const result = await signInWithFacebook();
+    setIsFacebookLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Facebook sign-in failed');
     }
   };
 
@@ -182,7 +195,16 @@ export default function LoginScreen() {
                 <GoogleSignInButton
                   onPress={handleGoogleSignIn}
                   loading={isGoogleLoading}
-                  disabled={isLoading || isGoogleLoading}
+                  disabled={isLoading || isGoogleLoading || isFacebookLoading}
+                />
+
+                <Spacer size="sm" />
+
+                {/* Facebook Sign-In Button */}
+                <FacebookSignInButton
+                  onPress={handleFacebookSignIn}
+                  loading={isFacebookLoading}
+                  disabled={isLoading || isGoogleLoading || isFacebookLoading}
                 />
 
                 <Spacer size="md" />

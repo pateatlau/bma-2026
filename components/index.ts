@@ -7,6 +7,7 @@ export { ThemeToggle, type ThemeToggleProps } from './ThemeToggle';
 
 // Auth components
 export { GoogleSignInButton } from './auth/GoogleSignInButton';
+export { FacebookSignInButton } from './auth/FacebookSignInButton';
 
 // Typography components
 export {
