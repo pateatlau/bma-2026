@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, View } from 'react-native';
 import { Link } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
   Button,
   Input,
   Card,
-  ScreenContainer,
   Text,
   Heading,
   Spacer,
@@ -25,6 +25,7 @@ import { withOpacity } from '@/utils/colors';
 export default function LoginScreen() {
   const { login, signInWithGoogle, signInWithFacebook } = useAuth();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,20 +83,30 @@ export default function LoginScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScreenContainer
-        centered
-        safeAreaTop
-        safeAreaBottom
-        padding="lg"
-        style={{ maxWidth: container.auth.maxWidth, width: '100%', alignSelf: 'center' }}
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingTop: insets.top + spacing.xl,
+          paddingBottom: insets.bottom + spacing.xl,
+          paddingHorizontal: spacing.lg,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View style={{ width: '100%' }}>
+        <View
+          style={{
+            maxWidth: container.auth.maxWidth,
+            width: '100%',
+            alignSelf: 'center',
+          }}
+        >
           {/* Theme Toggle - Top Right */}
           <View style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
             <ThemeToggle size="md" />
           </View>
 
-          <Stack gap="xl" style={{ width: '100%' }}>
+          <Stack gap="xl">
             {/* Header */}
             <Stack gap="md" style={{ alignItems: 'center' }}>
               <Avatar
@@ -225,7 +236,7 @@ export default function LoginScreen() {
             </Card>
           </Stack>
         </View>
-      </ScreenContainer>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
