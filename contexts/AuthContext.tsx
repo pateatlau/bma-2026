@@ -26,6 +26,70 @@ export interface AuthResult {
   message?: string;
 }
 
+// Helper function to extract tokens from OAuth callback URL and create session
+async function createSessionFromCallbackUrl(
+  callbackUrl: string,
+  provider: string
+): Promise<{
+  data: { user: any; session: any } | null;
+  error: string | null;
+}> {
+  try {
+    let params: URLSearchParams;
+
+    if (callbackUrl.includes('#')) {
+      const hashPart = callbackUrl.split('#')[1];
+      params = new URLSearchParams(hashPart);
+    } else if (callbackUrl.includes('?')) {
+      const queryPart = callbackUrl.split('?')[1];
+      params = new URLSearchParams(queryPart);
+    } else {
+      console.error(`[${provider} OAuth] No tokens found in callback URL`);
+      return { data: null, error: 'No tokens in callback URL' };
+    }
+
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    console.warn(`[${provider} OAuth] Token extraction:`, {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+    });
+
+    if (!accessToken) {
+      console.error(`[${provider} OAuth] No access token found`);
+      return { data: null, error: 'No access token found' };
+    }
+
+    if (!refreshToken) {
+      console.error(`[${provider} OAuth] No refresh token found in OAuth callback`);
+      return { data: null, error: 'No refresh token found' };
+    }
+
+    // Set the session with the extracted tokens
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (sessionError) {
+      console.error(`[${provider} OAuth] Error setting session:`, sessionError);
+      return { data: null, error: sessionError.message };
+    }
+
+    console.warn(`[${provider} OAuth] Session set successfully:`, {
+      hasUser: !!sessionData.user,
+      hasSession: !!sessionData.session,
+      userEmail: sessionData.user?.email,
+    });
+
+    return { data: sessionData, error: null };
+  } catch (err) {
+    console.error(`[${provider} OAuth] Error creating session:`, err);
+    return { data: null, error: 'Failed to create session' };
+  }
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -397,82 +461,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('[OAuth] Full result:', JSON.stringify(result, null, 2));
 
           if (result.type === 'success' && result.url) {
-            // Extract the URL returned from OAuth
-            const url = result.url;
-            console.warn('[OAuth] Callback URL received:', url);
+            console.warn('[OAuth] Callback URL received');
 
-            // Create a temporary URL object to parse the callback
-            // For implicit flow, tokens are in the hash fragment
-            const createSession = async (callbackUrl: string) => {
-              try {
-                // Try to extract from hash first (implicit flow)
-                let params: URLSearchParams;
+            const { data: sessionData, error: sessionError } = await createSessionFromCallbackUrl(
+              result.url,
+              'Google'
+            );
 
-                if (callbackUrl.includes('#')) {
-                  const hashPart = callbackUrl.split('#')[1];
-                  params = new URLSearchParams(hashPart);
-                } else if (callbackUrl.includes('?')) {
-                  // Fallback to query params
-                  const queryPart = callbackUrl.split('?')[1];
-                  params = new URLSearchParams(queryPart);
-                } else {
-                  console.error('No tokens found in callback URL');
-                  return null;
-                }
-
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-                const expiresIn = params.get('expires_in');
-                const tokenType = params.get('token_type');
-
-                console.warn('[OAuth] Token extraction:', {
-                  hasAccessToken: !!accessToken,
-                  hasRefreshToken: !!refreshToken,
-                  expiresIn,
-                  tokenType,
-                });
-
-                if (!accessToken) {
-                  console.error('No access token found');
-                  return null;
-                }
-
-                if (!refreshToken) {
-                  console.error('No refresh token found in OAuth callback');
-                  return null;
-                }
-
-                // Set the session with the extracted tokens
-                const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-                  access_token: accessToken,
-                  refresh_token: refreshToken,
-                });
-
-                if (sessionError) {
-                  console.error('Error setting session:', sessionError);
-                  return null;
-                }
-
-                console.warn('[OAuth] Session set successfully:', {
-                  hasUser: !!sessionData.user,
-                  hasSession: !!sessionData.session,
-                  userEmail: sessionData.user?.email,
-                });
-
-                return sessionData;
-              } catch (err) {
-                console.error('Error creating session:', err);
-                return null;
-              }
-            };
-
-            const sessionData = await createSession(url);
-
-            if (sessionData && sessionData.session) {
-              return { success: true };
+            if (sessionError || !sessionData?.session) {
+              return {
+                success: false,
+                error: sessionError || 'Failed to establish session after Google sign-in.',
+              };
             }
 
-            return { success: false, error: 'Failed to establish session after Google sign-in.' };
+            return { success: true };
           } else if (result.type === 'cancel') {
             return { success: false, error: 'Google sign-in was cancelled.' };
           } else {
@@ -559,74 +562,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('[Facebook OAuth] Browser result type:', result.type);
 
           if (result.type === 'success' && result.url) {
-            const url = result.url;
             console.warn('[Facebook OAuth] Callback URL received');
 
-            // Extract tokens from callback URL
-            const createSession = async (callbackUrl: string) => {
-              try {
-                let params: URLSearchParams;
+            const { data: sessionData, error: sessionError } = await createSessionFromCallbackUrl(
+              result.url,
+              'Facebook'
+            );
 
-                if (callbackUrl.includes('#')) {
-                  const hashPart = callbackUrl.split('#')[1];
-                  params = new URLSearchParams(hashPart);
-                } else if (callbackUrl.includes('?')) {
-                  const queryPart = callbackUrl.split('?')[1];
-                  params = new URLSearchParams(queryPart);
-                } else {
-                  console.error('No tokens found in callback URL');
-                  return null;
-                }
-
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-
-                console.warn('[Facebook OAuth] Token extraction:', {
-                  hasAccessToken: !!accessToken,
-                  hasRefreshToken: !!refreshToken,
-                });
-
-                if (!accessToken) {
-                  console.error('No access token found');
-                  return null;
-                }
-
-                if (!refreshToken) {
-                  console.error('No refresh token found in OAuth callback');
-                  return null;
-                }
-
-                // Set the session with the extracted tokens
-                const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-                  access_token: accessToken,
-                  refresh_token: refreshToken,
-                });
-
-                if (sessionError) {
-                  console.error('Error setting session:', sessionError);
-                  return null;
-                }
-
-                console.warn('[Facebook OAuth] Session set successfully:', {
-                  hasUser: !!sessionData.user,
-                  hasSession: !!sessionData.session,
-                  userEmail: sessionData.user?.email,
-                });
-
-                return sessionData;
-              } catch (err) {
-                console.error('Error creating session:', err);
-                return null;
-              }
-            };
-
-            const sessionData = await createSession(url);
-
-            if (sessionData && sessionData.session) {
-              return { success: true };
+            if (sessionError || !sessionData?.session) {
+              return {
+                success: false,
+                error: sessionError || 'Failed to establish session after Facebook sign-in.',
+              };
             }
 
-            return { success: false, error: 'Failed to establish session after Facebook sign-in.' };
+            return { success: true };
           } else if (result.type === 'cancel') {
             return { success: false, error: 'Facebook sign-in was cancelled.' };
           } else {

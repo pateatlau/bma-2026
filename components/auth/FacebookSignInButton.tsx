@@ -2,7 +2,6 @@ import React from 'react';
 import { TouchableOpacity, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@/components/typography';
-import { useTheme } from '@/contexts/ThemeContext';
 import { spacing, borderRadius } from '@/constants/theme';
 
 interface FacebookSignInButtonProps {
@@ -18,8 +17,6 @@ export function FacebookSignInButton({
   disabled = false,
   label = 'Continue with Facebook',
 }: FacebookSignInButtonProps) {
-  const { colors } = useTheme();
-
   return (
     <TouchableOpacity
       onPress={onPress}
