@@ -494,33 +494,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithFacebook = useCallback(async (): Promise<AuthResult> => {
     try {
-      // Build redirect URL based on platform
-      // Web: Use current origin (will redirect back to the app)
+      // Build OAuth options based on platform
+      // Web: Don't pass redirectTo - let Supabase use configured Site URL to avoid Facebook App Domains conflict
       // Mobile: Use Expo's makeRedirectUri for proper deep link handling
-      let redirectTo: string;
+      const isWeb = Platform.OS === 'web';
+      const oauthOptions: any = {
+        skipBrowserRedirect: !isWeb, // Don't auto-redirect on mobile
+        scopes: 'email public_profile', // Facebook specific scopes
+      };
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        redirectTo = window.location.origin;
-      } else {
-        // For mobile (both iOS and Android), generate the redirect URI
+      if (!isWeb) {
+        // For mobile only, generate the redirect URI
         // In Expo Go, this generates: exp://ip:port/--/auth/callback
         // In standalone builds, this generates: bma2026://auth/callback
-        redirectTo = makeRedirectUri({
+        const redirectTo = makeRedirectUri({
           scheme: 'bma2026',
           path: 'auth/callback',
         });
+        oauthOptions.redirectTo = redirectTo;
+        console.warn('[Facebook OAuth] Mobile redirect URI:', redirectTo);
+      } else {
+        console.warn('[Facebook OAuth] Web platform - using Supabase Site URL');
       }
-
-      console.warn('[Facebook OAuth] Generated redirect URI:', redirectTo);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: Platform.OS !== 'web', // Don't auto-redirect on mobile
-          // Facebook specific scopes (email and public_profile are default)
-          scopes: 'email public_profile',
-        },
+        options: oauthOptions,
       });
 
       if (error) {
@@ -536,13 +535,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('[Facebook OAuth] Opening browser for authentication...');
           console.warn('[Facebook OAuth] Platform:', Platform.OS);
 
+          // Get the mobile redirect URI from options
+          const mobileRedirectTo = oauthOptions.redirectTo;
+
           // Use different approach for Android vs iOS
           let result: WebBrowser.WebBrowserAuthSessionResult;
 
           if (Platform.OS === 'android') {
             // For Android, use auth session with options
             try {
-              result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
+              result = await WebBrowser.openAuthSessionAsync(data.url, mobileRedirectTo, {
                 showInRecents: true,
                 createTask: false,
               });
@@ -556,7 +558,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
             }
           } else {
-            result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+            result = await WebBrowser.openAuthSessionAsync(data.url, mobileRedirectTo);
           }
 
           console.warn('[Facebook OAuth] Browser result type:', result.type);
