@@ -24,6 +24,16 @@ BMA 2026 is a unified digital platform serving as the primary communication, mem
 | Notifications | Gupshup (WhatsApp), Resend (Email)                        |
 | DevOps        | GitHub Actions, EAS Build, Vercel                         |
 
+## Authentication
+
+The platform supports multiple authentication methods via Supabase Auth:
+
+- **Email & Password** - Traditional email/password sign-up and sign-in
+- **Google OAuth** - Sign in with Google account
+- **Facebook OAuth** - Sign in with Facebook account
+
+All authentication methods work across Web, iOS, and Android platforms.
+
 ## Prerequisites
 
 - Node.js 20+
