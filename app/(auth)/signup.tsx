@@ -16,13 +16,14 @@ import {
   Avatar,
   ThemeToggle,
   GoogleSignInButton,
+  FacebookSignInButton,
 } from '@/components';
 import { spacing, borderRadius } from '@/constants/theme';
 import { container } from '@/constants/tokens';
 import { withOpacity } from '@/utils/colors';
 
 export default function SignUpScreen() {
-  const { signUp, signInWithGoogle } = useAuth();
+  const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -34,6 +35,7 @@ export default function SignUpScreen() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,6 +98,18 @@ export default function SignUpScreen() {
 
     if (!result.success) {
       setError(result.error || 'Google sign-in failed');
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    setError('');
+    setSuccessMessage('');
+    setIsFacebookLoading(true);
+    const result = await signInWithFacebook();
+    setIsFacebookLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Facebook sign-in failed');
     }
   };
 
@@ -260,8 +274,18 @@ export default function SignUpScreen() {
                 <GoogleSignInButton
                   onPress={handleGoogleSignIn}
                   loading={isGoogleLoading}
-                  disabled={isLoading || isGoogleLoading}
+                  disabled={isLoading || isGoogleLoading || isFacebookLoading}
                   label="Sign up with Google"
+                />
+
+                <Spacer size="sm" />
+
+                {/* Facebook Sign-In Button */}
+                <FacebookSignInButton
+                  onPress={handleFacebookSignIn}
+                  loading={isFacebookLoading}
+                  disabled={isLoading || isGoogleLoading || isFacebookLoading}
+                  label="Sign up with Facebook"
                 />
 
                 <Spacer size="md" />

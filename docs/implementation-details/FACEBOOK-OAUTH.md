@@ -1,0 +1,867 @@
+# Facebook OAuth Implementation Guide
+
+**Status:** ✅ Implemented | ⚠️ Android requires Development Build (expected)
+
+This document details the implementation of Facebook OAuth authentication for the BMA 2026 application using Supabase Auth.
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [Facebook Developer Platform Setup](#facebook-developer-platform-setup)
+4. [Supabase Dashboard Configuration](#supabase-dashboard-configuration)
+5. [Code Implementation](#code-implementation)
+6. [Testing](#testing)
+7. [Known Issues](#known-issues)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## Overview
+
+Facebook OAuth integration allows users to sign in using their Facebook account. The implementation uses:
+
+- **Supabase Auth**: Handles OAuth flow server-side
+- **expo-web-browser**: Opens OAuth consent screen on mobile
+- **expo-auth-session**: Generates proper redirect URIs
+- **Custom redirect handling**: Extracts tokens and establishes session
+
+### Platform Support
+
+| Platform            | Status              | Notes                                       |
+| ------------------- | ------------------- | ------------------------------------------- |
+| Web                 | ✅ Expected to work | Auto-redirect after OAuth                   |
+| iOS                 | ✅ Expected to work | Uses in-app browser with custom scheme      |
+| Android (Expo Go)   | ⚠️ Limited          | Requires Development Build for full support |
+| Android (Dev Build) | ✅ Expected to work | Full OAuth support with custom scheme       |
+
+---
+
+## Prerequisites
+
+- Supabase project created
+- Facebook Developer account
+- Expo project with `expo-web-browser` and `expo-auth-session` installed (already installed for Google OAuth)
+
+```bash
+# Should already be installed from Google OAuth implementation
+npm install expo-web-browser expo-auth-session expo-crypto
+```
+
+---
+
+## Facebook Developer Platform Setup
+
+### 1. Create Facebook App
+
+1. Go to [Facebook Developers](https://developers.facebook.com/)
+2. Click **My Apps** in the top right
+3. Click **Create App**
+4. Select **Use Case**: **Authenticate and request data from users with Facebook Login**
+5. Click **Next**
+6. **App Type**: Select **Consumer**
+7. Click **Next**
+8. Fill in app details:
+   - **App Name**: `BMA 2026` or `Bangalore Mizo Association`
+   - **App Contact Email**: Your email
+   - **Business Account**: (Optional) Create or select if you have one
+9. Click **Create App**
+
+### 2. Add Facebook Login Product
+
+1. From the App Dashboard, find **Add Products to Your App**
+2. Locate **Facebook Login** and click **Set Up**
+3. Choose platform: **Web** (for initial setup)
+4. Click **Next**
+
+### 3. Configure OAuth Settings
+
+1. In the left sidebar, go to **Facebook Login** > **Settings**
+2. Configure the following settings:
+
+#### Valid OAuth Redirect URIs
+
+Add your Supabase callback URL:
+
+```
+https://<your-project-ref>.supabase.co/auth/v1/callback
+```
+
+**Example:**
+
+```
+https://dxwwnvlgtymnaawgcofd.supabase.co/auth/v1/callback
+```
+
+#### Client OAuth Settings
+
+- **Client OAuth Login**: ON
+- **Web OAuth Login**: ON
+- **Force Web OAuth Reauthentication**: OFF
+- **Use Strict Mode for Redirect URIs**: ON
+- **Enforce HTTPS**: ON
+
+Click **Save Changes**
+
+### 4. Configure App Settings
+
+1. Go to **Settings** > **Basic** in the left sidebar
+2. Fill in required fields:
+   - **App Domains**: Add your domain(s)
+     ```
+     bma-2026.vercel.app
+     localhost
+     ```
+   - **Privacy Policy URL**: `https://bma-2026.vercel.app/privacy` (create this page if it doesn't exist)
+   - **Terms of Service URL**: (Optional) `https://bma-2026.vercel.app/terms`
+   - **App Icon**: Upload BMA logo (1024x1024px recommended)
+
+3. **Add Platform** (if not already added):
+   - Click **Add Platform** at the bottom
+   - Choose **Website**
+   - **Site URL**: `https://bma-2026.vercel.app`
+   - For local development, also add: `http://localhost:8081`
+
+4. Scroll down and note your credentials:
+   - **App ID**: `123456789012345`
+   - **App Secret**: Click **Show** to reveal
+
+### 5. Configure Data Access
+
+1. Go to **App Review** > **Permissions and Features**
+2. Request the following permissions (if not already granted):
+   - **email** (should be granted by default)
+   - **public_profile** (granted by default)
+
+### 6. App Mode Settings
+
+#### During Development
+
+- Keep app in **Development Mode**
+- Add test users: Go to **Roles** > **Test Users** > **Add Test Users**
+- Test users can sign in without app review
+
+#### Before Production Launch
+
+1. Go to **App Review** > **Requests**
+2. Submit for **App Review** if you need additional permissions beyond `email` and `public_profile`
+3. Switch app to **Live Mode** in **Settings** > **Basic**
+4. Note: `email` and `public_profile` don't require review for most cases
+
+---
+
+## Supabase Dashboard Configuration
+
+### 1. Enable Facebook Provider
+
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project
+3. Navigate to **Authentication** > **Providers**
+4. Find **Facebook** in the list
+5. **Toggle ON** to enable
+
+### 2. Add Facebook Credentials
+
+In the Facebook provider settings:
+
+- **Facebook client ID**: Paste your Facebook **App ID**
+- **Facebook secret**: Paste your Facebook **App Secret**
+- **Authorized Client IDs**: Leave empty (not needed for web/mobile)
+
+Click **Save**
+
+### 3. Configure URL Settings
+
+Go to **Authentication** > **URL Configuration**:
+
+#### Site URL
+
+Set to your production URL:
+
+```
+https://bma-2026.vercel.app
+```
+
+For local development, you can use:
+
+```
+http://localhost:8081
+```
+
+#### Redirect URLs
+
+The redirect URLs should already be configured from Google OAuth setup. Verify these are present:
+
+```
+# Local development
+http://localhost:8081
+http://localhost:8081/**
+
+# Production
+https://bma-2026.vercel.app
+https://bma-2026.vercel.app/**
+
+# Mobile - Custom scheme (for production builds)
+bma2026://
+bma2026://**
+
+# Mobile - Expo Go (for development)
+exp://*
+exp://localhost:8081/**
+```
+
+**Important:** The `exp://*` wildcard allows OAuth to work in Expo Go during development.
+
+Click **Save**
+
+---
+
+## Code Implementation
+
+### 1. AuthContext Updates (`contexts/AuthContext.tsx`)
+
+#### Interface Update
+
+Add the new method to the `AuthContextType` interface:
+
+```typescript
+interface AuthContextType {
+  // ... existing methods
+  signInWithGoogle: () => Promise<AuthResult>;
+  signInWithFacebook: () => Promise<AuthResult>; // Add this
+}
+```
+
+#### signInWithFacebook Method
+
+Add this new method to the `AuthProvider` component (after `signInWithGoogle`):
+
+```typescript
+const signInWithFacebook = useCallback(async (): Promise<AuthResult> => {
+  try {
+    // Build redirect URL based on platform
+    // Web: Use current origin (will redirect back to the app)
+    // Mobile: Use Expo's makeRedirectUri for proper deep link handling
+    let redirectTo: string;
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      redirectTo = window.location.origin;
+    } else {
+      // For mobile (both iOS and Android), generate the redirect URI
+      // In Expo Go, this generates: exp://ip:port/--/auth/callback
+      // In standalone builds, this generates: bma2026://auth/callback
+      redirectTo = makeRedirectUri({
+        scheme: 'bma2026',
+        path: 'auth/callback',
+      });
+    }
+
+    console.warn('[Facebook OAuth] Generated redirect URI:', redirectTo);
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo,
+        skipBrowserRedirect: Platform.OS !== 'web', // Don't auto-redirect on mobile
+        // Facebook specific scopes (email and public_profile are default)
+        scopes: 'email public_profile',
+      },
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // For OAuth, signInWithOAuth returns a URL that the user needs to visit
+    // The actual session will be established after the OAuth flow completes
+    if (data?.url) {
+      // On web, the browser will automatically redirect
+      // On mobile, we need to open the URL (handled by Expo's WebBrowser)
+      if (Platform.OS !== 'web') {
+        console.warn('[Facebook OAuth] Opening browser for authentication...');
+        console.warn('[Facebook OAuth] Platform:', Platform.OS);
+
+        // Use different approach for Android vs iOS
+        let result: WebBrowser.WebBrowserAuthSessionResult;
+
+        if (Platform.OS === 'android') {
+          // For Android, use auth session with options
+          try {
+            result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
+              showInRecents: true,
+              createTask: false,
+            });
+          } catch (e) {
+            console.warn('[Facebook OAuth] Android auth session error, trying alternative:', e);
+            // Fallback: open in browser and rely on deep link handling
+            await WebBrowser.openBrowserAsync(data.url);
+            return {
+              success: true,
+              message: 'Please complete sign-in in your browser and return to the app.',
+            };
+          }
+        } else {
+          result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+        }
+
+        console.warn('[Facebook OAuth] Browser result type:', result.type);
+
+        if (result.type === 'success' && result.url) {
+          const url = result.url;
+          console.warn('[Facebook OAuth] Callback URL received');
+
+          // Extract tokens from callback URL
+          const createSession = async (callbackUrl: string) => {
+            try {
+              let params: URLSearchParams;
+
+              if (callbackUrl.includes('#')) {
+                const hashPart = callbackUrl.split('#')[1];
+                params = new URLSearchParams(hashPart);
+              } else if (callbackUrl.includes('?')) {
+                const queryPart = callbackUrl.split('?')[1];
+                params = new URLSearchParams(queryPart);
+              } else {
+                console.error('No tokens found in callback URL');
+                return null;
+              }
+
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+
+              console.warn('[Facebook OAuth] Token extraction:', {
+                hasAccessToken: !!accessToken,
+                hasRefreshToken: !!refreshToken,
+              });
+
+              if (!accessToken) {
+                console.error('No access token found');
+                return null;
+              }
+
+              if (!refreshToken) {
+                console.error('No refresh token found in OAuth callback');
+                return null;
+              }
+
+              // Set the session with the extracted tokens
+              const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+
+              if (sessionError) {
+                console.error('Error setting session:', sessionError);
+                return null;
+              }
+
+              console.warn('[Facebook OAuth] Session set successfully:', {
+                hasUser: !!sessionData.user,
+                hasSession: !!sessionData.session,
+                userEmail: sessionData.user?.email,
+              });
+
+              return sessionData;
+            } catch (err) {
+              console.error('Error creating session:', err);
+              return null;
+            }
+          };
+
+          const sessionData = await createSession(url);
+
+          if (sessionData && sessionData.session) {
+            return { success: true };
+          }
+
+          return { success: false, error: 'Failed to establish session after Facebook sign-in.' };
+        } else if (result.type === 'cancel') {
+          return { success: false, error: 'Facebook sign-in was cancelled.' };
+        } else {
+          return { success: false, error: 'Facebook sign-in failed.' };
+        }
+      }
+      return { success: true }; // Web will auto-redirect
+    }
+
+    return { success: false, error: 'Facebook sign-in failed. Please try again.' };
+  } catch (error) {
+    console.error('Facebook sign-in error:', error);
+    return { success: false, error: 'An unexpected error occurred. Please try again.' };
+  }
+}, []);
+```
+
+#### Provider Value Update
+
+Add `signInWithFacebook` to the provider value:
+
+```typescript
+const value = useMemo(
+  () => ({
+    user,
+    session,
+    isAuthenticated: !!session && !!user,
+    isLoading,
+    login,
+    signUp,
+    signInWithGoogle,
+    signInWithFacebook, // Add this
+    logout,
+    resetPassword,
+  }),
+  [
+    user,
+    session,
+    isLoading,
+    login,
+    signUp,
+    signInWithGoogle,
+    signInWithFacebook,
+    logout,
+    resetPassword,
+  ]
+);
+```
+
+### 2. Facebook Sign-In Button Component
+
+Create a new file: `components/auth/FacebookSignInButton.tsx`
+
+```typescript
+import React from 'react';
+import { TouchableOpacity, View, ActivityIndicator, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Text } from '@/components/typography';
+import { useTheme } from '@/contexts/ThemeContext';
+import { spacing, borderRadius } from '@/constants/theme';
+
+interface FacebookSignInButtonProps {
+  onPress: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  label?: string;
+}
+
+export function FacebookSignInButton({
+  onPress,
+  loading = false,
+  disabled = false,
+  label = 'Continue with Facebook',
+}: FacebookSignInButtonProps) {
+  const { colors } = useTheme();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={[
+        styles.button,
+        {
+          backgroundColor: '#1877F2', // Facebook blue
+          borderColor: '#1877F2',
+        },
+        (disabled || loading) && styles.buttonDisabled,
+      ]}
+      activeOpacity={0.7}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color="#FFFFFF" />
+      ) : (
+        <View style={styles.content}>
+          <Ionicons name="logo-facebook" size={20} color="#FFFFFF" />
+          <Text weight="medium" style={[styles.label, { color: '#FFFFFF' }]}>
+            {label}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    height: 48,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  label: {
+    fontSize: 16,
+  },
+});
+```
+
+### 3. Export Component
+
+Update `components/index.ts`:
+
+```typescript
+// Auth components
+export { GoogleSignInButton } from './auth/GoogleSignInButton';
+export { FacebookSignInButton } from './auth/FacebookSignInButton'; // Add this
+```
+
+### 4. Login Screen Integration
+
+Update `app/(auth)/login.tsx`:
+
+```typescript
+import { GoogleSignInButton, FacebookSignInButton } from '@/components';
+
+export default function LoginScreen() {
+  const { login, signInWithGoogle, signInWithFacebook } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setIsGoogleLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Google sign-in failed');
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    setError('');
+    setIsFacebookLoading(true);
+    const result = await signInWithFacebook();
+    setIsFacebookLoading(false);
+
+    if (!result.success) {
+      setError(result.error || 'Facebook sign-in failed');
+    }
+  };
+
+  return (
+    // ... existing form fields
+
+    <Button
+      title="Sign In"
+      onPress={handleLogin}
+      loading={isLoading}
+      size="lg"
+      fullWidth
+    />
+
+    <Spacer size="md" />
+
+    {/* Divider with "OR" text */}
+    <Row align="center" gap="md">
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+      <Text color="muted" variant="small">OR</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+    </Row>
+
+    <Spacer size="md" />
+
+    {/* Google Sign-In Button */}
+    <GoogleSignInButton
+      onPress={handleGoogleSignIn}
+      loading={isGoogleLoading}
+      disabled={isLoading || isGoogleLoading || isFacebookLoading}
+    />
+
+    <Spacer size="sm" />
+
+    {/* Facebook Sign-In Button */}
+    <FacebookSignInButton
+      onPress={handleFacebookSignIn}
+      loading={isFacebookLoading}
+      disabled={isLoading || isGoogleLoading || isFacebookLoading}
+    />
+
+    // ... rest of form
+  );
+}
+```
+
+### 5. SignUp Screen Integration
+
+Update `app/(auth)/signup.tsx` with similar code:
+
+```typescript
+<GoogleSignInButton
+  onPress={handleGoogleSignIn}
+  loading={isGoogleLoading}
+  disabled={isLoading || isGoogleLoading || isFacebookLoading}
+  label="Sign up with Google"
+/>
+
+<Spacer size="sm" />
+
+<FacebookSignInButton
+  onPress={handleFacebookSignIn}
+  loading={isFacebookLoading}
+  disabled={isLoading || isGoogleLoading || isFacebookLoading}
+  label="Sign up with Facebook"
+/>
+```
+
+### 6. App Configuration
+
+No changes needed to `app.json` - the existing configuration from Google OAuth already supports Facebook OAuth:
+
+```json
+{
+  "expo": {
+    "scheme": "bma2026",
+    "android": {
+      "package": "com.bma.app2026",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "bma2026"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": ["expo-router", "expo-web-browser"]
+  }
+}
+```
+
+### 7. Environment Variables
+
+No additional environment variables needed! Facebook OAuth credentials are stored in Supabase Dashboard.
+
+```bash
+# Existing variables (sufficient for OAuth)
+EXPO_PUBLIC_ENV=development
+EXPO_PUBLIC_SUPABASE_URL=https://dxwwnvlgtymnaawgcofd.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+---
+
+## Testing
+
+### Web
+
+1. Run: `npm start` → Press `w`
+2. Navigate to login or signup page
+3. Click "Continue with Facebook"
+4. Browser redirects to Facebook OAuth consent
+5. After approval, redirects back to app
+6. User is logged in ✅
+
+### iOS Simulator
+
+1. Run: `npm run ios`
+2. Navigate to login or signup page
+3. Click "Continue with Facebook"
+4. In-app browser opens Facebook OAuth
+5. After approval, browser closes
+6. User is logged in ✅
+
+### Android Emulator (Expo Go)
+
+1. Run: `npm run android`
+2. Navigate to login or signup page
+3. Click "Continue with Facebook"
+4. **Expected Issue**: May redirect to production instead of app
+5. **Workaround**: Use Development Build (see below)
+
+### Android Development Build
+
+1. Create development build:
+
+   ```bash
+   eas build --profile development --platform android
+   ```
+
+2. Install APK on device/emulator
+3. Test OAuth flow - should work correctly ✅
+
+---
+
+## Known Issues
+
+### Android Expo Go Limitation
+
+**Issue:** Facebook OAuth may not work properly in Expo Go on Android.
+
+**Reason:** Expo Go on Android has limitations with custom URL scheme redirects (`exp://...`) from Chrome Custom Tabs after OAuth completion.
+
+**Workaround:** Use a Development Build or Production Build for Android OAuth testing.
+
+**Status:**
+
+- ✅ Web: Expected to work
+- ✅ iOS Expo Go: Expected to work
+- ⚠️ Android Expo Go: Requires Development Build
+- ✅ Android Development Build: Expected to work
+- ✅ Production Builds: Expected to work
+
+### OAuth Consent Screen Domain
+
+**Issue:** Consent screen shows `dxwwnvlgtymnaawgcofd.supabase.co` instead of your domain.
+
+**Reason:** OAuth redirect goes through Supabase's authentication endpoint.
+
+**Solution:** Upgrade to Supabase Pro ($25/month) to use custom domain (e.g., `auth.bma2026.com`).
+
+**Current Status:** Acceptable for development. Users see your app branding (name + logo) prominently.
+
+### Facebook Email Permission
+
+**Issue:** Some users may not grant email permission, or their Facebook account doesn't have an email.
+
+**Handling:** Check if `user.email` is null after OAuth. If so, prompt user to add an email or use another sign-in method.
+
+---
+
+## Troubleshooting
+
+### "Unsupported provider: provider is not enabled"
+
+**Solution:** Enable Facebook provider in Supabase Dashboard > Authentication > Providers. Make sure the toggle is ON and credentials are saved.
+
+### "URL Blocked: This redirect failed because the redirect URI is not whitelisted"
+
+**Solution:** Add the Supabase callback URL to Facebook App Settings:
+
+- Go to Facebook App Dashboard > Facebook Login > Settings
+- Add `https://<your-project-ref>.supabase.co/auth/v1/callback` to **Valid OAuth Redirect URIs**
+- Click Save Changes
+
+### OAuth redirects to production instead of localhost
+
+**Solution:** Add redirect URL to Supabase:
+
+- Go to Authentication > URL Configuration > Redirect URLs
+- Add: `http://localhost:8081/**`
+- Click Save
+
+### iOS: User logged in but redirected back to login screen
+
+**Solution:** Check that the session is being established. Look for `[Facebook OAuth] Session set successfully` in logs. If missing, tokens may not be extracted properly from callback URL.
+
+### Android: Browser opens but gets stuck
+
+**Solution:**
+
+1. Verify `exp://*` is added to Supabase redirect URLs
+2. Ensure `expo-web-browser` plugin is in `app.json`
+3. Use Development Build for full OAuth support
+
+### "Can't Load URL: The domain of this URL isn't included in the app's domains"
+
+**Solution:** Add your domain to Facebook App Settings > Basic > App Domains:
+
+- Add: `bma-2026.vercel.app` and `localhost`
+
+### Facebook Login Button Doesn't Appear
+
+**Solution:** Make sure you've added the platform in Facebook App Settings:
+
+- Go to Settings > Basic
+- Click "Add Platform"
+- Choose "Website"
+- Add your Site URL
+
+### Testing in Expo Go vs Production
+
+| Environment       | URL Scheme                    | Works?      |
+| ----------------- | ----------------------------- | ----------- |
+| Web (localhost)   | `http://localhost:8081`       | ✅ Expected |
+| Web (production)  | `https://bma-2026.vercel.app` | ✅ Expected |
+| iOS Expo Go       | `exp://192.168.x.x:8081`      | ✅ Expected |
+| Android Expo Go   | `exp://192.168.x.x:8081`      | ⚠️ Limited  |
+| iOS Dev Build     | `bma2026://`                  | ✅ Expected |
+| Android Dev Build | `bma2026://`                  | ✅ Expected |
+
+---
+
+## Security Notes
+
+1. **App ID & Secret**: Stored in Supabase Dashboard (server-side), never exposed to client
+2. **OAuth Flow**: Handled by Supabase Auth (secure, industry-standard)
+3. **Token Storage**: Managed by Supabase client with AsyncStorage encryption
+4. **HTTPS Required**: All OAuth redirects must use HTTPS (except localhost)
+5. **Individual Accounts**: Safe to use personal Facebook Developer account during development
+
+---
+
+## Next Steps
+
+### For Production Launch
+
+1. **Facebook App Review**:
+   - Switch app from "Development" to "Live" mode in Settings > Basic
+   - If using permissions beyond `email` and `public_profile`, submit for App Review
+   - Add privacy policy and terms of service URLs
+   - Ensure app icon is uploaded (1024x1024px)
+
+2. **Supabase Custom Domain** (Optional):
+   - Upgrade to Supabase Pro
+   - Configure custom domain (e.g., `auth.bma2026.com`)
+   - Update Facebook OAuth redirect URIs
+
+3. **Mobile Builds**:
+   - Create production builds with EAS Build
+   - Test OAuth on physical devices
+   - Deploy to App Store and Play Store
+
+4. **Privacy Policy**:
+   - Create a comprehensive privacy policy that includes:
+     - What data you collect from Facebook (email, name, profile picture)
+     - How you use this data
+     - How long you retain it
+     - User's rights to delete their data
+   - Host it at `https://bma-2026.vercel.app/privacy`
+   - Link it in Facebook App Settings
+
+### Email Handling
+
+Facebook OAuth may return users without email addresses in some cases:
+
+- User didn't grant email permission
+- Facebook account doesn't have a verified email
+
+**Handle this by:**
+
+```typescript
+// After successful OAuth
+if (!user.email) {
+  // Prompt user to add email
+  // OR allow them to use the app without email (if your use case allows)
+  // OR ask them to sign up with a different method
+}
+```
+
+---
+
+## References
+
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+- [Facebook Login Documentation](https://developers.facebook.com/docs/facebook-login/)
+- [Facebook App Development](https://developers.facebook.com/docs/development)
+- [Expo AuthSession Documentation](https://docs.expo.dev/versions/latest/sdk/auth-session/)
+- [Expo WebBrowser Documentation](https://docs.expo.dev/versions/latest/sdk/webbrowser/)
+
+---
+
+**Last Updated:** 2026-01-14
+**Status:** ✅ Implemented
+**Tested Versions:** Expo SDK 54, React Native 0.81, Supabase JS v2
