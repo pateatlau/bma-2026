@@ -78,12 +78,19 @@ npm install expo-web-browser expo-auth-session expo-crypto
 
 ### 3. Configure OAuth Settings
 
-1. In the left sidebar, go to **Facebook Login** > **Settings**
-2. Configure the following settings:
+**CRITICAL: There are TWO places in Facebook Developer Console where you need to configure settings. The console is confusing - pay close attention to which section you're in!**
 
-#### Valid OAuth Redirect URIs
+---
 
-Add your Supabase callback URL:
+#### LOCATION 1: Dashboard > Use Case Settings (MOST IMPORTANT)
+
+This is the **primary location** that actually controls OAuth redirects:
+
+1. In the left sidebar, click **Dashboard** (not "App Settings"!)
+2. Find the section **"Customize the Authenticate and request data from users with Facebook Login use case"**
+3. Click **Settings** in that section
+4. Find **"Valid OAuth Redirect URIs"** input box
+5. Enter your Supabase callback URL:
 
 ```
 https://<your-project-ref>.supabase.co/auth/v1/callback
@@ -95,13 +102,33 @@ https://<your-project-ref>.supabase.co/auth/v1/callback
 https://dxwwnvlgtymnaawgcofd.supabase.co/auth/v1/callback
 ```
 
-#### Client OAuth Settings
+6. Click **Save**
 
-- **Client OAuth Login**: ON
-- **Web OAuth Login**: ON
-- **Force Web OAuth Reauthentication**: OFF
-- **Use Strict Mode for Redirect URIs**: ON
-- **Enforce HTTPS**: ON
+**This is the setting that actually fixes the "Can't load URL" error!**
+
+---
+
+#### LOCATION 2: App Settings > Basic (Secondary)
+
+This section is for general app configuration:
+
+1. In the left sidebar, click **App Settings** > **Basic**
+2. Configure:
+   - **App Domains**: `bma-2026.vercel.app` (no https://, just domain)
+   - **Privacy Policy URL**: `https://bma-2026.vercel.app/privacy`
+   - **Website Platform**: Add with Site URL `https://bma-2026.vercel.app`
+
+---
+
+#### Common Confusion Points
+
+| Section                             | Location                               | What to Configure                                 |
+| ----------------------------------- | -------------------------------------- | ------------------------------------------------- |
+| **Dashboard > Use Case > Settings** | Left sidebar → Dashboard               | **Valid OAuth Redirect URIs** (Supabase callback) |
+| **App Settings > Basic**            | Left sidebar → App Settings → Basic    | App Domains, Website Platform, Privacy Policy     |
+| **App Settings > Advanced**         | Left sidebar → App Settings → Advanced | Advanced settings (usually not needed)            |
+
+**The "Can't load URL" error is almost always caused by missing the OAuth Redirect URI in the Dashboard > Use Case > Settings section!**
 
 Click **Save Changes**
 
@@ -739,11 +766,16 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### "URL Blocked: This redirect failed because the redirect URI is not whitelisted"
 
-**Solution:** Add the Supabase callback URL to Facebook App Settings:
+**Solution:** Add the Supabase callback URL to the correct location in Facebook:
 
-- Go to Facebook App Dashboard > Facebook Login > Settings
-- Add `https://<your-project-ref>.supabase.co/auth/v1/callback` to **Valid OAuth Redirect URIs**
-- Click Save Changes
+**IMPORTANT: Go to the Dashboard section, NOT App Settings!**
+
+1. Go to Facebook Developer Console
+2. Click **Dashboard** in the left sidebar
+3. Find **"Customize the Authenticate and request data from users with Facebook Login use case"**
+4. Click **Settings**
+5. Add `https://<your-project-ref>.supabase.co/auth/v1/callback` to **Valid OAuth Redirect URIs**
+6. Click Save
 
 ### OAuth redirects to production instead of localhost
 
@@ -767,9 +799,23 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### "Can't Load URL: The domain of this URL isn't included in the app's domains"
 
-**Solution:** Add your domain to Facebook App Settings > Basic > App Domains:
+**Solution:** This error is almost always caused by configuring the wrong section in Facebook Developer Console.
 
-- Add: `bma-2026.vercel.app` and `localhost`
+**The fix:**
+
+1. Go to Facebook Developer Console
+2. Click **Dashboard** in the left sidebar (NOT "App Settings"!)
+3. Find **"Customize the Authenticate and request data from users with Facebook Login use case"**
+4. Click **Settings**
+5. In **"Valid OAuth Redirect URIs"**, add: `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback`
+6. Click **Save**
+
+**Common mistake:** Configuring "App Settings > Basic" but missing the "Dashboard > Use Case > Settings" section. Both are needed, but the Dashboard section is what fixes this specific error.
+
+**Also verify App Settings > Basic has:**
+
+- App Domains: `bma-2026.vercel.app`
+- Website Platform with Site URL
 
 ### Facebook Login Button Doesn't Appear
 
