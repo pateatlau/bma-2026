@@ -39,7 +39,7 @@ export function FacebookSignInButton({
       ) : (
         <View style={styles.content}>
           <Ionicons name="logo-facebook" size={20} color="#FFFFFF" />
-          <Text weight="medium" style={[styles.label, { color: '#FFFFFF' }]}>
+          <Text weight="medium" style={{ fontSize: 16, color: '#FFFFFF' }}>
             {label}
           </Text>
         </View>
@@ -64,8 +64,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  label: {
-    fontSize: 16,
   },
 });
