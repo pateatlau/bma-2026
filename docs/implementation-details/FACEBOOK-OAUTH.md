@@ -14,8 +14,9 @@ This document details the implementation of Facebook OAuth authentication for th
 4. [Supabase Dashboard Configuration](#supabase-dashboard-configuration)
 5. [Code Implementation](#code-implementation)
 6. [Testing](#testing)
-7. [Known Issues](#known-issues)
-8. [Troubleshooting](#troubleshooting)
+7. [Local Development with ngrok](#local-development-with-ngrok)
+8. [Known Issues](#known-issues)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -719,6 +720,206 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 2. Install APK on device/emulator
 3. Test OAuth flow - should work correctly ✅
+
+---
+
+## Local Development with ngrok
+
+**Important:** Unlike Google OAuth, Facebook OAuth does **NOT** support `localhost` testing. Facebook requires real domains with TLDs (like `.com`, `.app`). To test Facebook OAuth locally, you must use a tunneling service like ngrok.
+
+### Why ngrok is Required
+
+| Provider | Localhost Support | Reason                                                                 |
+| -------- | ----------------- | ---------------------------------------------------------------------- |
+| Google   | ✅ Yes            | Google allows `localhost` in OAuth redirect URIs                       |
+| Facebook | ❌ No             | Facebook requires domains with TLDs (rejects `localhost`, `127.0.0.1`) |
+
+### Step 1: Install ngrok
+
+```bash
+# Option A: Install globally via npm
+npm install -g ngrok
+
+# Option B: Install via Homebrew (macOS)
+brew install ngrok
+
+# Option C: Download from https://ngrok.com/download
+```
+
+### Step 2: Create ngrok Account (Free)
+
+1. Go to [https://ngrok.com/](https://ngrok.com/)
+2. Sign up for a free account
+3. Get your auth token from the dashboard
+4. Configure ngrok with your token:
+
+```bash
+ngrok config add-authtoken YOUR_AUTH_TOKEN
+```
+
+### Step 3: Start Your Local App
+
+```bash
+# In terminal 1: Start Expo
+npm start
+
+# Press 'w' to open web version
+# App runs at http://localhost:8081
+```
+
+### Step 4: Create ngrok Tunnel
+
+```bash
+# In terminal 2: Create HTTPS tunnel to your local server
+ngrok http 8081
+```
+
+You'll see output like:
+
+```
+Session Status                online
+Account                       your-email@example.com (Plan: Free)
+Version                       3.x.x
+Region                        United States (us)
+Latency                       -
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    https://abc123def456.ngrok-free.app -> http://localhost:8081
+```
+
+**Copy the `https://....ngrok-free.app` URL** - you'll need this for configuration.
+
+### Step 5: Configure Facebook Developer Console
+
+Add your ngrok URL to Facebook:
+
+#### Location 1: Dashboard > Use Case > Settings
+
+1. Go to Facebook Developer Console
+2. Click **Dashboard** in left sidebar
+3. Find **"Customize the Authenticate and request data from users with Facebook Login use case"**
+4. Click **Settings**
+5. In **"Valid OAuth Redirect URIs"**, you should already have:
+   ```
+   https://dxwwnvlgtymnaawgcofd.supabase.co/auth/v1/callback
+   ```
+   (This stays the same - ngrok doesn't change the Supabase callback)
+
+#### Location 2: App Settings > Basic
+
+1. Click **App Settings** > **Basic** in left sidebar
+2. **App Domains**: Add your ngrok domain (without https://):
+   ```
+   abc123def456.ngrok-free.app
+   bma-2026.vercel.app
+   ```
+3. **Add Platform** or edit existing **Website**:
+   - You may need to add a second Website platform for ngrok
+   - Or temporarily change the existing Site URL to your ngrok URL
+   - Site URL: `https://abc123def456.ngrok-free.app`
+4. Click **Save Changes**
+
+### Step 6: Configure Supabase
+
+Add ngrok URL to Supabase redirect allowlist:
+
+1. Go to **Supabase Dashboard** > **Authentication** > **URL Configuration**
+2. In **Redirect URLs**, add:
+   ```
+   https://abc123def456.ngrok-free.app/**
+   ```
+3. Optionally, temporarily change **Site URL** to your ngrok URL:
+   ```
+   https://abc123def456.ngrok-free.app
+   ```
+4. Click **Save**
+
+### Step 7: Test Facebook OAuth Locally
+
+1. Open your ngrok URL in the browser:
+   ```
+   https://abc123def456.ngrok-free.app
+   ```
+2. Navigate to the login page
+3. Click "Continue with Facebook"
+4. Complete the OAuth flow
+5. You should be redirected back and logged in ✅
+
+### Step 8: Cleanup After Testing
+
+**Important:** After testing, revert your configurations:
+
+#### Facebook Developer Console:
+
+- Remove ngrok domain from App Domains (or leave it - won't hurt)
+- Change Website Site URL back to: `https://bma-2026.vercel.app`
+
+#### Supabase Dashboard:
+
+- Change Site URL back to: `https://bma-2026.vercel.app`
+- You can leave the ngrok redirect URL in the list (it won't cause issues)
+
+### ngrok Tips and Notes
+
+#### Free Plan Limitations
+
+- URLs change every time you restart ngrok
+- You need to reconfigure Facebook/Supabase each time
+- Consider ngrok paid plan ($8/month) for stable URLs
+
+#### Paid Plan Benefits
+
+- Static/reserved domains (e.g., `bma-dev.ngrok.io`)
+- No need to reconfigure Facebook/Supabase
+- Multiple tunnels simultaneously
+
+#### Alternative: Use Vercel Preview Deployments
+
+If ngrok setup is too cumbersome:
+
+1. Create a feature branch:
+
+   ```bash
+   git checkout -b feature/test-facebook
+   ```
+
+2. Push to trigger Vercel preview deployment:
+
+   ```bash
+   git commit --allow-empty -m "test: Facebook OAuth testing"
+   git push origin feature/test-facebook
+   ```
+
+3. Vercel creates a preview URL like:
+
+   ```
+   https://bma-2026-git-feature-test-facebook-username.vercel.app
+   ```
+
+4. Add this URL to Facebook App Domains and test
+
+#### Web Interface for Debugging
+
+ngrok provides a local web interface for inspecting requests:
+
+```
+http://127.0.0.1:4040
+```
+
+This shows all HTTP requests passing through the tunnel - useful for debugging OAuth callbacks.
+
+### Quick Reference: Local Testing Checklist
+
+```
+□ ngrok installed and configured with auth token
+□ Local app running (npm start → w for web)
+□ ngrok tunnel created (ngrok http 8081)
+□ Facebook App Domains updated with ngrok domain
+□ Facebook Website platform URL updated (or added)
+□ Supabase Redirect URLs includes ngrok URL
+□ Supabase Site URL temporarily set to ngrok URL
+□ Test Facebook OAuth at ngrok URL
+□ Revert Facebook and Supabase settings after testing
+```
 
 ---
 
