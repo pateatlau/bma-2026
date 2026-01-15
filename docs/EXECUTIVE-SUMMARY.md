@@ -84,9 +84,12 @@ The Bangalore Mizo Association Digital Platform is a comprehensive mobile and we
 | Domain Renewal         | ₹100          | ₹1,000       |
 | Cloud Infrastructure   | Free          | ₹0           |
 | Gemini AI (Chatbot)    | ₹1,700        | ₹20,000      |
+| Gemini Overage Buffer  | ₹400          | ₹5,000       |
 | WhatsApp Notifications | ₹800          | ₹10,000      |
 | Email Service          | Free          | ₹0           |
-| **Operating Total**    | **₹2,600**    | **₹31,000**  |
+| **Operating Total**    | **₹3,000**    | **₹36,000**  |
+
+**Gemini AI Notes:** Free tier includes 30,000 tokens/min for embeddings and 100 requests/min. Overage buffer covers occasional spikes beyond free limits at $0.15 per 1M embedding tokens ($1.25-$2.50 per 1M generation tokens depending on context length).
 
 #### Typical Estimate (Moderate Usage)
 
@@ -94,18 +97,19 @@ The Bangalore Mizo Association Digital Platform is a comprehensive mobile and we
 | ---------------------- | ------------- | ------------ |
 | Domain Renewal         | ₹100          | ₹1,000       |
 | Cloud Infrastructure   | ₹3,300        | ₹40,000      |
-| Gemini AI (Chatbot)    | ₹1,700        | ₹20,000      |
+| Gemini AI (Chatbot)    | ₹2,100        | ₹25,000      |
+| Gemini Overage Buffer  | ₹800          | ₹10,000      |
 | WhatsApp Notifications | ₹800          | ₹10,000      |
 | Email Service          | Free          | ₹0           |
-| **Operating Total**    | **₹5,900**    | **₹71,000**  |
+| **Operating Total**    | **₹7,100**    | **₹86,000**  |
 
 #### Maximum Estimate (High Usage)
 
 | Item                | Monthly (INR) | Annual (INR) |
 | ------------------- | ------------- | ------------ |
-| All Services (Paid) | ₹14,200       | ₹1,70,000    |
+| All Services (Paid) | ₹16,700       | ₹2,00,000    |
 
-**Note:** Most organizations of BMA's size operate comfortably within the Conservative to Typical range (₹31,000 - ₹71,000 per year).
+**Note:** Most organizations of BMA's size operate comfortably within the Conservative to Typical range (₹36,000 - ₹86,000 per year). The Maximum estimate includes significant AI usage overages and is unlikely unless membership exceeds 5,000+ active users.
 
 ### Transaction Costs
 
@@ -120,11 +124,15 @@ The Bangalore Mizo Association Digital Platform is a comprehensive mobile and we
 
 | Scenario                  | Total Cost (INR) |
 | ------------------------- | ---------------- |
-| **Conservative**          | **₹83,700**      |
-| **Typical (Recommended)** | **₹1,23,700**    |
-| **Maximum**               | **₹2,23,200**    |
+| **Conservative**          | **₹88,700**      |
+| **Typical (Recommended)** | **₹1,38,700**    |
+| **Maximum**               | **₹2,53,200**    |
 
-**Recommended Budget:** ₹1,30,000 (provides comfortable buffer)
+**Recommended Budget:** ₹1,45,000 (provides comfortable buffer above Typical scenario)
+
+**Cost Breakdown:**
+
+- Setup (₹11,200) + Development (₹31,700) + Post-Launch Support (₹10,000) + Year 1 Operations (Conservative: ₹36,000 | Typical: ₹86,000 | Maximum: ₹2,00,000)
 
 ---
 
@@ -164,7 +172,7 @@ Projected 1,500 paid members in Year 1:
 
 - 1,500 members × ₹350 annual fee = ₹5,25,000 gross revenue
 - Less payment fees (2%) = ₹5,14,500 net revenue
-- Less platform costs (₹71,000 typical) = **₹4,43,500 net surplus**
+- Less platform costs (₹86,000 typical) = **₹4,28,500 net surplus**
 
 **Platform is highly profitable** and generates substantial surplus for community initiatives.
 
@@ -202,13 +210,25 @@ With 2,000 - 2,500 members by Years 2-3:
 
 ### Phased Release Plan
 
-| Platform            | Launch Status            | Timeline               |
-| ------------------- | ------------------------ | ---------------------- |
-| **Web**             | Full launch on March 21  | Confirmed              |
-| **Mobile Internal** | Testing builds available | March 21               |
-| **Mobile Public**   | Play Store & App Store   | 2-3 months post-launch |
+**Phase 1: Web-Only Launch (January 17 - March 21, 2026)**
 
-**Note:** Mobile public release depends on BMA organizational accounts (requires PAN card and D-U-N-S Number). Web platform and mobile testing proceed regardless.
+| Platform        | Launch Status         | Timeline |
+| --------------- | --------------------- | -------- |
+| **Web**         | Full public launch    | March 21 |
+| **Mobile Apps** | Internal testing only | March 21 |
+
+**Phase 2: Mobile App Store Release (April - June 2026)**
+
+| Platform          | Launch Status          | Timeline               |
+| ----------------- | ---------------------- | ---------------------- |
+| **Mobile Public** | Play Store & App Store | 2-3 months post-launch |
+
+**Critical Notes:**
+
+- **Web launch is guaranteed** on March 21 regardless of mobile app store approvals
+- Mobile public release depends on BMA organizational accounts (requires PAN card and D-U-N-S Number)
+- Members can access full functionality via web browsers on mobile devices from Day 1
+- Mobile apps provide enhanced experience but are not required for platform operation
 
 ### Competitive Advantage
 
@@ -349,7 +369,7 @@ To ensure successful development, launch, and operation of the platform, BMA wil
 
 The BMA Executive Committee is respectfully requested to **approve immediate commencement** of the BMA Digital Platform project with the following terms:
 
-1. **Budget Approval:** ₹1,30,000 for Year 1 (setup + development + post-launch support + operations)
+1. **Budget Approval:** ₹1,45,000 for Year 1 (setup + development + post-launch support + operations with contingency buffer)
 2. **Launch Target:** March 21, 2026 (BMA Annual Day) - Web platform
 3. **Membership Pricing:** ₹350 annual, Lifetime TBD by Committee
 4. **Team Formation:** Establish the three teams outlined above with designated leads
@@ -366,11 +386,29 @@ The BMA Executive Committee is respectfully requested to **approve immediate com
 
 ### Expected Timeline
 
+**Web-Only Launch Path (Confirmed Scope):**
+
 - **January 17:** Decision meeting
 - **January 18 - March 15:** Intensive development (8 weeks)
-- **March 16 - March 20:** Testing and final preparations
+  - Phase 0-1: Foundation, auth, i18n, design system (Weeks 1-3)
+  - Phase 2: Public features (news, events, content) (Weeks 4-5)
+  - Phase 3: Membership & payments (Razorpay) (Week 6)
+  - Phase 4: AI Chatbot (RAG, Gemini) (Week 7)
+  - Phase 5: Admin dashboard (Week 8)
+- **March 16 - March 20:** Phase 6: Testing, security audit, and final preparations (5 days)
+  - Security audit and penetration testing
+  - Cross-browser testing
+  - Payment flow verification
+  - 95%+ test coverage on critical paths
 - **March 21:** Public web launch at BMA Annual Day
-- **March - June:** Post-launch support and mobile store release
+- **March - June:** Post-launch support and mobile app store release
+
+**Timeline Verification:**
+
+- All critical features (payment, admin dashboard, bilingual content, chatbot) are included in 8-week development window
+- Security audit is scheduled in the 5-day testing window
+- Mobile app development is concurrent but store release is deferred to Phase 2 (April-June)
+- Contingency: If any phase slips, search feature (Phase 6, Task 6.5) can be deferred to post-launch without blocking March 21 web launch
 
 ---
 
@@ -380,10 +418,10 @@ The BMA Digital Platform represents a transformational investment in the organiz
 
 ### Investment vs Returns
 
-- **Year 1 Investment:** ₹1,30,000 (one-time + operations)
+- **Year 1 Investment:** ₹1,45,000 (setup + development + support + operations)
 - **Year 1 Revenue:** ₹5,25,000 - ₹7,00,000 (memberships + sponsorships + ads)
-- **Net Surplus:** ₹4,50,000 - ₹5,50,000+ available for community programs
-- **ROI:** 350%+ in first year alone
+- **Net Surplus:** ₹4,35,000 - ₹5,40,000+ available for community programs
+- **ROI:** 300%+ in first year alone
 
 ### What BMA Gains
 
