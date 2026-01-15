@@ -3,7 +3,7 @@
 ## Executive Summary for Leadership Review
 
 **Prepared for:** BMA Executive Committee Meeting
-**Date:** February 17, 2026
+**Date:** January 17, 2026
 **Proposed Launch:** March 21, 2026 (BMA Annual Day)
 
 ---
@@ -366,8 +366,8 @@ The BMA Executive Committee is respectfully requested to **approve immediate com
 
 ### Expected Timeline
 
-- **February 17:** Decision meeting
-- **February 18 - March 15:** Intensive development (4 weeks)
+- **January 17:** Decision meeting
+- **January 18 - March 15:** Intensive development (8 weeks)
 - **March 16 - March 20:** Testing and final preparations
 - **March 21:** Public web launch at BMA Annual Day
 - **March - June:** Post-launch support and mobile store release
@@ -411,4 +411,4 @@ Launching at the start of the 2026-27 membership cycle (April-March) means immed
 **Prepared by:** Technical Team
 **For Questions Contact:** [Project Lead Name/Email]
 **Document Version:** 1.0
-**Date:** February 15, 2026
+**Date:** January 15, 2026
