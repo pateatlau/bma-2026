@@ -151,6 +151,8 @@ The Bangalore Mizo Association Digital Platform is a comprehensive mobile and we
 - **Operational Efficiency** - Reduce manual work with automated membership tracking and renewals
 - **Better Communication** - Direct WhatsApp and email notifications reach members instantly
 - **Social Media Integration** - Seamlessly connects with BMA's Facebook, Instagram, YouTube Channel, and WhatsApp
+- **Data Ownership & Control** - BMA owns all member data and content; can export or migrate anytime without vendor lock-in, unlike third-party platforms (Facebook, WhatsApp groups)
+- **Privacy & Data Sovereignty** - Member data stays within BMA's control with bank-grade encryption; never sold or shared with third parties, unlike social media platforms
 - **Data-Driven Decisions** - Analytics dashboard provides insights on membership trends
 - **Professional Image** - Modern platform enhances BMA's standing and credibility
 - **Long-Term Savings** - Reduced dependency on third-party services and manual processes
