@@ -8,6 +8,7 @@ Phase 6 is the final sprint focused on testing, performance optimization, access
 **Prerequisites:** Phases 0-5 completed (all features implemented)
 **Deliverables:**
 
+- Site search feature (bilingual FTS) - P0 for launch, defer if time-constrained
 - Comprehensive test coverage (95%+ on critical paths)
 - Performance optimization (< 3s load time)
 - Accessibility compliance (WCAG 2.1 AA)
@@ -627,11 +628,326 @@ if (!parsed.success) {
 
 ---
 
-### Task 6.5: Web Deployment
+### Task 6.5: Site Search Implementation
+
+**GitHub Issue:** #52 - Implement Site Search Feature
+
+**Reference:** [SITE-SEARCH-SYSTEM-DESIGN.md](../design/SITE-SEARCH-SYSTEM-DESIGN.md)
+
+> **⚠️ Priority Note:**
+> This feature is P0 for launch (high user value) but can be deferred to post-launch Sprint 1 if schedule slips. If time constraints emerge in Phase 6, prioritize Tasks 6.1-6.4 and 6.6-6.8, and defer this task to Days 68-74.
+
+**Duration:** 6 days (can run parallel to testing/deployment tasks)
+
+#### 6.5.1: Database Setup (Day 1)
+
+**Files:** `supabase/migrations/*_search.sql`
+
+**Tasks:**
+
+1. Add search vector columns to `content` table
+2. Create GIN indexes for FTS
+3. Create `search_content` RPC function
+4. Create `search_content_count` RPC function
+5. Create update trigger for search vectors
+6. Backfill existing content
+
+**Migration Script:**
+
+```sql
+-- Add search vector columns
+ALTER TABLE content ADD COLUMN IF NOT EXISTS search_vector_en tsvector;
+ALTER TABLE content ADD COLUMN IF NOT EXISTS search_vector_lus tsvector;
+
+-- Create GIN indexes
+CREATE INDEX IF NOT EXISTS idx_content_search_en
+  ON content USING GIN (search_vector_en);
+
+CREATE INDEX IF NOT EXISTS idx_content_search_lus
+  ON content USING GIN (search_vector_lus);
+
+-- Create update trigger function
+CREATE OR REPLACE FUNCTION update_content_search_vectors()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector_en :=
+    setweight(to_tsvector('english', COALESCE(NEW.title_en, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(NEW.excerpt_en, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(NEW.body_en, '')), 'C');
+
+  NEW.search_vector_lus :=
+    setweight(to_tsvector('simple', COALESCE(NEW.title_lus, '')), 'A') ||
+    setweight(to_tsvector('simple', COALESCE(NEW.excerpt_lus, '')), 'B') ||
+    setweight(to_tsvector('simple', COALESCE(NEW.body_lus, '')), 'C');
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger
+CREATE TRIGGER trg_content_search_vectors
+  BEFORE INSERT OR UPDATE OF title_en, title_lus, body_en, body_lus, excerpt_en, excerpt_lus
+  ON content
+  FOR EACH ROW
+  EXECUTE FUNCTION update_content_search_vectors();
+
+-- Backfill existing content
+UPDATE content SET
+  search_vector_en =
+    setweight(to_tsvector('english', COALESCE(title_en, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(excerpt_en, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(body_en, '')), 'C'),
+  search_vector_lus =
+    setweight(to_tsvector('simple', COALESCE(title_lus, '')), 'A') ||
+    setweight(to_tsvector('simple', COALESCE(excerpt_lus, '')), 'B') ||
+    setweight(to_tsvector('simple', COALESCE(body_lus, '')), 'C')
+WHERE search_vector_en IS NULL OR search_vector_lus IS NULL;
+```
+
+**Create RPC functions:** (See design doc for full SQL)
+
+**Acceptance Criteria:**
+
+- [ ] Migration runs successfully
+- [ ] Indexes created
+- [ ] RPC functions tested in Supabase dashboard
+- [ ] Backfill completed
+
+#### 6.5.2: Search API & Hooks (Day 2)
+
+**Files:** `lib/search.ts`, `hooks/useSearch.ts`, `hooks/useRecentSearches.ts`, `hooks/useDebounce.ts`
+
+**Tasks:**
+
+1. Implement `searchContent` client function
+2. Implement `useSearch` hook with debouncing
+3. Implement `useRecentSearches` hook (AsyncStorage)
+4. Add TypeScript types
+5. Add error handling
+
+**Search Client Function:**
+
+```typescript
+// lib/search.ts
+import { supabase } from './supabase';
+
+export type ContentType = 'news' | 'article' | 'event' | 'newsletter' | 'gallery' | 'leadership';
+
+export interface SearchOptions {
+  query: string;
+  contentTypes?: ContentType[];
+  preferredLanguage?: 'en' | 'lus';
+  limit?: number;
+  offset?: number;
+}
+
+export async function searchContent(options: SearchOptions) {
+  const { query, contentTypes, preferredLanguage = 'en', limit = 20, offset = 0 } = options;
+
+  if (query.trim().length < 2) {
+    return { results: [], totalCount: 0, countsByType: {} };
+  }
+
+  const [resultsResponse, countsResponse] = await Promise.all([
+    supabase.rpc('search_content', {
+      query: query.trim(),
+      content_types: contentTypes || null,
+      preferred_language: preferredLanguage,
+      page_limit: limit,
+      page_offset: offset,
+    }),
+    supabase.rpc('search_content_count', {
+      query: query.trim(),
+      content_types: contentTypes || null,
+    }),
+  ]);
+
+  if (resultsResponse.error) throw resultsResponse.error;
+  if (countsResponse.error) throw countsResponse.error;
+
+  const counts = countsResponse.data?.[0];
+
+  return {
+    results: resultsResponse.data || [],
+    totalCount: counts?.total_count || 0,
+    countsByType: counts?.counts_by_type || {},
+  };
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Search function works with test queries
+- [ ] Hooks handle loading/error states
+- [ ] Recent searches persist in AsyncStorage
+- [ ] Debounce prevents excessive API calls
+
+#### 6.5.3: Search UI Components (Days 3-4)
+
+**Files:** `components/search/*.tsx`
+
+**Components to Create:**
+
+1. `SearchTrigger.tsx` - Header search icon/button
+2. `SearchModal.tsx` - Full search UI modal
+3. `SearchInput.tsx` - Input with clear button
+4. `SearchResults.tsx` - Results list container
+5. `SearchResultCard.tsx` - Individual result card
+6. `SearchTypeFilter.tsx` - Content type filter chips
+7. `RecentSearches.tsx` - Recent search history
+8. `SearchEmptyState.tsx` - No results message
+
+**SearchModal Component:**
+
+```typescript
+interface SearchModalProps {
+  visible: boolean;
+  onClose: () => void;
+  initialQuery?: string;
+}
+
+export function SearchModal({ visible, onClose, initialQuery }: SearchModalProps) {
+  const {
+    query,
+    setQuery,
+    results,
+    isLoading,
+    error,
+    totalCount,
+    countsByType,
+    selectedTypes,
+    setSelectedTypes,
+    loadMore,
+    hasMore,
+    clearSearch,
+  } = useSearch({ debounceMs: 300 });
+
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
+
+  // Implementation...
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] All components implemented
+- [ ] Consistent with design system
+- [ ] Responsive (mobile + desktop)
+- [ ] Dark mode support
+- [ ] Accessibility labels
+
+#### 6.5.4: Integration & Navigation (Day 5)
+
+**Files:** `components/navigation/WebHeader.tsx`, `components/navigation/MobileHeader.tsx`
+
+**Tasks:**
+
+1. Add search trigger to headers
+2. Wire up navigation to content detail pages
+3. Add offline detection
+4. Test across platforms
+5. Add loading skeletons
+
+**Header Integration:**
+
+```typescript
+// components/navigation/WebHeader.tsx
+import { SearchTrigger } from '@/components/search/SearchTrigger';
+import { SearchModal } from '@/components/search/SearchModal';
+
+export function WebHeader() {
+  const [searchVisible, setSearchVisible] = useState(false);
+
+  return (
+    <>
+      <View style={styles.header}>
+        {/* Logo, nav items */}
+        <SearchTrigger onPress={() => setSearchVisible(true)} />
+        {/* User menu */}
+      </View>
+
+      <SearchModal
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+      />
+    </>
+  );
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Search accessible from all pages
+- [ ] Navigation to content works
+- [ ] Offline banner shows when offline
+- [ ] Works on web, iOS, Android
+
+#### 6.5.5: Testing & Polish (Day 6)
+
+**Files:** `__tests__/unit/search/*.test.ts`, `__tests__/integration/search.test.ts`, `e2e/web/search.spec.ts`
+
+**Tasks:**
+
+1. Unit tests for hooks
+2. Integration test for search flow
+3. E2E test for search UI
+4. Bilingual testing (EN + Mizo queries)
+5. Performance testing
+6. Edge case handling
+
+**Test Coverage:**
+
+```typescript
+// __tests__/unit/hooks/useSearch.test.ts
+describe('useSearch', () => {
+  it('should debounce query input', () => {});
+  it('should return empty results for short queries', () => {});
+  it('should fetch results from API', () => {});
+  it('should handle API errors', () => {});
+  it('should support pagination', () => {});
+});
+
+// e2e/web/search.spec.ts
+test('should search for content', async ({ page }) => {
+  await page.goto('/');
+  await page.click('[data-testid="search-trigger"]');
+  await page.fill('[data-testid="search-input"]', 'membership');
+  await expect(page.locator('[data-testid="search-results"]')).toBeVisible();
+  await page.click('[data-testid="search-result"]:first-child');
+  await expect(page).toHaveURL(/\/(news|article|event)\//);
+});
+```
+
+**Acceptance Criteria:**
+
+- [ ] Unit test coverage > 80%
+- [ ] Integration tests passing
+- [ ] E2E test passing
+- [ ] Bilingual queries work correctly
+- [ ] Performance < 500ms p95
+
+#### 6.5.6: Documentation
+
+**Files:** `docs/features/SEARCH.md` (optional)
+
+**Tasks:**
+
+1. Document search functionality
+2. Add search to user guide
+3. Update README with search feature
+
+**Acceptance Criteria:**
+
+- [ ] Feature documented
+- [ ] User-facing documentation updated
+
+---
+
+### Task 6.6: Web Deployment
 
 **GitHub Issue:** #48 - Deploy Web to Production
 
-#### 6.5.1: Vercel Configuration
+#### 6.6.1: Vercel Configuration
 
 **Files:** `vercel.json`
 
@@ -654,7 +970,7 @@ if (!parsed.success) {
 }
 ```
 
-#### 6.5.2: Environment Variables (Vercel)
+#### 6.6.2: Environment Variables (Vercel)
 
 ```bash
 # Set via Vercel CLI or dashboard
@@ -664,14 +980,14 @@ vercel env add EXPO_PUBLIC_RAZORPAY_KEY_ID production
 vercel env add EXPO_PUBLIC_APP_ENV production
 ```
 
-#### 6.5.3: Domain Configuration
+#### 6.6.3: Domain Configuration
 
 1. Add custom domain in Vercel dashboard
 2. Configure DNS records
 3. Enable SSL (automatic)
 4. Update Supabase redirect URLs
 
-#### 6.5.4: Deploy
+#### 6.6.4: Deploy
 
 ```bash
 # Deploy to production
@@ -689,7 +1005,7 @@ vercel --prod
 
 ---
 
-### Task 6.6: iOS Deployment
+### Task 6.7: iOS Deployment
 
 **GitHub Issue:** #49 - Deploy iOS to App Store
 
@@ -703,7 +1019,7 @@ vercel --prod
 >
 > See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites).
 
-#### 6.6.1: App Store Connect Setup (Pending BMA Org Account)
+#### 6.7.1: App Store Connect Setup (Pending BMA Org Account)
 
 > These steps should be documented now but executed when BMA org account is available.
 
@@ -713,7 +1029,7 @@ vercel --prod
 4. Write bilingual description (EN + Mizo)
 5. Set pricing (Free with IAP for membership)
 
-#### 6.6.2: EAS Build Configuration
+#### 6.7.2: EAS Build Configuration
 
 **Files:** `eas.json`, `app.json`
 
@@ -732,7 +1048,7 @@ vercel --prod
 }
 ```
 
-#### 6.6.3: Build and Submit
+#### 6.8.3: Build and Submit
 
 ```bash
 # Build for App Store
@@ -742,7 +1058,7 @@ eas build --platform ios --profile production
 eas submit --platform ios --profile production
 ```
 
-#### 6.6.4: App Review Preparation
+#### 6.7.4: App Review Preparation
 
 1. Prepare demo account credentials
 2. Document in-app purchase testing
@@ -763,7 +1079,7 @@ eas submit --platform ios --profile production
 
 ---
 
-### Task 6.7: Android Deployment
+### Task 6.8: Android Deployment
 
 **GitHub Issue:** #50 - Deploy Android to Play Store
 
@@ -777,7 +1093,7 @@ eas submit --platform ios --profile production
 >
 > See [00-PREREQUISITES.md](../implementation-requirements/00-PREREQUISITES.md#60-blocker-app-store-account-prerequisites).
 
-#### 6.7.1: Play Console Setup (Pending BMA Org Account)
+#### 6.8.1: Play Console Setup (Pending BMA Org Account)
 
 > These steps should be documented now but executed when BMA org account is available.
 
@@ -787,7 +1103,7 @@ eas submit --platform ios --profile production
 4. Write bilingual listing
 5. Set up content rating
 
-#### 6.7.2: Signing Configuration
+#### 6.8.2: Signing Configuration
 
 **Files:** `eas.json`, credentials
 
@@ -798,7 +1114,7 @@ eas credentials --platform android
 # Or configure existing keystore
 ```
 
-#### 6.7.3: Build and Submit
+#### 6.8.3: Build and Submit
 
 ```bash
 # Build for Play Store
@@ -808,7 +1124,7 @@ eas build --platform android --profile production
 eas submit --platform android --profile production
 ```
 
-#### 6.7.4: Internal Testing (March 21, 2026)
+#### 6.8.4: Internal Testing (March 21, 2026)
 
 1. Build APK for internal distribution
 2. Distribute to internal testers via direct download or EAS internal distribution
@@ -829,7 +1145,7 @@ eas submit --platform android --profile production
 
 ---
 
-### Task 6.8: Monitoring & Observability Setup
+### Task 6.9: Monitoring & Observability Setup
 
 **GitHub Issue:** #51 - Setup Production Monitoring
 
@@ -837,7 +1153,7 @@ eas submit --platform android --profile production
 
 This task establishes production-ready observability for frontend, backend, and infrastructure monitoring.
 
-#### 6.8.1: Error Tracking (Sentry) - Enhanced
+#### 6.9.1: Error Tracking (Sentry) - Enhanced
 
 **Files:** `lib/sentry.ts`, `components/ErrorBoundary.tsx`, `app/_layout.tsx`
 
@@ -863,7 +1179,7 @@ npm install @sentry/react-native web-vitals
 - Performance monitoring
 - Custom error capture helpers
 
-#### 6.8.2: Backend Logging & Tracing
+#### 6.9.2: Backend Logging & Tracing
 
 **Files:** `supabase/functions/_shared/logger.ts`, `supabase/functions/_shared/error-handler.ts`, `supabase/functions/_shared/tracing.ts`
 
@@ -882,7 +1198,7 @@ npm install @sentry/react-native web-vitals
 - Request tracing middleware
 - Database query logging
 
-#### 6.8.3: Health Checks & Uptime Monitoring
+#### 6.9.3: Health Checks & Uptime Monitoring
 
 **Files:** `supabase/functions/health/index.ts`
 
@@ -913,7 +1229,7 @@ npm install @sentry/react-native web-vitals
 
 **Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §4.1-4.2 for health check code and UptimeRobot configuration.
 
-#### 6.8.4: Alerting Strategy
+#### 6.9.4: Alerting Strategy
 
 **Critical Alerts** (Immediate Response - Email + SMS):
 
@@ -932,7 +1248,7 @@ npm install @sentry/react-native web-vitals
 
 **Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §5 for complete alert rules and notification channels (Email via Resend, Slack webhooks).
 
-#### 6.8.5: User Behavior Analytics (Optional - Phase 7)
+#### 6.9.5: User Behavior Analytics (Optional - Phase 7)
 
 **Service**: Mixpanel or PostHog
 
@@ -948,7 +1264,7 @@ npm install @sentry/react-native web-vitals
 
 **Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §2.3 for analytics setup.
 
-#### 6.8.6: Production Runbook
+#### 6.9.6: Production Runbook
 
 **Files:** `docs/RUNBOOK.md`
 
@@ -978,7 +1294,7 @@ npm install @sentry/react-native web-vitals
 
 **Implementation**: See `OBSERVABILITY-IMPLEMENTATION.md` §6 for complete runbook with investigation steps, resolution procedures, and contact information.
 
-#### 6.8.7: Cost Analysis
+#### 6.9.7: Cost Analysis
 
 **Free Tier (Phase 6 - MVP)**:
 
@@ -1018,6 +1334,12 @@ npm install @sentry/react-native web-vitals
 > **Note:** This checklist reflects the phased release strategy. Mobile public release is pending BMA org accounts.
 
 ```text
+Day 61-62: Site Search Implementation (parallel with testing)
+□ Implement search database setup
+□ Build search API and hooks
+□ Create search UI components
+□ Or: Document for post-launch if time-constrained
+
 Day 61-62: Final Testing
 □ Run full test suite
 □ Fix any failing tests
@@ -1032,11 +1354,11 @@ Day 63-64: Performance & Security
 
 Day 65: Web Deployment ✅
 □ Deploy to Vercel production
-□ Verify all features
+□ Verify all features (including search if implemented)
 □ Test payment flow (Razorpay - test mode if no BMA account yet)
 □ Monitor for errors
 
-Day 66: Mobile Internal Testing Builds
+Day 66: Mobile Internal Testing Builds & Search (if time permits)
 □ Build iOS (TestFlight if available, or Expo Go testing)
 □ Build Android APK for internal distribution
 □ Distribute to internal testers
@@ -1160,6 +1482,7 @@ npm install @shopify/flash-list
 
 ### March 21, 2026 Definition of Done (Phased Release)
 
+- [ ] Site search feature implemented (or documented for post-launch if deferred)
 - [ ] All tests passing (unit, integration, E2E)
 - [ ] Performance targets met (< 3s load, Lighthouse > 90)
 - [ ] Accessibility audit passed (WCAG 2.1 AA)
