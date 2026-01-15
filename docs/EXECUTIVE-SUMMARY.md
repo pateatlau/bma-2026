@@ -265,6 +265,7 @@ Launching before similar community organizations establishes BMA as a technology
 **Development Workflow:**
 
 - **Source Control** - Git version control with complete change history
+- **Custom Design System** - Unified component library with design tokens for styling consistency across web and mobile; enables easy theme changes, color scheme updates, and brand evolution without touching individual screens
 - **Code Quality** - ESLint and Prettier for consistent, maintainable code
 - **Type Safety** - TypeScript for compile-time error prevention
 - **Testing** - Unit tests, integration tests, end-to-end tests (95%+ coverage on critical paths)
