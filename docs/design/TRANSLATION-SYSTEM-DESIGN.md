@@ -17,7 +17,6 @@
 7. [Admin UI Design](#admin-ui-design)
 8. [CMS Integration](#cms-integration)
 9. [Gemini API Integration](#gemini-api-integration)
-10. [Open Questions](#open-questions)
 
 ---
 
