@@ -42,8 +42,8 @@ Use breakpoint hooks for responsive layouts:
 import { useBreakpoint } from '@/hooks';
 
 const MyComponent = () => {
-  const breakpoint = useBreakpoint();
-  const isMobile = breakpoint === 'sm';
+  // useBreakpoint returns an object with boolean helpers and current breakpoint
+  const { isMobile, isDesktop, current } = useBreakpoint();
   
   return isMobile ? <MobileLayout /> : <DesktopLayout />;
 };
