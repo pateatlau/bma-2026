@@ -1,5 +1,9 @@
 # Project Rules
 
+> **Sync Notice:** This file is used by Claude Code. Cursor uses `.cursor/rules/*.mdc`.
+> When updating project guidelines, update both locations to keep them in sync.
+> See `.cursor/rules/` for the Cursor-equivalent rules.
+
 ## Project Overview
 
 BMA (Bangalore Mizo Association) Digital Platform - A bilingual (English + Mizo) community app with membership management, content publishing, AI chatbot, and admin dashboard.

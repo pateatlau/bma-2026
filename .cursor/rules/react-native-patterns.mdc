@@ -1,0 +1,63 @@
+---
+description: React Native and Expo patterns for this project
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# React Native Patterns
+
+## Component Structure
+
+- Use functional components with TypeScript
+- Use design system components from `/components`
+- Use design tokens from `/constants/tokens`
+- Support light and dark mode
+
+## UI Theme
+
+- Primary: Red (#DC2626)
+- Background: Black (#0A0A0A) / White (#FFFFFF)
+- Clean, modern, professional look
+- Avoid default-looking starter UI
+
+## Platform Differences
+
+Handle platform differences intentionally using hooks:
+
+```typescript
+import { usePlatform } from '@/hooks';
+
+const MyComponent = () => {
+  const { isWeb, isNative, isIOS, isAndroid } = usePlatform();
+  
+  return isWeb ? <WebVersion /> : <NativeVersion />;
+};
+```
+
+## Responsive Design
+
+Use breakpoint hooks for responsive layouts:
+
+```typescript
+import { useBreakpoint } from '@/hooks';
+
+const MyComponent = () => {
+  // useBreakpoint returns an object with boolean helpers and current breakpoint
+  const { isMobile, isDesktop, current } = useBreakpoint();
+  
+  return isMobile ? <MobileLayout /> : <DesktopLayout />;
+};
+```
+
+## Navigation
+
+Use Expo Router for all navigation:
+
+```typescript
+import { router } from 'expo-router';
+
+// Navigate
+router.push('/profile');
+router.replace('/home');
+router.back();
+```

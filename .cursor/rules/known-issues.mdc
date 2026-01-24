@@ -1,0 +1,30 @@
+---
+description: Known issues and workarounds
+alwaysApply: true
+---
+
+# Known Issues
+
+## Mobile Email Verification (TODO)
+
+**Status:** Parked for later resolution
+
+**Problem:** Email verification does not work properly on mobile (iOS/Android). When a user signs up from the mobile app and clicks the confirmation link in their email:
+
+1. The link opens in the device's browser (not the app)
+2. The browser navigates to the production web URL instead of triggering the app's deep link (`bma2026://auth/confirm`)
+3. User sees the web confirmation page but the mobile app doesn't know about the verification
+
+**Current Workaround:** The web `/auth/confirm` page detects mobile browsers and shows a message instructing users to return to the app and log in manually.
+
+**Web verification works correctly.** This issue only affects native mobile apps.
+
+**Potential Solutions:**
+
+1. Android App Links / iOS Universal Links
+2. Magic Link with OTP (6-digit code)
+3. Supabase native deep link updates
+
+## When Working on Auth
+
+If modifying authentication flows, be aware of this limitation. Do not attempt to fix this issue unless specifically tasked to do so.

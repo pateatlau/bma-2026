@@ -176,7 +176,7 @@ Projected 1,500 paid members in Year 1:
 - Less payment fees (2%) = ₹5,14,500 net revenue
 - Less platform costs (₹86,000 typical) = **₹4,28,500 net surplus**
 
-**Platform is highly profitable** and generates substantial surplus for community initiatives.
+**Platform is financially sustainable and self-funding** with substantial surplus available for community programs and initiatives.
 
 **2. Business Sponsorships**
 
@@ -418,7 +418,7 @@ The BMA Executive Committee is respectfully requested to **approve immediate com
 
 ## Conclusion
 
-The BMA Digital Platform represents a transformational investment in the organization's future. With projected Year 1 revenue of ₹5,25,000+ from memberships alone (plus sponsorships and advertisements), this is not just a technology upgrade—it's a **highly profitable venture** that positions BMA for sustainable growth.
+The BMA Digital Platform represents a transformational investment in the organization's future. With projected Year 1 revenue of ₹5,25,000+ from memberships alone (plus sponsorships and advertisements), this is not just a technology upgrade—it's a **financially sustainable, revenue-positive platform** that positions BMA for long-term growth while generating surplus for community programs.
 
 ### Investment vs Returns
 

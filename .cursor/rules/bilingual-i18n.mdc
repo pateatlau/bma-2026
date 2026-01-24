@@ -1,0 +1,58 @@
+---
+description: Bilingual (English + Mizo) internationalization guidelines
+globs: "**/*.{ts,tsx,json}"
+alwaysApply: false
+---
+
+# Bilingual Support (i18n)
+
+## Languages
+
+- English: `en`
+- Mizo: `lus` (ISO 639-3)
+
+## Implementation
+
+- Use `react-i18next` with `expo-localization`
+- Translation files in `/locales/{en,lus}/*.json`
+- AI-first translation (Gemini) with human review for cultural terms
+- All content supports dual-language entries
+
+## Usage Pattern
+
+```typescript
+import { useTranslation } from 'react-i18next';
+
+const MyComponent = () => {
+  const { t } = useTranslation();
+  
+  return <Text>{t('common.welcome')}</Text>;
+};
+```
+
+## Translation File Structure
+
+```
+/locales/
+  /en/
+    common.json
+    auth.json
+    content.json
+  /lus/
+    common.json
+    auth.json
+    content.json
+```
+
+## Content Model
+
+Database content entries support both languages:
+
+```typescript
+interface Content {
+  title_en: string;
+  title_lus: string;
+  body_en: string;
+  body_lus: string;
+}
+```
