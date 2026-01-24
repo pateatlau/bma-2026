@@ -1,0 +1,37 @@
+---
+description: Project documentation structure and references
+alwaysApply: true
+---
+
+# Documentation Reference
+
+## Architecture & Design
+
+- `docs/PRD-BMA-2026.md` - Product Requirements (LOCKED v1.4)
+- `docs/DATABASE-SCHEMA.md` - Database schema & ER diagram
+- `docs/API-DESIGN.md` - API endpoints & Edge Functions
+- `docs/UI-UX-WIREFRAMES.md` - Wireframes & Storybook plan
+
+## Implementation Plan (Phased)
+
+- `docs/implementation/00-IMPLEMENTATION-OVERVIEW.md` - Overview & architecture
+- `docs/implementation/01-PHASE-0-FOUNDATION.md` - Supabase, DB, CI/CD
+- `docs/implementation/02-PHASE-1-CORE-INFRASTRUCTURE.md` - Auth, i18n, design system
+- `docs/implementation/03-PHASE-2-PUBLIC-FEATURES.md` - News, events, content
+- `docs/implementation/04-PHASE-3-MEMBERSHIP-PAYMENTS.md` - Razorpay, tiers
+- `docs/implementation/05-PHASE-4-CHATBOT.md` - RAG, Gemini, escalation
+- `docs/implementation/06-PHASE-5-ADMIN-DASHBOARD.md` - User/content mgmt
+- `docs/implementation/07-PHASE-6-POLISH-LAUNCH.md` - Testing, deployment
+
+## Implementation Guides
+
+- `docs/DESIGN-SYSTEM-IMPLEMENTATION.md` - Design system guide
+- `docs/TESTING-IMPLEMENTATION-PLAN.md` - Testing strategy
+- `docs/CI-CD-IMPLEMENTATION-PLAN.md` - CI/CD & deployment
+
+## Before Starting Work
+
+1. Check the relevant phase document for context
+2. Review PRD for requirements (it's locked, no feature creep)
+3. Check DATABASE-SCHEMA.md for data model
+4. Check API-DESIGN.md for endpoint specs

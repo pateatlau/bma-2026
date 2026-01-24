@@ -1,0 +1,56 @@
+---
+description: Supabase backend and database guidelines
+globs: "**/*.{ts,tsx,sql}"
+alwaysApply: false
+---
+
+# Supabase Backend
+
+## Key Principles
+
+- **Authorization:** RLS (Row Level Security) as primary layer
+- **Type Safety:** Use `supabase gen types` for database types
+- **Never trust client-side payment callbacks** - use webhook only
+
+## Database Tables
+
+Key tables: `profiles`, `memberships`, `payments`, `content`, `comments`, `likes`, `knowledge_base`, `chat_conversations`, `chat_messages`, `escalations`, `audit_logs`
+
+## Commands
+
+```bash
+# Generate TypeScript types from database
+npx supabase gen types typescript --project-id <project-id> > lib/database.types.ts
+
+# Run migrations locally
+npx supabase db push
+
+# Deploy Edge Functions
+npx supabase functions deploy <function-name>
+```
+
+## Client Usage
+
+```typescript
+import { supabase } from '@/lib/supabase';
+
+// Query with RLS (automatic user context)
+const { data, error } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
+```
+
+## RLS Policy Pattern
+
+Every table MUST have RLS policies. Never skip them:
+
+```sql
+-- Enable RLS
+ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+
+-- Create policies
+CREATE POLICY "Users can view own data"
+  ON my_table FOR SELECT
+  USING (auth.uid() = user_id);
+```

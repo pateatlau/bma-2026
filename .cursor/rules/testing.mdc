@@ -1,0 +1,56 @@
+---
+description: Testing standards and patterns
+globs: "**/*.{test,spec}.{ts,tsx}"
+alwaysApply: false
+---
+
+# Testing Standards
+
+## Test Types
+
+| Type | Framework | Command |
+|------|-----------|---------|
+| Unit | Jest + React Native Testing Library | `npm run test` |
+| Integration | Jest + MSW | `npm run test:integration` |
+| E2E (Web) | Playwright | `npm run test:e2e` |
+| E2E (Mobile) | Maestro | Manual |
+
+## File Locations
+
+```
+/__tests__/           # Unit tests
+  /hooks/             # Hook tests
+  /utils/             # Utility tests
+  /components/        # Component tests
+/__mocks__/           # MSW handlers
+  /msw/
+    handlers.ts
+    server.ts
+/e2e/                 # Playwright E2E tests
+```
+
+## Unit Test Pattern
+
+```typescript
+import { renderHook } from '@testing-library/react-native';
+import { useMyHook } from '@/hooks';
+
+describe('useMyHook', () => {
+  it('should return expected value', () => {
+    const { result } = renderHook(() => useMyHook());
+    expect(result.current.value).toBe('expected');
+  });
+});
+```
+
+## MSW Handler Pattern
+
+```typescript
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  http.get('/api/users', () => {
+    return HttpResponse.json([{ id: 1, name: 'Test' }]);
+  }),
+];
+```

@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# Expo build artifacts
+.expo/
+dist/
+web-build/
+android/
+ios/
+
+# Native build files
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.keystore
+
+# Metro
+.metro-health-check*
+
+# Testing artifacts
+coverage/
+playwright-report/
+playwright-results/
+test-results/
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Generated files
+*.tsbuildinfo
+expo-env.d.ts
+
+# Large binary assets (not useful for AI context)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.pdf
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# Package lock (too large, not useful for AI)
+package-lock.json
+
+# Secrets
+.env
+.env.local
+.env.*.local
+google-service-account.json
