@@ -34,6 +34,40 @@ The platform supports multiple authentication methods via Supabase Auth:
 
 All authentication methods work across Web, iOS, and Android platforms.
 
+## Developer Quick Start
+
+Get up and running in under 5 minutes:
+
+```bash
+# 1. Clone and install
+git clone https://github.com/pateatlau/bma-2026.git
+cd bma-2026
+npm install
+
+# 2. Set up environment
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
+# 3. Start development
+npm run web      # Web browser
+npm run ios      # iOS Simulator
+npm run android  # Android Emulator
+```
+
+**Before committing:**
+
+```bash
+npm run check    # Typecheck + lint + format check
+```
+
+**Essential docs to read first:**
+
+1. [Implementation Overview](docs/implementation/00-IMPLEMENTATION-OVERVIEW.md) - Architecture & current phase
+2. [CLAUDE.md](CLAUDE.md) or [.cursor/rules/](.cursor/rules/) - AI assistant guidelines
+3. [DATABASE-SCHEMA.md](docs/DATABASE-SCHEMA.md) - Data model
+
+---
+
 ## Prerequisites
 
 - Node.js 20+
@@ -47,7 +81,7 @@ All authentication methods work across Web, iOS, and Android platforms.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/bma-2026.git
+git clone https://github.com/pateatlau/bma-2026.git
 cd bma-2026
 ```
 
@@ -108,6 +142,7 @@ npm run android  # Android Emulator
 
 ```
 /bma-2026
+├── /.cursor/rules         # Cursor AI assistant rules
 ├── /app                   # Expo Router app directory
 │   ├── /(public)          # Public pages (no auth required)
 │   ├── /(auth)            # Authentication screens
@@ -125,7 +160,9 @@ npm run android  # Android Emulator
 │   ├── /functions         # Edge functions
 │   └── /seed              # Seed data
 ├── /docs                  # Documentation
-└── /e2e                   # Playwright E2E tests
+├── /e2e                   # Playwright E2E tests
+├── CLAUDE.md              # Claude Code AI assistant rules
+└── .cursorignore          # Files excluded from Cursor indexing
 ```
 
 ## User Roles
@@ -208,10 +245,13 @@ npm run android  # Android Emulator
 
 ### 🔧 Reference Materials
 
-- **[CLAUDE.md](CLAUDE.md)** - Project rules and instructions for AI assistance
+- **[CLAUDE.md](CLAUDE.md)** - Project rules for Claude Code AI assistance
+- **[.cursor/rules/](.cursor/rules/)** - Project rules for Cursor AI assistance
 - **Database Types**: Auto-generated from Supabase schema (`lib/database.types.ts`)
 - **Supabase Migrations**: Located in `/supabase/migrations/`
 - **Edge Functions**: Located in `/supabase/functions/`
+
+> **Note**: Both Claude Code and Cursor are supported for AI-assisted development. When updating project guidelines, update both `CLAUDE.md` and `.cursor/rules/` to keep them in sync.
 
 ### 📖 Quick Links by Role
 
