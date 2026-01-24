@@ -5,6 +5,9 @@ alwaysApply: true
 
 # BMA-2026 Project Overview
 
+> **Sync Notice:** Cursor uses `.cursor/rules/*.mdc`. Claude Code uses `CLAUDE.md`.
+> When updating project guidelines, update both locations to keep them in sync.
+
 BMA (Bangalore Mizo Association) Digital Platform - A bilingual (English + Mizo) community app with membership management, content publishing, AI chatbot, and admin dashboard.
 
 **PRD Status:** Locked (v1.4) - No feature creep allowed.
