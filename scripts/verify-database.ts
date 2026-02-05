@@ -43,8 +43,6 @@ const REQUIRED_TABLES = [
   'notification_logs',
 ] as const;
 
-type TableName = (typeof REQUIRED_TABLES)[number];
-
 async function verifyDatabase() {
   console.log('\n🔍 Verifying Supabase Database Setup...\n');
   console.log('='.repeat(60));
@@ -68,7 +66,7 @@ async function verifyDatabase() {
 
   // Test 2: Tables Existence
   console.log('\n📋 Test 2: Table Existence');
-  for (const table of REQUIRED_TABLES as readonly TableName[]) {
+  for (const table of REQUIRED_TABLES) {
     try {
       const { error } = await supabase.from(table).select('id').limit(0);
       if (error && error.code !== 'PGRST116') {
