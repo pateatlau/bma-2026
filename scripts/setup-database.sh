@@ -46,9 +46,20 @@ fi
 echo -e "${GREEN}✅ Access token found${NC}"
 echo ""
 
+# Verify SUPABASE_PROJECT_REF is set
+if [ -z "$SUPABASE_PROJECT_REF" ]; then
+    echo -e "${RED}❌ Error: SUPABASE_PROJECT_REF environment variable not set${NC}"
+    echo ""
+    echo "Please add SUPABASE_PROJECT_REF to your .env file:"
+    echo "  SUPABASE_PROJECT_REF=your-project-ref"
+    echo ""
+    echo "You can find it in Supabase Dashboard > Project Settings > General > Reference ID"
+    exit 1
+fi
+
 # Step 1: Link project
 echo -e "${BLUE}📍 Step 1/3: Linking to Supabase project...${NC}"
-if npx supabase link --project-ref dxwwnvlgtymnaawgcofd; then
+if npx supabase link --project-ref "$SUPABASE_PROJECT_REF"; then
     echo -e "${GREEN}✅ Project linked successfully${NC}"
 else
     echo -e "${RED}❌ Failed to link project${NC}"
@@ -62,14 +73,13 @@ if npx supabase db push; then
     echo -e "${GREEN}✅ Migrations applied successfully${NC}"
 else
     echo -e "${RED}❌ Failed to apply migrations${NC}"
-    echo ""
-    echo "Note: If migrations were already applied, this error can be ignored."
+    exit 1
 fi
 echo ""
 
 # Step 3: Generate TypeScript types
 echo -e "${BLUE}🔧 Step 3/3: Generating TypeScript types...${NC}"
-if npx supabase gen types typescript --project-id dxwwnvlgtymnaawgcofd > lib/database.types.ts; then
+if npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" > lib/database.types.ts; then
     echo -e "${GREEN}✅ TypeScript types generated: lib/database.types.ts${NC}"
 else
     echo -e "${RED}❌ Failed to generate types${NC}"

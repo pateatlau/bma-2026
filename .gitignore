@@ -30,6 +30,8 @@ yarn-error.*
 .env
 .env.local
 .env.*.local
+.env.production
+.env.preview
 !.env.example
 !.env.required
 
@@ -45,6 +47,9 @@ test-results/
 # EAS Build
 google-service-account.json
 *.keystore
+
+# Supabase
+supabase/.temp/
 
 # IDE
 .idea/

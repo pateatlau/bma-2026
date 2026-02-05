@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-/* eslint-disable no-console, no-undef */
+/* global Buffer, __dirname */
+/* eslint-disable no-console */
 /**
  * Apply Database Migrations to Supabase
  *
@@ -11,8 +12,6 @@
  *
  * Get your service role key from:
  *   Supabase Dashboard > Project Settings > API > service_role (secret)
- *
- * Note: This is a Node.js script, not TypeScript, so undef warnings are expected.
  */
 
 const fs = require('fs');

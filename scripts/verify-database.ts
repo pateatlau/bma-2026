@@ -41,7 +41,9 @@ const REQUIRED_TABLES = [
   'daily_message_counts',
   'audit_logs',
   'notification_logs',
-];
+] as const;
+
+type TableName = (typeof REQUIRED_TABLES)[number];
 
 async function verifyDatabase() {
   console.log('\n🔍 Verifying Supabase Database Setup...\n');
@@ -58,29 +60,28 @@ async function verifyDatabase() {
       throw error;
     }
     console.log('✅ Connection successful');
-  } catch (error) {
-    console.error('❌ Connection failed:', error);
+  } catch (err) {
+    const error = err as { message?: string };
+    console.error('❌ Connection failed:', error.message ?? err);
     allPassed = false;
   }
 
   // Test 2: Tables Existence
   console.log('\n📋 Test 2: Table Existence');
-  for (const table of REQUIRED_TABLES) {
+  for (const table of REQUIRED_TABLES as readonly TableName[]) {
     try {
-      const { error } = await supabase
-        .from(table as any)
-        .select('id')
-        .limit(0);
+      const { error } = await supabase.from(table).select('id').limit(0);
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
       console.log(`✅ Table exists: ${table}`);
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { code?: string; message?: string };
       if (error.code === '42P01') {
         console.error(`❌ Table missing: ${table}`);
         allPassed = false;
       } else {
-        console.error(`❌ Error checking ${table}:`, error.message);
+        console.error(`❌ Error checking ${table}:`, error.message ?? err);
         allPassed = false;
       }
     }
@@ -101,8 +102,9 @@ async function verifyDatabase() {
     } else {
       console.log('⚠️  RLS might not be properly configured (check manually)');
     }
-  } catch (error) {
-    console.error('❌ RLS test failed:', error);
+  } catch (err) {
+    const error = err as { message?: string };
+    console.error('❌ RLS test failed:', error.message ?? err);
     allPassed = false;
   }
 
@@ -125,8 +127,9 @@ async function verifyDatabase() {
       console.error('❌ TypeScript types file not found');
       allPassed = false;
     }
-  } catch (error) {
-    console.error('❌ Type check failed:', error);
+  } catch (err) {
+    const error = err as { message?: string };
+    console.error('❌ Type check failed:', error.message ?? err);
     allPassed = false;
   }
 
@@ -145,7 +148,8 @@ async function verifyDatabase() {
   }
 }
 
-verifyDatabase().catch((error) => {
-  console.error('\n❌ Fatal error:', error);
+verifyDatabase().catch((err) => {
+  const error = err as { message?: string };
+  console.error('\n❌ Fatal error:', error.message ?? err);
   process.exit(1);
 });
