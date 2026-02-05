@@ -86,7 +86,8 @@ async function runMigrations() {
       console.log(`   ✅ Success\n`);
     } catch (err) {
       console.error(`   ❌ Failed: ${err}`);
-      console.error(`   Continuing with next migration...\n`);
+      console.error(`   Aborting migrations due to failure.\n`);
+      process.exit(1);
     }
   }
 

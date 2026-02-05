@@ -26,16 +26,18 @@ These are needed for building the app and running tests.
 
 **Where to find them:**
 
-- Go to: https://supabase.com/dashboard/project/dxwwnvlgtymnaawgcofd/settings/api
+- Go to: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/settings/api
 - Copy **Project URL** → Set as `EXPO_PUBLIC_SUPABASE_URL`
 - Copy **anon public** key → Set as `EXPO_PUBLIC_SUPABASE_ANON_KEY`
 
-**Your values:**
+**Example format:**
 
 ```
-EXPO_PUBLIC_SUPABASE_URL=https://dxwwnvlgtymnaawgcofd.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d3dudmxndHltbmFhd2djb2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMTcwMDEsImV4cCI6MjA4MzU5MzAwMX0.06yOSMDyGRSMWgdImWNFo7hzM2-4w8C6ggmOtyyZ0vI
+EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
+
+**⚠️ Security Note:** Replace the placeholders above with your actual credentials from the Supabase Dashboard. If this repository is public, rotate your keys immediately if they were ever committed.
 
 ### 2. Codecov Token (Optional - for test coverage)
 
@@ -119,12 +121,12 @@ Add all required secrets following the format above.
 
 ## Quick Setup Script
 
-You can add the required Supabase secrets with these values:
+Add the required Supabase secrets with your actual values from the Supabase Dashboard:
 
-| Name                            | Value                                                                                                                                                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `EXPO_PUBLIC_SUPABASE_URL`      | `https://dxwwnvlgtymnaawgcofd.supabase.co`                                                                                                                                                                         |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d3dudmxndHltbmFhd2djb2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMTcwMDEsImV4cCI6MjA4MzU5MzAwMX0.06yOSMDyGRSMWgdImWNFo7hzM2-4w8C6ggmOtyyZ0vI` |
+| Name                            | Value                                   |
+| ------------------------------- | --------------------------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL`      | `https://your-project-id.supabase.co`   |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | `your-anon-key-from-supabase-dashboard` |
 
 ---
 

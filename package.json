@@ -20,10 +20,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "supabase:link": "npx supabase link --project-ref dxwwnvlgtymnaawgcofd",
+    "supabase:link": "node -e \"if(!process.env.SUPABASE_PROJECT_REF){console.error('Error: SUPABASE_PROJECT_REF not set. Add it to your .env file.');process.exit(1)}\" && npx supabase link --project-ref $SUPABASE_PROJECT_REF",
     "supabase:status": "npx supabase db remote commit",
     "supabase:push": "npx supabase db push",
-    "supabase:types": "npx supabase gen types typescript --project-id dxwwnvlgtymnaawgcofd > lib/database.types.ts",
+    "supabase:types": "node -e \"if(!process.env.SUPABASE_PROJECT_REF){console.error('Error: SUPABASE_PROJECT_REF not set. Add it to your .env file.');process.exit(1)}\" && npx supabase gen types typescript --project-id $SUPABASE_PROJECT_REF > lib/database.types.ts",
     "prepare": "husky"
   },
   "dependencies": {
