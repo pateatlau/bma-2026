@@ -1,6 +1,7 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import type { Database } from './database.types';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -12,7 +13,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Check if we're in a browser environment (not SSR)
 const isBrowser = typeof window !== 'undefined';
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Use AsyncStorage for React Native, use default (localStorage) for web
     storage: Platform.OS === 'web' ? undefined : AsyncStorage,

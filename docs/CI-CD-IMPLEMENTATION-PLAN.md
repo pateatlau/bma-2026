@@ -119,14 +119,20 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
         └───────────────────────────────────┘
 ```
 
-### Test Execution Strategy
+### Test Execution Strategy (Trunk-Based)
 
-| Trigger            | Unit Tests | Integration Tests | E2E Tests        |
-| ------------------ | ---------- | ----------------- | ---------------- |
-| PR Creation/Update | ✅ Run     | ✅ Run            | ❌ Skip          |
-| Push to `main`     | ✅ Run     | ✅ Run            | ✅ Web only      |
-| Tag push (`v*`)    | ✅ Run     | ✅ Run            | ✅ All platforms |
-| Manual trigger     | ✅ Run     | ✅ Run            | ✅ All platforms |
+| Trigger          | Unit Tests | Integration Tests | E2E Tests     | Build       |
+| ---------------- | ---------- | ----------------- | ------------- | ----------- |
+| PR to `main`     | ✅ Run     | ✅ Run            | ❌ Skip       | ✅ Verify   |
+| Push to `main`   | ✅ Run     | ✅ Run            | ✅ Web only   | ✅ Artifact |
+| Tag push (`v*`)  | ✅ Run     | ✅ Run            | ✅ Full suite | ✅ Prod     |
+| Manual (release) | ✅ Run     | ✅ Run            | ✅ Full suite | ✅ Prod     |
+
+**Rationale:**
+
+- PRs get fast feedback (no slow E2E tests)
+- Main branch gets full validation after merge
+- Releases get comprehensive testing before deployment
 
 ### Testing Tools
 
@@ -153,17 +159,37 @@ This document outlines the comprehensive CI/CD strategy for the BMA 2026 Expo pr
 
 ## Git Branching Strategy
 
-### Recommended: GitHub Flow (Simple)
+### Current: Trunk-Based Development
+
+**Status:** ✅ IMPLEMENTED (February 5, 2026)
+
+**Single Branch:** `main` (trunk, always deployable)
+
+**Workflow:**
 
 ```plaintext
-main (production)
+main (trunk, always deployable)
   │
-  ├── feature/user-auth ──────► PR ──────► merge to main
+  ├── feature/user-auth ──────► PR ──────► CI ──────► Review ──────► Merge to main
+  │                                         ✅ Lint, Test, Build
   │
-  ├── feature/payment ────────► PR ──────► merge to main
+  ├── feature/payment ────────► PR ──────► CI ──────► Review ──────► Merge to main
   │
-  └── fix/login-bug ──────────► PR ──────► merge to main
+  ├── fix/login-bug ──────────► PR ──────► CI ──────► Review ──────► Merge to main
+  │
+  └── [Post-merge] ───────────► E2E Tests (Web) ──────► Tag v1.0.0 ──────► Deploy
+                                 ✅ Critical flows
 ```
+
+**Key Points:**
+
+- All feature branches created from `main`
+- All PRs target `main` directly
+- E2E tests run AFTER merge to `main` (not on PR)
+- Release tags trigger full deployment pipeline
+- No `develop` branch (removed in trunk-based migration)
+
+**See:** `docs/TRUNK-BASED-DEVELOPMENT-MIGRATION.md` for full migration details
 
 ### Branch Naming Convention
 

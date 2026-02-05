@@ -336,10 +336,55 @@ Supports both light and dark mode.
 
 ## Contributing
 
-1. Create a feature branch from `develop`
-2. Make your changes
-3. Run `npm run check` to ensure code quality
-4. Submit a pull request
+We use **trunk-based development** with `main` as the only long-lived branch:
+
+1. **Create a feature branch from `main`:**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes** and commit often:
+
+   ```bash
+   git add .
+   git commit -m "feat: add new feature"
+   # Pre-commit hooks will run: lint, format, typecheck
+   ```
+
+3. **Run quality checks** before pushing:
+
+   ```bash
+   npm run check    # Typecheck + lint + format check
+   npm test         # Run tests
+   ```
+
+4. **Push your branch:**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+5. **Create a Pull Request** to `main`:
+   - Go to GitHub and create a PR
+   - Base branch: `main`
+   - All CI checks must pass (lint, test, build)
+   - Requires 1 approval
+
+6. **After merge:**
+   - E2E tests will run automatically on `main`
+   - Delete your feature branch
+
+**Branch Naming Convention:**
+
+- `feature/description` - New features
+- `fix/description` - Bug fixes
+- `hotfix/description` - Critical production fixes
+- `chore/description` - Maintenance tasks
+
+**See:** [Trunk-Based Development Migration](docs/TRUNK-BASED-DEVELOPMENT-MIGRATION.md) for details
 
 ## License
 
