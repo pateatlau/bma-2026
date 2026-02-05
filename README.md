@@ -48,11 +48,13 @@ npm install
 cp .env.example .env.local
 # Edit .env.local with your Supabase credentials
 
-# 3. Start development
-npm run web      # Web browser
+# 3. Start development (runs on port 2026)
+npm run web      # Web browser at http://localhost:2026
 npm run ios      # iOS Simulator
 npm run android  # Android Emulator
 ```
+
+**Note:** This project uses port **2026** (matching the project name) instead of the default 8081 to avoid conflicts with other projects.
 
 **Before committing:**
 
