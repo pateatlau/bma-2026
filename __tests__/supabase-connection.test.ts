@@ -24,6 +24,7 @@ describe('Supabase Setup', () => {
 
   it('should be able to import supabase client without errors', () => {
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../lib/supabase');
     }).not.toThrow();
   });
