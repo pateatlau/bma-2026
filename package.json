@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "expo start --port 2026",
+    "android": "expo start --android --port 2026",
+    "ios": "expo start --ios --port 2026",
+    "web": "expo start --web --port 2026",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
@@ -20,6 +20,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "supabase:link": "npx supabase link --project-ref dxwwnvlgtymnaawgcofd",
+    "supabase:status": "npx supabase db remote commit",
+    "supabase:push": "npx supabase db push",
+    "supabase:types": "npx supabase gen types typescript --project-id dxwwnvlgtymnaawgcofd > lib/database.types.ts",
     "prepare": "husky"
   },
   "dependencies": {
