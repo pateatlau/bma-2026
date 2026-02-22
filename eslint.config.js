@@ -69,6 +69,7 @@ module.exports = [
       'metro.config.js',
       'playwright-report/',
       'playwright-results/',
+      'expo-env.d.ts',
     ],
   },
 ];
